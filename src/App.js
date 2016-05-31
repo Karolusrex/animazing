@@ -11,6 +11,7 @@ import {HomeController}             from './controllers/HomeController.js';
  * and are globally available through the Dependency Injection context. (arva-utils/Context.js)
  * Be sure to add any new controllers you add after HomeController,
  * or the Router won't find them! */
+
 @inject(HomeController)
 export class App extends ArvaApp {
 

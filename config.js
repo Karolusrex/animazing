@@ -24,7 +24,7 @@ System.config({
       "loader": "arva-utils/ImageLoader"
     },
     "/*.png": {
-      "loader": "arva-utils/ImageLoader"
+      "loader": "arva-js/utils/ImageLoader"
     },
     "/*.jpg": {
       "loader": "arva-utils/ImageLoader"
@@ -42,6 +42,7 @@ System.config({
     "famous": "github:bizboard/famous@develop",
     "famous-flex": "github:bizboard/famous-flex@master",
     "fastclick": "npm:fastclick@1.0.6",
+    "insert-rule": "npm:insert-rule@2.1.0",
     "lodash": "npm:lodash@3.10.1",
     "traceur": "github:jmcriffey/bower-traceur@0.0.90",
     "traceur-runtime": "github:jmcriffey/bower-traceur-runtime@0.0.90",
@@ -177,6 +178,11 @@ System.config({
     },
     "npm:inherits@2.0.1": {
       "util": "github:jspm/nodelibs-util@0.1.0"
+    },
+    "npm:insert-rule@2.1.0": {
+      "child_process": "github:jspm/nodelibs-child_process@0.1.0",
+      "process": "github:jspm/nodelibs-process@0.1.2",
+      "systemjs-json": "github:systemjs/plugin-json@0.1.1"
     },
     "npm:json-query@1.8.0": {
       "process": "github:jspm/nodelibs-process@0.1.2"

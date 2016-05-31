@@ -7,14 +7,13 @@
       <option name="description" value="" />
       <option name="exitCodeBehavior" value="ERROR" />
       <option name="fileExtension" value="js" />
-      <option name="immediateSync" value="true" />
+      <option name="immediateSync" value="false" />
       <option name="name" value="Devbuild" />
       <option name="output" value="" />
       <option name="outputFilters">
         <array />
       </option>
       <option name="outputFromStdout" value="false" />
-      <option name="passParentEnvs" value="true" />
       <option name="program" value="/bin/sh" />
       <option name="scopeName" value="src" />
       <option name="trackOnlyRoot" value="false" />

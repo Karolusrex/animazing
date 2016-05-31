@@ -12,6 +12,7 @@
       "famous": "github:bizboard/famous@develop",
       "famous-flex": "github:bizboard/famous-flex@master",
       "fastclick": "npm:fastclick@^1.0.6",
+      "insert-rule": "npm:insert-rule@^2.1.0",
       "lodash": "npm:lodash@^3.10.0"
     },
     "devDependencies": {
