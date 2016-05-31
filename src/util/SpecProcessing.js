@@ -3,7 +3,7 @@
  */
 
 
-let specAttributes = {
+export let specAttributes = {
     rotate: {dimensions: 3, defaultValue: [0, 0, 0]},
     align: {dimensions: 2, defaultValue: [0, 0]},
     origin: {dimensions: 2, defaultValue: [0.5, 0.5]},

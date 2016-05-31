@@ -14,6 +14,7 @@ import {Snappable}              from '../components/Snappable.js';
 import {Shapes}                 from '../components/Shapes.js';
 import {associateShapesInInterval,
 turnShape}from '../util/SpecProcessing.js';
+import {Shape}                  from '../components/Shape.js';
 
 insertRule('.bar::after', {
     webkitBoxShadow: '1px 30px 47px 0px rgba(178,97,137,1)',
@@ -46,6 +47,7 @@ export class HomeView extends View {
                 }
             }), bar);
         }
+        this.renderables.shape = new Shape({shape: Shapes.twistedMenu});
         this._initDraggable();
         this._initAnimationBehaviour();
     }
@@ -82,9 +84,6 @@ export class HomeView extends View {
         });
     }
 
-    _distance(p1, p2) {
-        return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
-    }
 
     _initAnimationBehaviour() {
         this.layouts.push((context) => {
@@ -134,6 +133,17 @@ export class HomeView extends View {
             translate: [0, 0, 0],
             opacity: 0.8
         });
+
+        context.set('shape', {
+            size: [this.maxRange * 2, 1],
+            align: [0.8, 0.8],
+            rotate: [0,0,0.2],
+            origin: [0.5, 0.5],
+            translate: [0, 0, 30],
+            opacity: 0.8
+        });
+
+
     }
 
 
