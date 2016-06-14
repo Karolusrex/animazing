@@ -13,8 +13,11 @@ import insertRule               from 'insert-rule';
 import {Snappable}              from '../components/Snappable.js';
 import {Shapes}                 from '../components/Shapes.js';
 import {associateShapesInInterval,
-turnShape}from '../util/SpecProcessing.js';
+    turnShape,
+    specBoundingBoxSize, shapeBoundingBox}        from '../util/SpecProcessing.js';
 import {Shape}                  from '../components/Shape.js';
+import {ShapeSelector}          from '../components/ShapeSelector.js';
+import {ShapeGrid}              from '../components/ShapeGrid.js';
 
 insertRule('.bar::after', {
     webkitBoxShadow: '1px 30px 47px 0px rgba(178,97,137,1)',
@@ -47,7 +50,12 @@ export class HomeView extends View {
                 }
             }), bar);
         }
-        this.renderables.shape = new Shape({shape: Shapes.twistedMenu});
+        this.renderables.shapeSelector = new ShapeSelector({shapes: [Shapes.upArrow, Shapes.upPointArrow]});
+        this.renderables.shapeSelectorBackground = new Surface({properties: {backgroundColor: 'white'}});
+        this.renderables.shape = new Shape({shape: Shapes.upPointArrow});
+        this.renderables.box = new Surface({properties: {backgroundColor: 'black'}});
+        this.renderables.boundingBox = new Surface({properties: {backgroundColor: 'white'}});
+        this.renderables.shapeGrid = new ShapeGrid();
         this._initDraggable();
         this._initAnimationBehaviour();
     }
@@ -100,10 +108,9 @@ export class HomeView extends View {
 
             context.set('snappable', draggableSpec);
 
-            associateShapesInInterval(inputPosition[0], [Shapes.startState, turnShape(1,Shapes.startState),turnShape(2,Shapes.upPointArrow),turnShape(3,Shapes.upPointArrow),Shapes.upPointArrow], context, this.maxRange);
+            associateShapesInInterval(inputPosition[0], [Shapes.startState, turnShape(1, Shapes.startState), turnShape(2, Shapes.upArrow), turnShape(3, Shapes.upPointArrow), Shapes.upPointArrow], context, this.maxRange);
         });
     }
-
 
 
     _restrictController(controllerPosition) {
@@ -134,20 +141,23 @@ export class HomeView extends View {
             opacity: 0.8
         });
 
-        context.set('shape', {
-            size: [this.maxRange * 2, 1],
-            align: [0.8, 0.8],
-            rotate: [0,0,0.2],
+
+         context.set('shapeSelector', {
+         size: [undefined, 200],
+         align: [0.5, 0.75],
+         origin: [0.5, 0.5],
+         translate: [0, 0, 30]
+         });
+
+        /*context.set('shapeSelectorBackground', {
+            size: [undefined, 100],
+            align: [0.5, 0.7],
             origin: [0.5, 0.5],
-            translate: [0, 0, 30],
-            opacity: 0.8
-        });
+            translate: [0, 0, 10]
+        });*/
 
 
     }
-
-
-
 
 
     _getBarNames() {

@@ -32,7 +32,7 @@ export class ShapeCollection {
         topBar: {
             rotate: [0, 0, Math.PI / 3],
             align: [0.5, 0.5],
-            translate: [35, -30, 0], //7.2, 9.1 normalized, -7.2, -9.1 flipped
+            translate: [35, -30, 0],
             size: this.stickDimensions
         },
         midBar: {

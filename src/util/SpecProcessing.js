@@ -21,6 +21,10 @@ export function turnShape(quarterCycles, shape) {
         return shape;
     }
     for (let [objectName, object] of Object.entries(shape)) {
+        if (objectName === 'size') {
+            turnedShape.size = quarterTurn || threeQuarterTurn ? [object[1], object[0]] : object;
+            continue;
+        }
         if (quarterTurn || threeQuarterTurn) {
             let rotateZ = quarterTurn ? -Math.PI / 2 : Math.PI / 2;
             let origin = object.origin || specAttributes.origin.defaultValue;
@@ -48,6 +52,60 @@ export function turnShape(quarterCycles, shape) {
     }
     return turnedShape;
 }
+//For actual shapes
+export function shapeBoundingBox(shape) {
+    let minPos = [Infinity, Infinity], maxPos = [0, 0];
+    for(let [name, spec] of Object.entries(shape)){
+        let specBoundingBox = specBoundingBoxSize(spec);
+        let {origin = specAttributes.origin.defaultValue, translate = specAttributes.translate.defaultValue} = spec;
+        let absolutePosition = [translate[0] - specBoundingBox[0]*origin[0], translate[1] - specBoundingBox[1]*origin[1]];
+        minPos = [Math.min(absolutePosition[0], minPos[0]), Math.min(absolutePosition[1], minPos[1])];
+        maxPos = [Math.max(absolutePosition[0] + specBoundingBox[0], maxPos[0]), Math.max(absolutePosition[1] + specBoundingBox[1], maxPos[1])];
+    }
+    return {size:[maxPos[0] - minPos[0], maxPos[1] - minPos[1]], topLeftCorner: [minPos[0], minPos[1]]};
+}
+//For boxes
+export function specBoundingBoxSize(spec) {
+    let {size} = spec;
+    let boundingBoxSize = [...spec.size];
+    let {rotate = specAttributes.rotate.defaultValue} = spec;
+    let corners = {};
+
+    /* Pretend that origin is [0, 0] */
+    corners['topLeft'] = [0, 0];
+    corners['topRight'] = [Math.cos(rotate[2]) * size[0], -Math.sin(rotate[2]) * size[0]];
+    let rotateMinusHalfPi = rotate[2] - Math.PI / 2;
+    corners['bottomLeft'] = [Math.cos(rotateMinusHalfPi) * size[1], -Math.sin(rotateMinusHalfPi) * size[1]];
+    let hypotenuse = Math.sqrt(Math.pow(size[0], 2) + Math.pow(size[1], 2));
+    let hypotenuseAngle = Math.atan(size[1] / size[0]);
+    let rotateRelativeHypotenuse = rotate[2] - hypotenuseAngle;
+    corners['bottomRight'] = [Math.cos(rotateRelativeHypotenuse) * hypotenuse, -Math.sin(rotateRelativeHypotenuse) * hypotenuse];
+
+    let normalizedRotation = rotate[2] > 0 ? (rotate[2] % (Math.PI * 2)) : (rotate[2] - Math.PI*2*(Math.floor(rotate[2]/(Math.PI*2))));
+
+    let width = normalizedRotation < Math.PI / 2 ?
+    corners['bottomRight'][0] - corners['topLeft'][0] : (
+        normalizedRotation < Math.PI ?
+        corners['bottomLeft'][0] - corners['topRight'][0] : (
+            normalizedRotation < 3 * Math.PI / 2 ?
+            -corners['bottomRight'][0] + corners['topLeft'][0] : (
+                -corners['bottomLeft'][0] + corners['topRight'][0]
+            )
+        )
+    );
+    let height = normalizedRotation < Math.PI / 2 ?
+    corners['bottomLeft'][1] - corners['topRight'][1] : (
+        normalizedRotation < Math.PI ?
+        corners['topLeft'][1] - corners['bottomRight'][1] : (
+            normalizedRotation < 3 * Math.PI / 2 ?
+            -corners['bottomLeft'][1] + corners['topRight'][1] : (
+                corners['topLeft'][1] + corners['bottomRight'][1]
+            )
+        )
+    );
+
+    return [width, height];
+}
 
 export function associateShapesInInterval(input, shapes, context, maxRange) {
     for (let [i,bar] of Object.keys(shapes[0]).entries()) {
@@ -70,8 +128,8 @@ export function associateShapesInInterval(input, shapes, context, maxRange) {
     }
 }
 
-let _ensureNewArray = (potentialArray)  => Array.isArray(potentialArray) ? [...potentialArray] : [potentialArray];
-let _normalizeWeights = (weights, goalT, easing) =>{
+let _ensureNewArray = (potentialArray) => Array.isArray(potentialArray) ? [...potentialArray] : [potentialArray];
+let _normalizeWeights = (weights, goalT, easing) => {
     let normalizedWeights = [...weights];
     if (easing) {
         goalT = easing(goalT);
@@ -97,7 +155,7 @@ export function mergeSpecs(startSpec, endSpec, t, goalT, easing) {
             if (attribute === 'rotate') {
 
                 let hasDifferentSigns = Math.sign(endSpecAttribute[i]) !== Math.sign(startSpecAttribute[i]);
-                if(!hasDifferentSigns && Math.abs(Math.abs(endSpecAttribute[i] - startSpecAttribute[i]) - Math.PI / 2) <= Number.EPSILON){
+                if (!hasDifferentSigns && Math.abs(Math.abs(endSpecAttribute[i] - startSpecAttribute[i]) - Math.PI / 2) <= Number.EPSILON) {
                     endSpecAttribute[i] += Math.sign(startSpecAttribute[i] - endSpecAttribute[i]) * Math.PI;
                 }
                 else if ((hasDifferentSigns && Math.abs(endSpecAttribute[i]) + Math.abs(startSpecAttribute[i]) > Math.PI / 2) ||
