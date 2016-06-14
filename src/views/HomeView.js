@@ -50,7 +50,7 @@ export class HomeView extends View {
                 }
             }), bar);
         }
-        this.renderables.shapeSelector = new ShapeSelector({shapes: [Shapes.upArrow, Shapes.upPointArrow]});
+        this.renderables.shapeSelector = new ShapeSelector({shapes: [Shapes.twistedMenu, Shapes.upArrow, Shapes.upPointArrow]});
         this.renderables.shapeSelectorBackground = new Surface({properties: {backgroundColor: 'white'}});
         this.renderables.shape = new Shape({shape: Shapes.upPointArrow});
         this.renderables.box = new Surface({properties: {backgroundColor: 'black'}});

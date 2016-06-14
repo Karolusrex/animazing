@@ -3,11 +3,16 @@
  */
 import _                    from 'lodash';
 import Surface              from 'famous/core/Surface.js';
+import Transitionable       from 'famous/transitions/Transitionable';
+
 import {View}               from 'arva-js/core/View.js';
 import {layout}             from 'arva-js/layout/decorators.js';
 
+
 import {Shape}              from './Shape.js';
 import {ShapeGrid}          from './ShapeGrid.js';
+import {ShapeWithGrid}      from './ShapeWithGrid.js';
+import Easing               from 'famous/transitions/Easing';
 
 
 export class ShapeSelector extends View {
@@ -15,18 +20,17 @@ export class ShapeSelector extends View {
 
     constructor(options = {}) {
         super(options);
-        this.layout.options.alwaysLayout = true;
+
+        this._fading = new Transitionable(1);
+        this._sliding = new Transitionable(0);
+
         let shapeEntries = options.shapes.entries();
         for(let [i, shape] of shapeEntries){
-            let shapeRenderable = new Shape({shape});
-            shapeRenderable.on('mouseover', () => {
-                console.log("mouseover");
-            });
+            let shapeRenderable = new ShapeWithGrid({shape, autoSpin:true, startRotation:i*Math.PI/2});
+
             this.addRenderable(shapeRenderable, `shape${i}`);
-            let shapeGrid = new ShapeGrid();
-            //Pipe to get click events
-            shapeGrid.pipe(shapeRenderable);
-            this.addRenderable(shapeGrid, `shapeGrid${i}`);
+            shapeRenderable.on('click', this._onShapeClicked.bind(this,i));
+
         }
         options.margins = options.margins || [10,10,10,10];
         this._currentDisplayRotation = 0;
@@ -41,23 +45,31 @@ export class ShapeSelector extends View {
             for(let i=0;i<noRenderables;i++){
                 let gridName = `shapeGrid${i}`;
                 let shapeName = `shape${i}`;
-                context.set(gridName, {
-                    size: [gridLength, gridLength],
-                    origin: [0.5,0.5],
-                    rotate: [0,0,0],
-                    translate: [xOffset, gridLength/2, 0]
-                });
-                let sizeDistorion = this.renderables[gridName].getSize()[0]/gridLength;
-                let shapeSize = this.renderables[shapeName].getSize().map((size) => size/sizeDistorion);
+                let isChosen = i===this._selectedIndex;
                 context.set(shapeName, {
-                    size: shapeSize,
-                    origin: [0.5,0.5],
-                    rotate: [0,0,this._currentDisplayRotation + 2*Math.PI/noRenderables],
-                    translate: [xOffset, gridLength/2, 10]
+                    size: [gridLength, gridLength],
+                    origin: [0,0],
+                    rotate: [0,0,0],
+                    opacity:  isChosen ? 1 : this._fading.get(),
+                    translate: [isChosen ? xOffset - (xOffset - context.size[0]/2)*this._sliding.get() : xOffset, gridLength/2, 0]
                 });
                 xOffset+=shapeWidth + this._displaySpacing;
             }
         });
 
+    }
+
+    _onShapeClicked(index){
+        this._selectedIndex = index;
+        for(let i=0;i<this.options.shapes.length;i++){
+            this.layout.options.alwaysLayout = true;
+            this[`shape${i}`].setAutoSpin(i===index);
+            let transition = {
+                duration: 500,
+                curve: Easing.inOutQuad
+            };
+            this._fading.set(0,transition);
+            this._sliding.set(1,transition);
+        }
     }
 }
