@@ -15,7 +15,7 @@ export class ShapeCollection {
             size: this.stickDimensions
         },
         midBar: {
-            rotate: [0, 0, 0],
+            rotate: [0, 0, Math.PI/2],
             align: [0.5, 0.5],
             translate: [0, 0, 0],
             size: this.stickDimensions

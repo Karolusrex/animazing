@@ -12,6 +12,56 @@ export let specAttributes = {
     opacity: {dimensions: 1, defaultValue: 1}
 };
 
+export function doBoxesCollide(box1, box2){
+    let boxes = [box1, box2];
+    let axes = [];
+    let boxCorners = [];
+    for(let box of boxes){
+        let cornerCoordinates = calcSpecCorners(box);
+
+        cornerCoordinates = [[cornerCoordinates['topLeft'], cornerCoordinates['bottomLeft']], [cornerCoordinates['topRight'], cornerCoordinates['bottomRight']]];
+        let generateAxisDimension = (cornerCoordinates, axisDirection, dimension) => axisDirection === 0 ? cornerCoordinates[+!axisDirection][0][dimension] - cornerCoordinates[axisDirection][0][dimension] :
+        cornerCoordinates[1][+!axisDirection][dimension] - cornerCoordinates[1][axisDirection][dimension];
+        for(let dimension of [0,1]){
+            //http://www.gamedev.net/page/resources/_/technical/game-programming/2d-rotated-rectangle-collision-r2604
+            axes.push([generateAxisDimension(cornerCoordinates, 0,dimension), generateAxisDimension(cornerCoordinates, 1,+!dimension)]);
+        }
+        boxCorners.push(cornerCoordinates);
+    }
+
+    /* We have the axes, go on to step 2 and calc projections */
+    for(let axis of axes){
+        let minMaxCornerValues = [[Infinity, 0], [Infinity, 0]];
+        for(let [boxNo, corners] of boxCorners.entries()){
+            for(let cornerPair of corners){
+                for(let corner of cornerPair){
+                    let {translate = specAttributes.translate.defaultValue} = boxes[boxNo];
+                    let adjustedCorner = [corner[0] + translate[0], corner[1] + translate[1]];
+                    let cornerProjectionBase = (adjustedCorner[0]*axis[0] + adjustedCorner[1]*axis[1]) / (Math.pow(axis[0], 2) + Math.pow(axis[1], 2));
+                    /* Step 3 */
+                    let cornerProjection = [cornerProjectionBase*axis[0], cornerProjectionBase*axis[1]];
+                    let scalarValue = cornerProjection[0]*axis[0] + cornerProjection[1]*axis[1];
+                    minMaxCornerValues[boxNo][0] = Math.min(minMaxCornerValues[boxNo][0], scalarValue);
+                    minMaxCornerValues[boxNo][1] = Math.max(minMaxCornerValues[boxNo][1], scalarValue);
+                }
+            }
+        }
+        let hasOverlap = false;
+        for(let boxNo of [0, 1]){
+            /* Step 4 */
+            if((minMaxCornerValues[boxNo][0] > minMaxCornerValues[+!boxNo][0] && minMaxCornerValues[boxNo][0] < minMaxCornerValues[+!boxNo][1]) ||
+                (minMaxCornerValues[boxNo][1] < minMaxCornerValues[+!boxNo][1] && minMaxCornerValues[boxNo][1] > minMaxCornerValues[+!boxNo][0])){
+                hasOverlap = true;
+                break;
+            }
+        }
+        if(!hasOverlap){
+            return false;
+        }
+    }
+    return true;
+}
+
 export function turnShape(quarterCycles, shape) {
     let turnedShape = {};
     let quarterTurn = quarterCycles === 1;
@@ -64,13 +114,11 @@ export function shapeBoundingBox(shape) {
     }
     return {size:[maxPos[0] - minPos[0], maxPos[1] - minPos[1]], topLeftCorner: [minPos[0], minPos[1]]};
 }
-//For boxes
-export function specBoundingBoxSize(spec) {
+
+export function calcSpecCorners(spec){
     let {size} = spec;
-    let boundingBoxSize = [...spec.size];
     let {rotate = specAttributes.rotate.defaultValue} = spec;
     let corners = {};
-
     /* Pretend that origin is [0, 0] */
     corners['topLeft'] = [0, 0];
     corners['topRight'] = [Math.cos(rotate[2]) * size[0], -Math.sin(rotate[2]) * size[0]];
@@ -80,6 +128,14 @@ export function specBoundingBoxSize(spec) {
     let hypotenuseAngle = Math.atan(size[1] / size[0]);
     let rotateRelativeHypotenuse = rotate[2] - hypotenuseAngle;
     corners['bottomRight'] = [Math.cos(rotateRelativeHypotenuse) * hypotenuse, -Math.sin(rotateRelativeHypotenuse) * hypotenuse];
+    return corners;
+}
+
+//For boxes
+export function specBoundingBoxSize(spec) {
+    let boundingBoxSize = [...spec.size];
+    let {rotate = specAttributes.rotate.defaultValue} = spec;
+    let corners = calcSpecCorners(spec);
 
     let normalizedRotation = rotate[2] > 0 ? (rotate[2] % (Math.PI * 2)) : (rotate[2] - Math.PI*2*(Math.floor(rotate[2]/(Math.PI*2))));
 
@@ -108,6 +164,8 @@ export function specBoundingBoxSize(spec) {
 }
 
 export function associateShapesInInterval(input, shapes, context, maxRange) {
+    /* For collision handling */
+    let allSpecs = [];
     for (let [i,bar] of Object.keys(shapes[0]).entries()) {
         let specCombo = [];
         let j;
@@ -122,10 +180,13 @@ export function associateShapesInInterval(input, shapes, context, maxRange) {
         specCombo.push(shapes[j][bar]);
         specCombo.push(shapes[j + 1][bar]);
         let targetValue = maxRange / (shapes.length - 1);
-        context.set(bar, mergeSpecs(...specCombo,
+        let spec = mergeSpecs(...specCombo,
             inbetween ? input - Math.min(Math.floor(input / (targetValue)), shapes.length - 2) * (targetValue) : targetValue,
-            targetValue, (t) => t));
+            targetValue, (t) => t);
+        allSpecs.push(spec);
+        context.set(bar, spec);
     }
+    console.log(doBoxesCollide(allSpecs[0], allSpecs[1]) || doBoxesCollide(allSpecs[0], allSpecs[2]) || doBoxesCollide(allSpecs[1], allSpecs[2]));
 }
 
 let _ensureNewArray = (potentialArray) => Array.isArray(potentialArray) ? [...potentialArray] : [potentialArray];
