@@ -1,14 +1,7 @@
-import _                    from 'lodash';
 import Surface              from 'famous/core/Surface.js';
-import Easing               from 'famous/transitions/Easing';
 
 import {View}               from 'arva-js/core/View.js';
 import {layout, options}    from 'arva-js/layout/decorators.js';
-import Draggable                from 'famous/modifiers/Draggable';
-import StateModifier            from 'famous/modifiers/StateModifier';
-import Transitionable           from 'famous/transitions/Transitionable';
-import SnapTransition           from 'famous/transitions/SnapTransition';
-import RenderNode               from 'famous/core/RenderNode';
 import insertRule               from 'insert-rule';
 import {Snappable}              from '../components/Snappable.js';
 import {Shapes}                 from '../components/Shapes.js';
@@ -56,6 +49,12 @@ export class HomeView extends View {
         this.renderables.box = new Surface({properties: {backgroundColor: 'black'}});
         this.renderables.boundingBox = new Surface({properties: {backgroundColor: 'white'}});
         this.renderables.shapeGrid = new ShapeGrid();
+        for(let i=0;i<200;i++){
+            this.renderables[`debug${i}`] = new Surface({properties: {backgroundColor: 'black'}});
+            this.renderables[`debugColor${i}`] = new Surface({properties: {borderRadius: '100%',backgroundColor: ['red', 'blue', 'green', 'yellow', 'magenta', 'yellow','green', 'green'][i]}});
+            this.renderables[`redDebug${i}`] = new Surface({properties: {borderRadius: '100%',backgroundColor: 'red'}});
+            this.renderables[`blueDebug${i}`] = new Surface({properties: {borderRadius: '100%',backgroundColor: 'blue'}});
+        }
         this._initDraggable();
         this._initAnimationBehaviour();
     }

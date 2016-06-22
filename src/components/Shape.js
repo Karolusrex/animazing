@@ -21,6 +21,7 @@ export class Shape extends View{
                     backgroundColor: options.colorScheme[i]
                 }}),renderableName);
         }
+        this.addRenderable(new Surface({properties: {backgroundColor: 'white'}}), 'debugBackground', layout.size(...this.getSize()), layout.translate(0, 0,-10));
         this.layouts.push((context) => {
             let contextSize = context.size;
             let sizeDistortion = this.getSizeDistortion(contextSize);

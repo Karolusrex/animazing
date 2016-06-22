@@ -16,50 +16,95 @@ export function doBoxesCollide(box1, box2){
     let boxes = [box1, box2];
     let axes = [];
     let boxCorners = [];
+    let hasOverlap = true;
+
     for(let box of boxes){
-        let cornerCoordinates = calcSpecCorners(box);
+        let cornerCoordinates = calcSpecCorners(box, true);
+        /* Adjust corners to take the different origin into account. We're basically doing an inverse rotation matrix (I think) */
+        let {rotate = specAttributes.rotate.defaultValue, size, origin = specAttributes.origin.defaultValue} = box;
+        for(let [cornerName, corner] of Object.entries(cornerCoordinates)){
+            corner[0] = corner[0] - Math.cos(rotate[2])*size[0]*origin[0] + Math.sin(rotate[2])*size[1]*origin[1];
+            corner[1]  = corner[1] - Math.cos(rotate[2])*size[1]*origin[1] - Math.sin(rotate[2])*size[0]*origin[0];
+        }
 
         cornerCoordinates = [[cornerCoordinates['topLeft'], cornerCoordinates['bottomLeft']], [cornerCoordinates['topRight'], cornerCoordinates['bottomRight']]];
-        let generateAxisDimension = (cornerCoordinates, axisDirection, dimension) => axisDirection === 0 ? cornerCoordinates[+!axisDirection][0][dimension] - cornerCoordinates[axisDirection][0][dimension] :
-        cornerCoordinates[1][+!axisDirection][dimension] - cornerCoordinates[1][axisDirection][dimension];
-        for(let dimension of [0,1]){
+        let generateAxisDimension = (cornerCoordinates, axisDirection, dimension) => {
+
+            return axisDirection === 0 ? cornerCoordinates[1][0][dimension] - cornerCoordinates[0][0][dimension] :
+            cornerCoordinates[1][1][dimension] - cornerCoordinates[1][0][dimension]
+            };
+
+
+        for(let axisDirection of [0,1]){
             //http://www.gamedev.net/page/resources/_/technical/game-programming/2d-rotated-rectangle-collision-r2604
-            axes.push([generateAxisDimension(cornerCoordinates, 0,dimension), generateAxisDimension(cornerCoordinates, 1,+!dimension)]);
+            let xAxis = generateAxisDimension(cornerCoordinates, axisDirection,0);
+            let yAxis = generateAxisDimension(cornerCoordinates, axisDirection,1);
+
+            /*debugContext.set(`debugColor${debugCounter++}`,{
+                size: [10, 100],
+                origin: [0, 0],
+                rotate: [0,0,Math.atan(yAxis/xAxis)],
+                align: [0.5, 0.5],
+                translate: [0, 0, 30]
+            });*/
+
+            /*debugContext.set(`debugColor${debugCounter++}`,{
+                size: [7, 7],
+                origin: [0.5, 0.5],
+                align: [0.5, 0.5],
+                translate: [xAxis, yAxis, 30]
+            });*/
+
+            axes.push([xAxis, yAxis]);
         }
         boxCorners.push(cornerCoordinates);
     }
 
     /* We have the axes, go on to step 2 and calc projections */
     for(let axis of axes){
-        let minMaxCornerValues = [[Infinity, 0], [Infinity, 0]];
+        let minMaxCornerValues = [[Infinity, -Infinity], [Infinity, -Infinity]];
         for(let [boxNo, corners] of boxCorners.entries()){
             for(let cornerPair of corners){
                 for(let corner of cornerPair){
+
                     let {translate = specAttributes.translate.defaultValue} = boxes[boxNo];
-                    let adjustedCorner = [corner[0] + translate[0], corner[1] + translate[1]];
+                    let adjustedCorner = [corner[0]+ translate[0], corner[1] + translate[1]];
+
+                    /*debugContext.set(`debug${debugCounter++}`,{
+                        size: [10, 10],
+                        origin: [0.5, 0.5],
+                        align: [0.5, 0.5],
+                        translate: [adjustedCorner[0], adjustedCorner[1], 30]
+                    });*/
+
                     let cornerProjectionBase = (adjustedCorner[0]*axis[0] + adjustedCorner[1]*axis[1]) / (Math.pow(axis[0], 2) + Math.pow(axis[1], 2));
                     /* Step 3 */
                     let cornerProjection = [cornerProjectionBase*axis[0], cornerProjectionBase*axis[1]];
-                    let scalarValue = cornerProjection[0]*axis[0] + cornerProjection[1]*axis[1];
+
+                    /*debugContext.set(`${boxNo === 0 ? 'red' : 'blue'}Debug${debugCounter++}`,{
+                        size: [10, 10],
+                        origin: [0.5, 0.5],
+                        align: [0.5, 0.5],
+                        translate: [cornerProjection[0], cornerProjection[1], 30]
+                    });*/
+
+                    let scalarValue = cornerProjection[0]*Math.abs(axis[0]) + cornerProjection[1]*Math.abs(axis[1]);
                     minMaxCornerValues[boxNo][0] = Math.min(minMaxCornerValues[boxNo][0], scalarValue);
                     minMaxCornerValues[boxNo][1] = Math.max(minMaxCornerValues[boxNo][1], scalarValue);
                 }
             }
         }
-        let hasOverlap = false;
-        for(let boxNo of [0, 1]){
-            /* Step 4 */
-            if((minMaxCornerValues[boxNo][0] > minMaxCornerValues[+!boxNo][0] && minMaxCornerValues[boxNo][0] < minMaxCornerValues[+!boxNo][1]) ||
-                (minMaxCornerValues[boxNo][1] < minMaxCornerValues[+!boxNo][1] && minMaxCornerValues[boxNo][1] > minMaxCornerValues[+!boxNo][0])){
-                hasOverlap = true;
-                break;
+        /* Step 4 */
+        if(!(minMaxCornerValues[0][0] < minMaxCornerValues[1][1] && minMaxCornerValues[1][0] < minMaxCornerValues[0][1])) {
+            for (let boxNo of [0, 1]) {
+                if (!(minMaxCornerValues[boxNo][0] > minMaxCornerValues[+!boxNo][0] && minMaxCornerValues[boxNo][0] < minMaxCornerValues[+!boxNo][1]) ||
+                    (minMaxCornerValues[boxNo][1] < minMaxCornerValues[+!boxNo][1] && minMaxCornerValues[boxNo][1] > minMaxCornerValues[+!boxNo][0])) {
+                    return false;
+                }
             }
         }
-        if(!hasOverlap){
-            return false;
-        }
     }
-    return true;
+    return hasOverlap;
 }
 
 export function turnShape(quarterCycles, shape) {
@@ -115,21 +160,25 @@ export function shapeBoundingBox(shape) {
     return {size:[maxPos[0] - minPos[0], maxPos[1] - minPos[1]], topLeftCorner: [minPos[0], minPos[1]]};
 }
 
-export function calcSpecCorners(spec){
+export function calcSpecCorners(spec, doBackwardsRotation = false){
     let {size} = spec;
-    let {rotate = specAttributes.rotate.defaultValue} = spec;
+    let {rotate = specAttributes.rotate.defaultValue, origin = specAttributes.origin.defaultValue} = spec;
+    /* It seems like famous is treating the rotation as going backwards...TODO: Verify this*/
+    let zRotation = doBackwardsRotation ? -rotate[2] : rotate[2];
+    //rotate[2] *=-1;
     let corners = {};
     /* Pretend that origin is [0, 0] */
     corners['topLeft'] = [0, 0];
-    corners['topRight'] = [Math.cos(rotate[2]) * size[0], -Math.sin(rotate[2]) * size[0]];
-    let rotateMinusHalfPi = rotate[2] - Math.PI / 2;
+    corners['topRight'] = [Math.cos(zRotation) * size[0], -Math.sin(zRotation) * size[0]];
+    let rotateMinusHalfPi = zRotation - Math.PI / 2;
     corners['bottomLeft'] = [Math.cos(rotateMinusHalfPi) * size[1], -Math.sin(rotateMinusHalfPi) * size[1]];
     let hypotenuse = Math.sqrt(Math.pow(size[0], 2) + Math.pow(size[1], 2));
     let hypotenuseAngle = Math.atan(size[1] / size[0]);
-    let rotateRelativeHypotenuse = rotate[2] - hypotenuseAngle;
+    let rotateRelativeHypotenuse = zRotation - hypotenuseAngle;
     corners['bottomRight'] = [Math.cos(rotateRelativeHypotenuse) * hypotenuse, -Math.sin(rotateRelativeHypotenuse) * hypotenuse];
     return corners;
 }
+
 
 //For boxes
 export function specBoundingBoxSize(spec) {
@@ -186,7 +235,7 @@ export function associateShapesInInterval(input, shapes, context, maxRange) {
         allSpecs.push(spec);
         context.set(bar, spec);
     }
-    console.log(doBoxesCollide(allSpecs[0], allSpecs[1]) || doBoxesCollide(allSpecs[0], allSpecs[2]) || doBoxesCollide(allSpecs[1], allSpecs[2]));
+    console.log(doBoxesCollide(allSpecs[1], allSpecs[2]) || doBoxesCollide(allSpecs[1], allSpecs[0]) || doBoxesCollide(allSpecs[0], allSpecs[2]));
 }
 
 let _ensureNewArray = (potentialArray) => Array.isArray(potentialArray) ? [...potentialArray] : [potentialArray];
