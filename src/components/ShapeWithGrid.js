@@ -19,7 +19,7 @@ export class ShapeWithGrid extends View {
     @layout.origin(0.5,0.5)
     @layout.rotate(0, 0, 0)
     @layout.translate(0, 0, 30)
-    shape = new Shape({shape: this.options.shape});
+    shape = new Shape(this.options);
 
     setAutoSpin(autoSpin){
         this._autoSpin = this.layout.options.alwaysLayout = autoSpin;

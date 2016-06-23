@@ -26,7 +26,7 @@ export class ShapeSelector extends View {
 
         let shapeEntries = options.shapes.entries();
         for(let [i, shape] of shapeEntries){
-            let shapeRenderable = new ShapeWithGrid({shape, autoSpin:true, startRotation:i*Math.PI/2});
+            let shapeRenderable = new ShapeWithGrid({colorScheme: 'transparent', shape, autoSpin:true, startRotation:i*Math.PI/2});
 
             this.addRenderable(shapeRenderable, `shape${i}`);
             shapeRenderable.on('click', this._onShapeClicked.bind(this,i));

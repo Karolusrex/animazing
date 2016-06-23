@@ -18,21 +18,21 @@ export class Shape extends View{
             this.addRenderable(new options.renderableType({
                 properties: {
                     webkitBoxShadow: '1px 3px 37px 0px rgba(168,91,132,1)',
-                    backgroundColor: options.colorScheme[i]
+                    backgroundColor: Array.isArray(options.colorScheme) ? options.colorScheme[i] : options.colorScheme
                 }}),renderableName);
         }
         this.renderables.background = new Surface({properties: {backgroundColor: 'white'}});
         this.layouts.push((context) => {
             let contextSize = context.size;
             let sizeDistortion = this.getSizeDistortion(contextSize);
-
+            /*For debugging
             context.set('background', {
                 size: this.getSize().map((size) => size/sizeDistortion),
                 align: [0, 0],
                 origin: [0, 0],
                 translate: [0, 0, -10]
             });
-
+*/
 
             for(let renderableName in options.shape){
                 let spec = {};
