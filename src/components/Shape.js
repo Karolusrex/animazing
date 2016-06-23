@@ -21,10 +21,19 @@ export class Shape extends View{
                     backgroundColor: options.colorScheme[i]
                 }}),renderableName);
         }
-        this.addRenderable(new Surface({properties: {backgroundColor: 'white'}}), 'debugBackground', layout.size(...this.getSize()), layout.translate(0, 0,-10));
+        this.renderables.background = new Surface({properties: {backgroundColor: 'white'}});
         this.layouts.push((context) => {
             let contextSize = context.size;
             let sizeDistortion = this.getSizeDistortion(contextSize);
+
+            context.set('background', {
+                size: this.getSize().map((size) => size/sizeDistortion),
+                align: [0, 0],
+                origin: [0, 0],
+                translate: [0, 0, -10]
+            });
+
+
             for(let renderableName in options.shape){
                 let spec = {};
                 for(let [specAttribute,{defaultValue,dimensions}] of Object.entries(specAttributes)){
