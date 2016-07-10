@@ -6,15 +6,21 @@ import {View}               from 'arva-js/core/View.js';
 import Surface              from 'famous/core/Surface.js';
 import {layout}             from 'arva-js/layout/decorators.js';
 
-import {specAttributes, shapeBoundingBox}     from '../util/SpecProcessing.js';
+import {Snappable}              from '../components/Snappable.js';
+
+import {associateShapesInInterval,
+    turnShape,
+    specBoundingBoxSize, specAttributes, shapeBoundingBox}     from '../util/SpecProcessing.js';
+
 
 export class Shape extends View{
+
     constructor(options){
         super(options);
         options.renderableType = options.renderableType || Surface;
         options.colorScheme = options.colorScheme || ['#2ecc71','#8e44ad','#d35400', '#27ae60','#e67e22','#9b59b6'];
-        this._boundingBox = shapeBoundingBox(options.shape);
-        for(let [i, renderableName] of Object.keys(options.shape).entries()){
+        this._boundingBox = shapeBoundingBox(options.spec);
+        for(let [i, renderableName] of Object.keys(options.spec).entries()){
             this.addRenderable(new options.renderableType({
                 properties: {
                     webkitBoxShadow: '1px 3px 37px 0px rgba(168,91,132,1)',
@@ -25,19 +31,11 @@ export class Shape extends View{
         this.layouts.push((context) => {
             let contextSize = context.size;
             let sizeDistortion = this.getSizeDistortion(contextSize);
-            /*For debugging
-            context.set('background', {
-                size: this.getSize().map((size) => size/sizeDistortion),
-                align: [0, 0],
-                origin: [0, 0],
-                translate: [0, 0, -10]
-            });
-*/
 
-            for(let renderableName in options.shape){
+            for(let renderableName in options.spec){
                 let spec = {};
                 for(let [specAttribute,{defaultValue,dimensions}] of Object.entries(specAttributes)){
-                    let attribute = options.shape[renderableName][specAttribute] || defaultValue;
+                    let attribute = options.spec[renderableName][specAttribute] || defaultValue;
                     if(specAttribute === 'align'){
                         attribute = [0, 0];
                     } else if(specAttribute === 'size'){
@@ -53,10 +51,14 @@ export class Shape extends View{
         });
     }
 
+    enableRotation() {
+
+    }
+
     getSizeDistortion(contextSize){
         let size = this.getSize();
         let absoluteSizeDistortion = [...contextSize.entries()].map(([index, singleContextSize]) => Math.min(singleContextSize/size[index], size[index]/singleContextSize));
-        let biggestDistortionIndex = +(absoluteSizeDistortion[1] > absoluteSizeDistortion[0]);
+        let biggestDistortionIndex = +(absoluteSizeDistortion[1] < absoluteSizeDistortion[0]);
         return size[biggestDistortionIndex]/contextSize[biggestDistortionIndex];
     }
 

@@ -4,13 +4,14 @@ import {View}               from 'arva-js/core/View.js';
 import {layout, options}    from 'arva-js/layout/decorators.js';
 import insertRule               from 'insert-rule';
 import {Snappable}              from '../components/Snappable.js';
-import {Shapes}                 from '../components/Shapes.js';
+import {ShapeSpecs}              from '../components/ShapeSpecs.js';
 import {associateShapesInInterval,
     turnShape,
     specBoundingBoxSize, shapeBoundingBox}        from '../util/SpecProcessing.js';
 import {Shape}                  from '../components/Shape.js';
 import {ShapeSelector}          from '../components/ShapeSelector.js';
 import {ShapeGrid}              from '../components/ShapeGrid.js';
+import {ShapeSlider}            from '../components/ShapeSlider.js';
 
 insertRule('.bar::after', {
     webkitBoxShadow: '1px 30px 47px 0px rgba(178,97,137,1)',
@@ -22,12 +23,15 @@ insertRule('.bar:hover::after', {
     opacity: 1
 });
 
-
+@layout.margins([100,50,50,50])
 export class HomeView extends View {
 
+    @layout.translate(0, 0, -10)
     @layout.fullscreen
     background = new Surface({properties: {backgroundColor: '#2F2F40'}});
 
+    @layout.dock("top", 150)
+    shapeSlider = new ShapeSlider({shapeSpecs: [ShapeSpecs.upArrow,ShapeSpecs.downArrow,ShapeSpecs.upArrow, ShapeSpecs.upPointArrow]});
 
     constructor(options = {}) {
         super(options);
@@ -43,9 +47,10 @@ export class HomeView extends View {
                 }
             }), bar);
         }
-        this.renderables.shapeSelector = new ShapeSelector({shapes: [Shapes.twistedMenu, Shapes.upArrow, Shapes.upPointArrow]});
+
+        this.renderables.shapeSelector = new ShapeSelector({showInitially: false, shapeSpecs: [ShapeSpecs.twistedMenu, ShapeSpecs.twistedMenu, ShapeSpecs.upArrow, ShapeSpecs.upPointArrow]});
         this.renderables.shapeSelectorBackground = new Surface({properties: {backgroundColor: 'white'}});
-        this.renderables.shape = new Shape({shape: Shapes.upPointArrow});
+        this.renderables.shape = new Shape({spec: ShapeSpecs.upPointArrow});
         this.renderables.box = new Surface({properties: {backgroundColor: 'black'}});
         this.renderables.boundingBox = new Surface({properties: {backgroundColor: 'white'}});
         this.renderables.shapeGrid = new ShapeGrid();
@@ -55,6 +60,14 @@ export class HomeView extends View {
             this.renderables[`redDebug${i}`] = new Surface({properties: {borderRadius: '100%',backgroundColor: 'red'}});
             this.renderables[`blueDebug${i}`] = new Surface({properties: {borderRadius: '100%',backgroundColor: 'blue'}});
         }
+        this.shapeSlider.on('modifyShape', (index) => {
+           this.renderables.shapeSelector.offerSelection();
+            this.renderables.shapeSelector.once('shapeSelected', (spec) => {
+                this.shapeSlider.setSelection(index,spec);
+                /*this.renderables.shapeSelector.hideAll();*/
+            });
+        });
+
         this._initDraggable();
         this._initAnimationBehaviour();
     }
@@ -107,7 +120,7 @@ export class HomeView extends View {
 
             context.set('snappable', draggableSpec);
 
-            associateShapesInInterval(inputPosition[0], [Shapes.startState, turnShape(1, Shapes.startState), turnShape(2, Shapes.upArrow), turnShape(3, Shapes.upPointArrow), Shapes.upPointArrow], context, this.maxRange);
+            associateShapesInInterval(inputPosition[0], [ShapeSpecs.startState, turnShape(1, ShapeSpecs.startState), turnShape(2, ShapeSpecs.upArrow), turnShape(3, ShapeSpecs.upPointArrow), ShapeSpecs.upPointArrow], context, this.maxRange);
         });
     }
 
@@ -142,7 +155,7 @@ export class HomeView extends View {
 
 
          context.set('shapeSelector', {
-         size: [undefined, 200],
+         size: [undefined, 250],
          align: [0.5, 0.75],
          origin: [0.5, 0.5],
          translate: [0, 0, 30]

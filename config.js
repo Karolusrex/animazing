@@ -32,49 +32,34 @@ System.config({
   },
 
   map: {
-    "arva-js": "github:bizboard/arva-js@unification",
+    "arva-js": "github:bizboard/arva-js@develop",
     "babel": "npm:babel-core@5.8.34",
     "babel-runtime": "npm:babel-runtime@5.8.34",
     "clean-css": "npm:clean-css@3.4.8",
     "core-js": "npm:core-js@1.2.6",
     "css": "github:systemjs/plugin-css@0.1.20",
     "di.js": "github:bizboard/di.js@master",
-    "famous": "github:bizboard/famous@develop",
+    "famous": "github:bizboard/famous@0.3.7",
     "famous-flex": "github:bizboard/famous-flex@master",
     "fastclick": "npm:fastclick@1.0.6",
     "insert-rule": "npm:insert-rule@2.1.0",
     "lodash": "npm:lodash@3.10.1",
     "traceur": "github:jmcriffey/bower-traceur@0.0.90",
     "traceur-runtime": "github:jmcriffey/bower-traceur-runtime@0.0.90",
-    "github:bizboard/SPSoapAdapter@develop": {
-      "arva-utils": "github:bizboard/arva-utils@develop",
-      "eventemitter3": "npm:eventemitter3@1.2.0",
-      "json-query": "npm:json-query@1.8.0",
-      "lodash": "npm:lodash@4.13.1",
-      "xml2js": "npm:xml2js@0.4.16"
-    },
-    "github:bizboard/arva-js@unification": {
-      "SPSoapAdapter": "github:bizboard/SPSoapAdapter@develop",
+    "github:bizboard/arva-js@develop": {
       "bowser": "npm:bowser@1.3.0",
       "camelcase": "npm:camelcase@2.1.1",
       "di": "github:bizboard/di.js@master",
       "eventemitter3": "npm:eventemitter3@1.2.0",
-      "famous": "github:bizboard/famous@develop",
+      "famous": "github:bizboard/famous@0.3.7",
       "famous-flex": "github:bizboard/famous-flex@master",
-      "firebase": "github:firebase/firebase-bower@2.4.2",
+      "firebase": "github:firebase/firebase-bower@3.0.5",
       "fs": "github:jspm/nodelibs-fs@0.1.2",
       "lodash": "npm:lodash@4.13.1",
       "ordered-hashmap": "npm:ordered-hashmap@1.0.0",
       "path": "github:jspm/nodelibs-path@0.1.0",
-      "request-animation-frame-mock": "github:erykpiast/request-animation-frame-mock@0.1.8"
-    },
-    "github:bizboard/arva-utils@develop": {
-      "bowser": "npm:bowser@1.3.0",
-      "calmelcase": "npm:camelcase@2.1.1",
-      "di": "github:bizboard/di.js@master",
-      "fs": "github:jspm/nodelibs-fs@0.1.2",
-      "lodash": "npm:lodash@4.13.1",
-      "path": "github:jspm/nodelibs-path@0.1.0"
+      "request-animation-frame-mock": "github:erykpiast/request-animation-frame-mock@0.1.8",
+      "xml2js": "npm:xml2js@0.4.16"
     },
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.4.1"
@@ -186,9 +171,6 @@ System.config({
       "child_process": "github:jspm/nodelibs-child_process@0.1.0",
       "process": "github:jspm/nodelibs-process@0.1.2",
       "systemjs-json": "github:systemjs/plugin-json@0.1.1"
-    },
-    "npm:json-query@1.8.0": {
-      "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:lodash@3.10.1": {
       "process": "github:jspm/nodelibs-process@0.1.2"

@@ -3,7 +3,7 @@
  */
 
 
-export class ShapeCollection {
+export class ShapeSpecCollection {
 
     stickDimensions = [100, 10];
     
@@ -138,4 +138,4 @@ export class ShapeCollection {
     }
 }
 
-export const Shapes = new ShapeCollection();
+export const ShapeSpecs = new ShapeSpecCollection();
