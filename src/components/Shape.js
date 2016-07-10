@@ -14,9 +14,11 @@ import {associateShapesInInterval,
 
 
 export class Shape extends View{
+    
 
     constructor(options){
         super(options);
+
         options.renderableType = options.renderableType || Surface;
         options.colorScheme = options.colorScheme || ['#2ecc71','#8e44ad','#d35400', '#27ae60','#e67e22','#9b59b6'];
         this._boundingBox = shapeBoundingBox(options.spec);
@@ -50,10 +52,7 @@ export class Shape extends View{
 
         });
     }
-
-    enableRotation() {
-
-    }
+    
 
     getSizeDistortion(contextSize){
         let size = this.getSize();
