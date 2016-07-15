@@ -4,8 +4,8 @@
 
 import {View}                   from 'arva-js/core/View.js';
 
-import Draggable                from 'famous/modifiers/Draggable';
 import Surface                  from 'famous/core/Surface.js';
+import Draggable                from 'famous/modifiers/Draggable';
 import RenderNode               from 'famous/core/RenderNode';
 import Transitionable           from 'famous/transitions/Transitionable';
 import Easing                   from 'famous/transitions/Easing';
@@ -15,8 +15,12 @@ import Easing                   from 'famous/transitions/Easing';
 export class Snappable extends View {
     constructor(options) {
         super(options);
-        this.layout.options.alwaysLayout = true;
         this._draggable = new Draggable(options);
+        if(options.disabled){
+            this.disable();
+        } else {
+            this.enable();
+        }
 
 
         let dragSurface = new Surface(options.surfaceOptions || {});
@@ -64,6 +68,10 @@ export class Snappable extends View {
         });
     }
 
+    setDraggableRange(xRange, yRange){
+        this._draggable.setOptions({xRange, yRange});
+    }
+
     getPosition(){
         if(this._doSnap){
             return this._snapPositionState.get();
@@ -81,9 +89,23 @@ export class Snappable extends View {
         this._doSnap = enabled;
     }
 
+    disable() {
+        this.layout.options.alwaysLayout = false;
+        this._draggable.deactivate();
+    }
+
+    enable() {
+        this.layout.options.alwaysLayout = true;
+        this._draggable.activate();
+    }
+
+    setSnapPoints(snapPoints){
+        this._snapPoints = snapPoints;
+    }
+
     doSnapping() {
-        let draggablePosition= this._draggable.getPosition();
-        this.restrictedPosition = this._restrictFunction ? this._restrictFunction(draggablePosition) : draggablePosition;
+        let lastDraggablePosition = [...this._draggable.getPosition()];
+        this.restrictedPosition = this._restrictFunction ? this._restrictFunction(lastDraggablePosition) : lastDraggablePosition;
 
         this._calcToNearestPoint();
 
@@ -113,16 +135,16 @@ export class Snappable extends View {
         } else if(this._draggableFollowSnap){
             this._draggable.setPosition(this._snapPositionState.get());
         }
-
-
-
+        let newPosition = this.getPosition();
+        if(lastDraggablePosition[0] !== newPosition[0] || lastDraggablePosition[1] !== newPosition[1]){
+            this._eventOutput.emit('newPosition', newPosition);
+        }
 
     }
 
     _distance(p1, p2) {
         return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
     }
-
     _calcToNearestPoint() {
 
         let position = this.snapNext ? this._draggable.getPosition() : this.restrictedPosition;

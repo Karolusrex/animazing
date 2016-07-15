@@ -2,6 +2,8 @@
  * Created by lundfall on 5/31/16.
  */
 
+import {turnShape}  from '../util/SpecProcessing.js';
+
 
 export class ShapeSpecCollection {
 
@@ -86,7 +88,8 @@ export class ShapeSpecCollection {
         }
     };
 
-     rightPointArrow = {
+
+    /*rightPointArrow = {
         topBar: {
             rotate: [0, 0, Math.PI / 4],
             align: [0.5, 0.5],
@@ -105,10 +108,25 @@ export class ShapeSpecCollection {
             translate: [-10, 40, 0],
             size: this.stickDimensions
         }
+    };*/
+
+
+
+
+     upPointArrow = {
+        topBar: Object.assign({}, this.upArrow.topBar, {translate: [this.upArrow.topBar.translate[0], ...this.upArrow.topBar.translate.slice(1)]}),
+        midBar: Object.assign({}, this.upArrow.midBar, {translate: [this.upArrow.midBar.translate[0], ...this.upArrow.midBar.translate.slice(1)]}),
+        bottomBar: {
+            rotate: [0, 0, Math.PI / 2],
+            translate: [0, 45, 0],
+            align: [0.5, 0.5],
+            size: this.stickDimensions
+        }
     };
 
+    rightPointArrow = turnShape(3,this.upPointArrow);
 
-     leftPointArrow = {
+    leftPointArrow = {
         topBar: Object.assign({}, this.rightPointArrow.topBar, {
             translate: [-30, this.rightPointArrow.topBar.translate[1], 0],
             rotate: [0, 0, -this.rightPointArrow.topBar.rotate[2]]
@@ -120,16 +138,6 @@ export class ShapeSpecCollection {
             rotate: [0, 0, -this.rightPointArrow.bottomBar.rotate[2]]
         })
     }
-
-     upPointArrow = {
-        topBar: Object.assign({}, this.upArrow.topBar, {translate: [this.upArrow.topBar.translate[0], ...this.upArrow.topBar.translate.slice(1)]}),
-        midBar: Object.assign({}, this.upArrow.midBar, {translate: [this.upArrow.midBar.translate[0], ...this.upArrow.midBar.translate.slice(1)]}),
-        bottomBar: Object.assign({}, this.rightPointArrow.midBar, {
-            rotate: [0, 0, Math.PI / 2],
-            translate: [0, 45, 0],
-            size: this.stickDimensions
-        })
-    };
 
      twistedMenu = {
         topBar: Object.assign({}, this.upPointArrow.bottomBar, {translate: [this.upPointArrow.bottomBar.translate[0] + 40, 0, 0]}),

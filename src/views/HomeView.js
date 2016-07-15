@@ -31,7 +31,7 @@ export class HomeView extends View {
     background = new Surface({properties: {backgroundColor: '#2F2F40'}});
 
     @layout.dock("top", 150)
-    shapeSlider = new ShapeSlider({shapeSpecs: [ShapeSpecs.upArrow,ShapeSpecs.downArrow,ShapeSpecs.upArrow, ShapeSpecs.upPointArrow]});
+    shapeSlider = new ShapeSlider({shapeSpecs: [ShapeSpecs.upArrow,ShapeSpecs.downArrow,ShapeSpecs.upArrow, ShapeSpecs.rightPointArrow]});
 
     constructor(options = {}) {
         super(options);

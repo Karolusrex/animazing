@@ -248,7 +248,7 @@ let _normalizeWeights = (weights, goalT, easing) => {
         normalizedWeights[i] = easing(normalizedWeights[i]) / goalT;
     }
     return normalizedWeights;
-}
+};
 
 export function mergeSpecs(startSpec, endSpec, t, goalT, easing) {
     let [normalizedT] = _normalizeWeights([t], goalT, easing);
@@ -287,8 +287,7 @@ export function mergeSpecs(startSpec, endSpec, t, goalT, easing) {
 }
 
 /* Deprecated, but might be useul in the future for more advanced 2d animation spaces */
-
-export function _getSpec(startState, endSpecs, weights, goalT, easing) {
+export function mergeMultipleSpecs(startState, endSpecs, weights, goalT, easing) {
     let normalizedWeights = _normalizeWeights(weights, goalT, easing);
     let spec = {};
     for (let [attribute, {dimensions, defaultValue}] of Object.entries(specAttributes)) {
