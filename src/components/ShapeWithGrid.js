@@ -46,7 +46,6 @@ export class ShapeWithGrid extends View {
         this._rotationTransitionable = new Transitionable(0);
         this._spinSpeed = options.spinSpeed || 0.0225;
         this._currentRotation = options.startRotation || 0;
-        this._ensurePlaceholder();
         this.layout.on('layoutstart', ({size, oldSize}) => {
             if (size[0] !== oldSize[0] || size[1] !== oldSize[1]) {
                 /* Counter-translate the shape since it needed a center origin to rotate center */
@@ -86,15 +85,20 @@ export class ShapeWithGrid extends View {
         let numberOfTurns = Math.floor(rotation/(2*Math.PI));
         /* rotate the shortest way */
         let currentRotation = this._rotationTransitionable.get();
+        this._targetRotation = rotation;
         let rotationDiff = currentRotation - rotation;
         if(Math.abs(rotationDiff) > Math.PI){
             if(Math.abs(Math.PI*2 - Math.abs(rotationDiff)) > Math.PI/2){
-                currentRotation -= Math.PI*2*(Math.floor(currentRotation/(2*Math.PI)+1));
+                currentRotation -= Math.PI*2*(Math.floor((currentRotation % Math.PI*2)/(2*Math.PI)+1));
             }
             this._rotationTransitionable.set((currentRotation % (Math.PI*2)) +numberOfTurns*Math.PI*2);
         }
         this._rotationTransitionable.set(rotation, {curve: Easing.inCubic, duration: 300});
         this.layout.options.alwaysLayout = true;
+    }
+    
+    getDeterminedRotation() {
+        return this._targetRotation;
     }
 
 

@@ -31,7 +31,7 @@ export class HomeView extends View {
     background = new Surface({properties: {backgroundColor: '#2F2F40'}});
 
     @layout.dock("top", 150)
-    shapeSlider = new ShapeSlider({shapeSpecs: [ShapeSpecs.upArrow,ShapeSpecs.downArrow,ShapeSpecs.upArrow, ShapeSpecs.rightPointArrow]});
+    shapeSlider = new ShapeSlider({shapeSpecs: [ShapeSpecs.startState,,,,]});
 
     constructor(options = {}) {
         super(options);
@@ -48,7 +48,7 @@ export class HomeView extends View {
             }), bar);
         }
 
-        this.renderables.shapeSelector = new ShapeSelector({showInitially: false, shapeSpecs: [ShapeSpecs.twistedMenu, ShapeSpecs.twistedMenu, ShapeSpecs.upArrow, ShapeSpecs.upPointArrow]});
+        this.renderables.shapeSelector = new ShapeSelector({showInitially: false, shapeSpecs: [ShapeSpecs.upArrow, ShapeSpecs.upPointArrow]});
         this.renderables.shapeSelectorBackground = new Surface({properties: {backgroundColor: 'white'}});
         this.renderables.shape = new Shape({spec: ShapeSpecs.upPointArrow});
         this.renderables.box = new Surface({properties: {backgroundColor: 'black'}});
@@ -64,7 +64,6 @@ export class HomeView extends View {
            this.renderables.shapeSelector.offerSelection();
             this.renderables.shapeSelector.once('shapeSelected', (spec) => {
                 this.shapeSlider.setSelection(index,spec);
-                /*this.renderables.shapeSelector.hideAll();*/
             });
         });
 
