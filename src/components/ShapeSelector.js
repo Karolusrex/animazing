@@ -38,7 +38,7 @@ export class ShapeSelector extends View {
             this.hideAll();
             Timer.setTimeout(() => {
                 /* The turn shape calculates the rotation backwards from what famous does, so it's inverted here */
-                this._eventOutput.emit('shapeSelected', turnShape((4 - rotation / (Math.PI / 2)) % 4, shapeSpec));
+                this._eventOutput.emit('shapeSelected', turnShape(Math.round((4 - (rotation % (Math.PI*2))/ (Math.PI / 2)) % 4), shapeSpec));
             }, this._transition.duration);
         });
 
@@ -65,7 +65,7 @@ export class ShapeSelector extends View {
                     this._selectedShape.setRotation(rotation + Math.PI / 2);
                 }
             });
-            this.addRenderable(arrowRenderable, `${arrowDirection}Arrow`, layout.rotate(0, 0, rotation), layout.origin(0.5, 0.5), layout.size(...arrowSize), layout.animate({
+            this.addRenderable(arrowRenderable, `${arrowDirection}Arrow`, layout.rotate(0, 0, rotation), layout.origin(0.5, 0.5), layout.size(...arrowSize), layout.translate(0, 0, 20), layout.animate({
                 showInitially: false,
                 animation: function () {
                     return {
@@ -93,7 +93,7 @@ export class ShapeSelector extends View {
                     for (let i of [0, 1]) {
                         size[i] = size[i] - (size[i] - (contextSize[1] - this._arrowSpace * 2)) * this._sliding.get();
                     }
-                    let horizontalArrowVerticalTranslate = 0;
+                    let horizontalArrowVerticalTranslate = -this._arrowSpace;
                     let verticalArrowHorizontalTranslate = context.size[0] / 2;
                     let arrowZindex = 50;
                     this.leftArrow.decorations.translate = [context.size[0] / 2 - size[0] / 2 - this._arrowSpace / 2, contextSize[1] / 2 + this._arrowSpace / 2,
@@ -172,7 +172,8 @@ export class ShapeSelector extends View {
                 this[`shape${i}`].setAutoSpin(false);
             }
             Timer.setTimeout(() => {
-                shapeRenderable.setRotation(0);
+                let currentRotation = shapeRenderable.getRotation();
+                shapeRenderable.setRotation(Math.round(currentRotation/(Math.PI/2))*Math.PI/2);
             }, this._transition.duration);
             this.showRenderable('okButton');
         }

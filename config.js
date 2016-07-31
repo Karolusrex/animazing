@@ -13,7 +13,8 @@ System.config({
   },
   paths: {
     "github:*": "jspm_packages/github/*",
-    "npm:*": "jspm_packages/npm/*"
+    "npm:*": "jspm_packages/npm/*",
+    "bitbucket:*": "jspm_packages/bitbucket/*"
   },
 
   meta: {
@@ -33,8 +34,10 @@ System.config({
 
   map: {
     "arva-js": "github:bizboard/arva-js@develop",
+    "arva-kit": "bitbucket:bizboard/arva-kit@master",
     "babel": "npm:babel-core@5.8.34",
     "babel-runtime": "npm:babel-runtime@5.8.34",
+    "bizboard/arva-kit": "bitbucket:bizboard/arva-kit@master",
     "clean-css": "npm:clean-css@3.4.8",
     "core-js": "npm:core-js@1.2.6",
     "css": "github:systemjs/plugin-css@0.1.20",
@@ -46,20 +49,27 @@ System.config({
     "lodash": "npm:lodash@3.10.1",
     "traceur": "github:jmcriffey/bower-traceur@0.0.90",
     "traceur-runtime": "github:jmcriffey/bower-traceur-runtime@0.0.90",
+    "bitbucket:bizboard/arva-kit@master": {
+      "arva-js": "github:bizboard/arva-js@develop",
+      "famous": "github:bizboard/famous@0.3.7",
+      "famous-bkimagesurface": "github:bizboard/famous-bkimagesurface@master",
+      "famous-flex": "github:bizboard/famous-flex@master",
+      "lodash": "npm:lodash@4.13.1"
+    },
     "github:bizboard/arva-js@develop": {
-      "bowser": "npm:bowser@1.3.0",
+      "bowser": "npm:bowser@1.4.1",
       "camelcase": "npm:camelcase@2.1.1",
       "di": "github:bizboard/di.js@master",
       "eventemitter3": "npm:eventemitter3@1.2.0",
       "famous": "github:bizboard/famous@0.3.7",
       "famous-flex": "github:bizboard/famous-flex@master",
-      "firebase": "github:firebase/firebase-bower@3.0.5",
+      "firebase": "github:firebase/firebase-bower@3.2.0",
       "fs": "github:jspm/nodelibs-fs@0.1.2",
       "lodash": "npm:lodash@4.13.1",
       "ordered-hashmap": "npm:ordered-hashmap@1.0.0",
       "path": "github:jspm/nodelibs-path@0.1.0",
       "request-animation-frame-mock": "github:erykpiast/request-animation-frame-mock@0.1.8",
-      "xml2js": "npm:xml2js@0.4.16"
+      "xml2js": "npm:xml2js@0.4.17"
     },
     "github:jspm/nodelibs-assert@0.1.0": {
       "assert": "npm:assert@1.4.1"
@@ -88,7 +98,7 @@ System.config({
       "path-browserify": "npm:path-browserify@0.0.0"
     },
     "github:jspm/nodelibs-process@0.1.2": {
-      "process": "npm:process@0.11.3"
+      "process": "npm:process@0.11.5"
     },
     "github:jspm/nodelibs-stream@0.1.0": {
       "stream-browserify": "npm:stream-browserify@1.0.0"
@@ -104,6 +114,9 @@ System.config({
     },
     "github:jspm/nodelibs-util@0.1.0": {
       "util": "npm:util@0.10.3"
+    },
+    "github:jspm/nodelibs-vm@0.1.0": {
+      "vm-browserify": "npm:vm-browserify@0.0.4"
     },
     "npm:amdefine@1.0.0": {
       "fs": "github:jspm/nodelibs-fs@0.1.2",
@@ -173,7 +186,7 @@ System.config({
       "systemjs-json": "github:systemjs/plugin-json@0.1.1"
     },
     "npm:isarray@1.0.0": {
-      "systemjs-json": "github:systemjs/plugin-json@0.1.1"
+      "systemjs-json": "github:systemjs/plugin-json@0.1.2"
     },
     "npm:lodash@3.10.1": {
       "process": "github:jspm/nodelibs-process@0.1.2"
@@ -188,8 +201,10 @@ System.config({
     "npm:path-browserify@0.0.0": {
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
-    "npm:process@0.11.3": {
-      "assert": "github:jspm/nodelibs-assert@0.1.0"
+    "npm:process@0.11.5": {
+      "assert": "github:jspm/nodelibs-assert@0.1.0",
+      "fs": "github:jspm/nodelibs-fs@0.1.2",
+      "vm": "github:jspm/nodelibs-vm@0.1.0"
     },
     "npm:punycode@1.3.2": {
       "process": "github:jspm/nodelibs-process@0.1.2"
@@ -223,7 +238,7 @@ System.config({
       "buffer": "github:jspm/nodelibs-buffer@0.1.0"
     },
     "npm:timers-browserify@1.4.2": {
-      "process": "npm:process@0.11.3"
+      "process": "npm:process@0.11.5"
     },
     "npm:url@0.10.3": {
       "assert": "github:jspm/nodelibs-assert@0.1.0",
@@ -235,7 +250,10 @@ System.config({
       "inherits": "npm:inherits@2.0.1",
       "process": "github:jspm/nodelibs-process@0.1.2"
     },
-    "npm:xml2js@0.4.16": {
+    "npm:vm-browserify@0.0.4": {
+      "indexof": "npm:indexof@0.0.1"
+    },
+    "npm:xml2js@0.4.17": {
       "events": "github:jspm/nodelibs-events@0.1.1",
       "process": "github:jspm/nodelibs-process@0.1.2",
       "sax": "npm:sax@1.2.1",

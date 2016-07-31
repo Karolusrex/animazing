@@ -5,9 +5,9 @@
 
 export let specAttributes = {
     rotate: {dimensions: 3, defaultValue: [0, 0, 0]},
-    align: {dimensions: 2, defaultValue: [0, 0]},
+    align: {dimensions: 2, defaultValue: [0.5, 0.5]},
     origin: {dimensions: 2, defaultValue: [0.5, 0.5]},
-    size: {dimensions: 2, defaultValue: [0, 0]},
+    size: {dimensions: 2, defaultValue: [100, 10]},
     translate: {dimensions: 3, defaultValue: [0, 0, 0]},
     opacity: {dimensions: 1, defaultValue: 1}
 };
@@ -121,6 +121,7 @@ export function turnShape(quarterCycles, shape) {
             continue;
         }
         if (quarterTurn || threeQuarterTurn) {
+            /* Deduced from wolfram alpha */
             let rotateZ = quarterTurn ? -Math.PI / 2 : Math.PI / 2;
             let origin = object.origin || specAttributes.origin.defaultValue;
             let originX = origin[0] * object.size[0];
@@ -235,7 +236,7 @@ export function associateShapesInInterval(input, shapes, context, maxRange) {
         allSpecs.push(spec);
         context.set(bar, spec);
     }
-    //console.log(doBoxesCollide(allSpecs[1], allSpecs[2]) || doBoxesCollide(allSpecs[1], allSpecs[0]) || doBoxesCollide(allSpecs[0], allSpecs[2]));
+    // console.log(doBoxesCollide(allSpecs[1], allSpecs[2]) || doBoxesCollide(allSpecs[1], allSpecs[0]) || doBoxesCollide(allSpecs[0], allSpecs[2]));
 }
 
 let _ensureNewArray = (potentialArray) => Array.isArray(potentialArray) ? [...potentialArray] : [potentialArray];
@@ -260,12 +261,18 @@ export function mergeSpecs(startSpec, endSpec, t, goalT, easing) {
             let sumOfAttributeDimension = 0;
             let startSpecAttribute = _ensureNewArray(startSpec[attribute] !== undefined ? startSpec[attribute] : defaultValue);
             let endSpecAttribute = _ensureNewArray(endSpec[attribute] !== undefined ? endSpec[attribute] : defaultValue);
-            let addition = (endSpecAttribute[i] - startSpecAttribute[i]) * normalizedT;
-            /* Rotate the shortest way */
             if (attribute === 'rotate') {
+                /* Rotate the shortest way */
+                startSpecAttribute[2] = normalizeRotationToOther(endSpecAttribute[2], startSpecAttribute[2], Math.PI);
+            }
+
+            let addition = (endSpecAttribute[i] - startSpecAttribute[i]) * normalizedT;
+
+
+            /*if (attribute === 'rotate') {
 
                 let hasDifferentSigns = Math.sign(endSpecAttribute[i]) !== Math.sign(startSpecAttribute[i]);
-                if (!hasDifferentSigns && Math.abs(Math.abs(endSpecAttribute[i] - startSpecAttribute[i]) - Math.PI / 2) <= Number.EPSILON) {
+                if(!hasDifferentSigns && Math.abs(Math.abs(endSpecAttribute[i] - startSpecAttribute[i]) - Math.PI / 2) <= Number.EPSILON){
                     endSpecAttribute[i] += Math.sign(startSpecAttribute[i] - endSpecAttribute[i]) * Math.PI;
                 }
                 else if ((hasDifferentSigns && Math.abs(endSpecAttribute[i]) + Math.abs(startSpecAttribute[i]) > Math.PI / 2) ||
@@ -273,7 +280,7 @@ export function mergeSpecs(startSpec, endSpec, t, goalT, easing) {
                     endSpecAttribute[i] += Math.sign(startSpecAttribute[i]) * Math.PI;
                     addition = (endSpecAttribute[i] - startSpecAttribute[i]) * normalizedT;
                 }
-            }
+            }*/
             sumOfAttributeDimension += addition;
             let specAttribute = startSpecAttribute[i] + sumOfAttributeDimension;
             if (dimensions > 1) {
@@ -284,6 +291,28 @@ export function mergeSpecs(startSpec, endSpec, t, goalT, easing) {
         }
     }
     return spec;
+}
+
+/** Returns a normalized rotation of the second argument that make rotation turn the shortest way
+ *
+ * @param rotation
+ * @param otherRotation
+ * @param maxRotation
+ */
+export function normalizeRotationToOther(rotation, otherRotation, maxRotation = Math.PI*2) {
+    let numberOfTurns = Math.floor(rotation/(maxRotation));
+    /* rotate the shortest way */
+    let rotationDiff = otherRotation - rotation;
+    /* If it needs to be normalized... */
+    if(Math.abs(rotationDiff) > (maxRotation/2)){
+        otherRotation = otherRotation % (maxRotation) + numberOfTurns*maxRotation;
+        /* If it needs to rotate the other way... */
+        let normalizedDiff = otherRotation - rotation;
+        if(Math.abs(normalizedDiff) > (maxRotation/2)){
+            otherRotation -= Math.sign(normalizedDiff)*maxRotation;
+        }
+    }
+    return otherRotation;
 }
 
 /* Deprecated, but might be useul in the future for more advanced 2d animation spaces */

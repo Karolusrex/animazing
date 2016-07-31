@@ -14,6 +14,7 @@ import {associateShapesInInterval,
 
 
 export class Shape extends View{
+    
 
     constructor(options){
         super(options);
@@ -28,11 +29,14 @@ export class Shape extends View{
                 }}),renderableName);
         }
         this.renderables.background = new Surface({properties: {backgroundColor: 'white'}});
+
+        let specNames = Object.keys(options.spec).sort();
+
         this.layouts.push((context) => {
             let contextSize = context.size;
-            let sizeDistortion = this.getSizeDistortion(contextSize);
+            let sizeDistortion = this.getSizeDistortion(contextSize);   
 
-            for(let renderableName in options.spec){
+            for(let renderableName of specNames){
                 let spec = {};
                 for(let [specAttribute,{defaultValue,dimensions}] of Object.entries(specAttributes)){
                     let attribute = options.spec[renderableName][specAttribute] || defaultValue;
@@ -64,6 +68,10 @@ export class Shape extends View{
 
     getSize() {
         return this._boundingBox.size;
+    }
+
+    getSpec() {
+        return this.options.spec;
     }
 
 }

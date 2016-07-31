@@ -10,14 +10,26 @@ import {layout, options}    from 'arva-js/layout/decorators.js';
 
 import {Shape}              from './Shape.js';
 import {ShapeGrid}          from './ShapeGrid.js';
+import {
+    normalizeRotationToOther
+}
+    from '../util/SpecProcessing.js';
+import {Settings}           from '../util/Settings.js';
 import AnimationController  from 'famous-flex/AnimationController.js';
-
+import {combineOptions}      from 'arva-js/utils/CombineOptions.js';
 
 export class ShapeWithGrid extends View {
 
-
     @layout.fullscreen
     grid = new ShapeGrid();
+
+    @layout.dock('fill')
+    @layout.translate(0, 0, 30)
+    overlay = new Surface({
+        properties: {
+            backgroundColor: this.options.enabled ? 'none' : Settings.transparentBackgroundColor
+        }
+    });
 
     @layout.animate({
         transition: {duration: 0}, animation: function () {
@@ -41,7 +53,10 @@ export class ShapeWithGrid extends View {
     placeholder = new Surface({content: '?', properties: {fontSize: '100px', textAlign: 'center'}});
 
     constructor(options) {
-        super(options);
+        super(combineOptions(
+            {enabled: true}
+            , options));
+        this._enabled = options.enabled;
         this.setAutoSpin(options.autoSpin);
         this._rotationTransitionable = new Transitionable(0);
         this._spinSpeed = options.spinSpeed || 0.0225;
@@ -72,6 +87,10 @@ export class ShapeWithGrid extends View {
         })
     }
 
+    isEnabled() {
+        return this._enabled;
+    }
+
     setAutoSpin(autoSpin) {
         this._autoSpin = this.layout.options.alwaysLayout = autoSpin;
     }
@@ -82,23 +101,28 @@ export class ShapeWithGrid extends View {
 
 
     setRotation(rotation) {
-        let numberOfTurns = Math.floor(rotation/(2*Math.PI));
-        /* rotate the shortest way */
-        let currentRotation = this._rotationTransitionable.get();
         this._targetRotation = rotation;
-        let rotationDiff = currentRotation - rotation;
-        if(Math.abs(rotationDiff) > Math.PI){
-            if(Math.abs(Math.PI*2 - Math.abs(rotationDiff)) > Math.PI/2){
-                currentRotation -= Math.PI*2*(Math.floor((currentRotation % Math.PI*2)/(2*Math.PI)+1));
-            }
-            this._rotationTransitionable.set((currentRotation % (Math.PI*2)) +numberOfTurns*Math.PI*2);
-        }
+        /* rotate the shortest way */
+        let adjustedCurrentRotation = normalizeRotationToOther(rotation, this._rotationTransitionable.get());
+        this._rotationTransitionable.set(adjustedCurrentRotation);
         this._rotationTransitionable.set(rotation, {curve: Easing.inCubic, duration: 300});
         this.layout.options.alwaysLayout = true;
     }
-    
+
+    /** Gets the final rotation, not considering any ongoing animation
+     *
+     * @returns {*}
+     */
     getDeterminedRotation() {
         return this._targetRotation;
+    }
+
+    /** Gets the current rotation of the shape
+     *
+     * @returns Number
+     */
+    getRotation() {
+        return this._currentRotation;
     }
 
 
@@ -125,6 +149,10 @@ export class ShapeWithGrid extends View {
         if (!this.renderables.shape.get() || !(this.shape instanceof Shape)) {
             this.showRenderable('placeholder');
         }
+    }
+
+    getSpec() {
+        return this.shape.getSpec ? this.shape.getSpec() : undefined;
     }
 
     hideShape() {

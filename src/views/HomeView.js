@@ -25,13 +25,14 @@ insertRule('.bar:hover::after', {
 
 @layout.margins([100,50,50,50])
 export class HomeView extends View {
+    
 
     @layout.translate(0, 0, -10)
     @layout.fullscreen
     background = new Surface({properties: {backgroundColor: '#2F2F40'}});
 
     @layout.dock("top", 150)
-    shapeSlider = new ShapeSlider({shapeSpecs: [ShapeSpecs.startState,,,,]});
+    shapeSlider = new ShapeSlider({shapeSpecs: [ShapeSpecs.shuffledHamburger,,,,,ShapeSpecs.fallenHamburger]});
 
     constructor(options = {}) {
         super(options);
@@ -41,14 +42,14 @@ export class HomeView extends View {
                 content: '',
                 classes: ['bar'],
                 properties: {
-                    backgroundColor: ['red', 'blue', 'green'][i],
+                    backgroundColor: ['#2ecc71','#8e44ad','#d35400', '#27ae60','#e67e22','#9b59b6'][i],
                     /*borderRadius: '15px',*/
                     webkitBoxShadow: '1px 3px 37px 0px rgba(168,91,132,1)'
                 }
             }), bar);
         }
 
-        this.renderables.shapeSelector = new ShapeSelector({showInitially: false, shapeSpecs: [ShapeSpecs.upArrow, ShapeSpecs.upPointArrow]});
+        this.renderables.shapeSelector = new ShapeSelector({showInitially: false, shapeSpecs: [ShapeSpecs.insect,ShapeSpecs.upPointArrow, ShapeSpecs.shuffledUpPointArrow, ShapeSpecs.pi]});
         this.renderables.shapeSelectorBackground = new Surface({properties: {backgroundColor: 'white'}});
         this.renderables.shape = new Shape({spec: ShapeSpecs.upPointArrow});
         this.renderables.box = new Surface({properties: {backgroundColor: 'black'}});
@@ -64,6 +65,22 @@ export class HomeView extends View {
            this.renderables.shapeSelector.offerSelection();
             this.renderables.shapeSelector.once('shapeSelected', (spec) => {
                 this.shapeSlider.setSelection(index,spec);
+            });
+        });
+
+        this._selectedShapeSequence = [ShapeSpecs.hamburger, turnShape(3, ShapeSpecs.upPointArrow),  ShapeSpecs.upArrow,turnShape(2, ShapeSpecs.upArrow), ShapeSpecs.upPointArrow];
+
+        this.shapeSlider.on('selectionComplete', (sequence) => {
+            this._selectedShapeSequence = sequence;
+            let sequenceLength = sequence.length;
+            this.renderables.snappable = new Snappable({
+                projection: 'x',
+                /*surfaceOptions: {properties: {backgroundColor: 'red'}},*/
+                snapPoints: [...Array(sequenceLength).keys()].map((index) => [this.maxRange/(sequenceLength-1) * (index), 0]),
+                xRange: [0, this.maxRange],
+                /*yRange: [-this.maxRange - 8, this.maxRange + 8],*/
+                scale: 1, restrictFunction: this._restrictController,
+                snapOnDrop: true
             });
         });
 
@@ -93,33 +110,35 @@ export class HomeView extends View {
         this.renderables.verticalGuideLine = new Surface({properties: guideLineProperties});
         this.renderables.horizontalGuideLine = new Surface({properties: guideLineProperties});
 
-        this.renderables.snappable = new Snappable({
-            projection: 'x',
-            snapPoints: [[0, 0], [this.maxRange / 4, 0], [0, 0], [this.maxRange / 2, 0], [3 * this.maxRange / 4, 0], [this.maxRange, 0]],
-            xRange: [0, this.maxRange],
-            /*yRange: [-this.maxRange - 8, this.maxRange + 8],*/
-            scale: 1, restrictFunction: this._restrictController,
-            snapOnDrop: true
-        });
+
     }
 
 
     _initAnimationBehaviour() {
         this.layouts.push((context) => {
-            let inputPosition = this.renderables.snappable.getPosition();
-
-
-            this._drawGuides(context, inputPosition, this.renderables.snappable.getUnSnappedPosition());
-            let draggableSpec = {
-                size: [context.size[0], context.size[1]],
-                align: [0.5, 0.5],
+            context.set('shapeSelector', {
+                size: [undefined, 250],
+                align: [0.5, 0.75],
                 origin: [0.5, 0.5],
-                translate: [0, 0, 0]
-            };
+                translate: [0, 0, 30]
+            });
 
-            context.set('snappable', draggableSpec);
+            if(this.renderables.snappable){
+                let inputPosition = this.renderables.snappable.getPosition();
 
-            associateShapesInInterval(inputPosition[0], [ShapeSpecs.startState, turnShape(1, ShapeSpecs.startState), turnShape(2, ShapeSpecs.upArrow), turnShape(3, ShapeSpecs.upPointArrow), ShapeSpecs.upPointArrow], context, this.maxRange);
+
+                this._drawGuides(context);
+                let draggableSpec = {
+                    size: [context.size[0], context.size[1]],
+                    align: [0.5, 0.5],
+                    origin: [0.5, 0.5],
+                    translate: [0, 0, 0]
+                };
+
+                context.set('snappable', draggableSpec);
+
+                associateShapesInInterval(inputPosition[0], this._selectedShapeSequence, context, this.maxRange);
+            }
         });
     }
 
@@ -135,7 +154,7 @@ export class HomeView extends View {
         return restrictedPosition;
     }
 
-    _drawGuides(context, inputPosition, controllerPosition) {
+    _drawGuides(context) {
 
         context.set('verticalGuideLine', {
             size: [1, this.maxRange * 2],
@@ -153,19 +172,6 @@ export class HomeView extends View {
         });
 
 
-         context.set('shapeSelector', {
-         size: [undefined, 250],
-         align: [0.5, 0.75],
-         origin: [0.5, 0.5],
-         translate: [0, 0, 30]
-         });
-
-        /*context.set('shapeSelectorBackground', {
-            size: [undefined, 100],
-            align: [0.5, 0.7],
-            origin: [0.5, 0.5],
-            translate: [0, 0, 10]
-        });*/
 
 
     }
