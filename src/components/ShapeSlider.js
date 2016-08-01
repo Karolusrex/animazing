@@ -20,6 +20,9 @@ export class ShapeSlider extends View {
         }
     });
 
+    /*@layout.fullscreen
+    bg = new Surface({properties: {backgroundColor: 'red'}})*/
+
     setSelection(index, shapeSpec) {
         this[`circle${index}`].showShape(shapeSpec);
         this._eventOutput.emit('shapeChanged', index, shapeSpec);
@@ -47,7 +50,8 @@ export class ShapeSlider extends View {
 
     constructor(options) {
         super(options);
-        let lastShapeIndex = options.shapeSpecs.length - 1;
+        let sequenceLength = options.shapeSpecs.length;
+        let lastShapeIndex = sequenceLength - 1;
         for (let [index, shapeSpec] of options.shapeSpecs.entries()) {
             let shapeEnabled = index && index !== lastShapeIndex;
             let circle = new ShapeSelection({shapeSpec, enabled: shapeEnabled});
@@ -77,11 +81,12 @@ export class ShapeSlider extends View {
             }
         });
         this.layout.on('layoutstart', ({size}) => {
-            let circleWidth = Math.min(size[0], size[1]);
+            let circleWidth = Math.min(180, (size[0] - (Settings.shapeSpacing*(sequenceLength-1)))/(sequenceLength));
             this.path.decorations.size[0] = size[0] - circleWidth;
+            this.path.decorations.translate[1] = circleWidth - size[1] + 20;
             for (let i = 0; i < options.shapeSpecs.length; i++) {
                 let {decorations} = this[`circle${i}`];
-                decorations.size = [circleWidth, circleWidth];
+                decorations.size = [circleWidth, circleWidth+30];
                 if (decorations.dock) {
                     decorations.dock.size[0] = size[0] / lastShapeIndex - circleWidth / lastShapeIndex;
                 }

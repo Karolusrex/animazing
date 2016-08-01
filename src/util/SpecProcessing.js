@@ -2,6 +2,7 @@
  * Created by lundfall on 5/31/16.
  */
 
+import {ShapeSpec}      from '../components/ShapeSpecs.js';
 
 export let specAttributes = {
     rotate: {dimensions: 3, defaultValue: [0, 0, 0]},
@@ -115,12 +116,10 @@ export function turnShape(quarterCycles, shape) {
     if (noTurn) {
         return shape;
     }
-    for (let [objectName, object] of Object.entries(shape)) {
+    shape.forEach((objectName, object) => {
         if (objectName === 'size') {
             turnedShape.size = quarterTurn || threeQuarterTurn ? [object[1], object[0]] : object;
-            continue;
-        }
-        if (quarterTurn || threeQuarterTurn) {
+        } else if (quarterTurn || threeQuarterTurn) {
             /* Deduced from wolfram alpha */
             let rotateZ = quarterTurn ? -Math.PI / 2 : Math.PI / 2;
             let origin = object.origin || specAttributes.origin.defaultValue;
@@ -145,19 +144,19 @@ export function turnShape(quarterCycles, shape) {
                 }
             )
         }
-    }
-    return turnedShape;
+    });
+    return new ShapeSpec(turnedShape);
 }
 //For actual shapes
 export function shapeBoundingBox(shape) {
     let minPos = [Infinity, Infinity], maxPos = [0, 0];
-    for(let [name, spec] of Object.entries(shape)){
+    shape.forEach((name, spec) => {
         let specBoundingBox = specBoundingBoxSize(spec);
         let {origin = specAttributes.origin.defaultValue, translate = specAttributes.translate.defaultValue} = spec;
         let absolutePosition = [translate[0] - specBoundingBox[0]*origin[0], translate[1] - specBoundingBox[1]*origin[1]];
         minPos = [Math.min(absolutePosition[0], minPos[0]), Math.min(absolutePosition[1], minPos[1])];
         maxPos = [Math.max(absolutePosition[0] + specBoundingBox[0], maxPos[0]), Math.max(absolutePosition[1] + specBoundingBox[1], maxPos[1])];
-    }
+    });
     return {size:[maxPos[0] - minPos[0], maxPos[1] - minPos[1]], topLeftCorner: [minPos[0], minPos[1]]};
 }
 
@@ -213,10 +212,19 @@ export function specBoundingBoxSize(spec) {
     return [width, height];
 }
 
-export function associateShapesInInterval(input, shapes, context, maxRange) {
-    /* For collision handling */
+/**
+ *
+ * @param input
+ * @param shapes
+ * @param context
+ * @param maxRange
+ * @returns {boolean} collisionFree if there was no collision
+ */
+export function associateShapesInInterval(input, shapes, context, maxRange, displayOpaque = false) {
+
     let allSpecs = [];
-    for (let [i,bar] of Object.keys(shapes[0]).entries()) {
+    let i=0;
+    shapes[0].forEach((bar) => {
         let specCombo = [];
         let j;
         let inbetween = false;
@@ -234,9 +242,15 @@ export function associateShapesInInterval(input, shapes, context, maxRange) {
             inbetween ? input - Math.min(Math.floor(input / (targetValue)), shapes.length - 2) * (targetValue) : targetValue,
             targetValue, (t) => t);
         allSpecs.push(spec);
+        if(displayOpaque){
+            spec.opacity = 0.5;
+        }
         context.set(bar, spec);
-    }
-    // console.log(doBoxesCollide(allSpecs[1], allSpecs[2]) || doBoxesCollide(allSpecs[1], allSpecs[0]) || doBoxesCollide(allSpecs[0], allSpecs[2]));
+        i++;
+    });
+    /* For collision handling */
+    let hasCollision = doBoxesCollide(allSpecs[1], allSpecs[2]) || doBoxesCollide(allSpecs[1], allSpecs[0]) || doBoxesCollide(allSpecs[0], allSpecs[2]);
+    return !hasCollision;
 }
 
 let _ensureNewArray = (potentialArray) => Array.isArray(potentialArray) ? [...potentialArray] : [potentialArray];

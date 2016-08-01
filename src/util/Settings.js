@@ -10,4 +10,8 @@ export class Settings{
     static get transparentBackgroundColor() {
         return Settings.backgroundColor.replace('rgb(','rgba(').replace(')', ', 0.5)');
     }
+    
+    static get shapeSpacing () {
+        return 10;
+    }
 }

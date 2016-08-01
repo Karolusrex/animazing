@@ -12,6 +12,7 @@ import {layout}             from 'arva-js/layout/decorators.js';
 import {OutlineTextButton}  from 'arva-kit/buttons/OutlineTextButton.js'
 
 import {turnShape}                  from '../util/SpecProcessing.js';
+import {Settings}                   from '../util/Settings.js';
 import {ShapeWithGrid}              from './ShapeWithGrid.js';
 import AnimationController          from 'famous-flex/AnimationController.js';
 import arrowImage                   from './next.png';
@@ -23,6 +24,7 @@ export class ShapeSelector extends View {
     @layout.align(0.8, 1)
     @layout.size(100, 30)
     okButton = new OutlineTextButton({variation: 'bold', content: 'OK'});
+
 
     constructor(options = {}) {
         super(options);
@@ -76,7 +78,7 @@ export class ShapeSelector extends View {
             }));
         }
         options.margins = options.margins || [10, 10, 10, 10];
-        this._displaySpacing = 10;
+        this._displaySpacing = Settings.shapeSpacing;
         this.layouts.push((context)=> {
             this.layout.options.alwaysLayout = this._fading.isActive();
             let noRenderables = options.shapeSpecs.length;
@@ -174,6 +176,7 @@ export class ShapeSelector extends View {
             Timer.setTimeout(() => {
                 let currentRotation = shapeRenderable.getRotation();
                 shapeRenderable.setRotation(Math.round(currentRotation/(Math.PI/2))*Math.PI/2);
+                this._eventOutput.emit('rotatingShape', shapeRenderable.getSpec());
             }, this._transition.duration);
             this.showRenderable('okButton');
         }

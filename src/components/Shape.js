@@ -21,25 +21,25 @@ export class Shape extends View{
         options.renderableType = options.renderableType || Surface;
         options.colorScheme = options.colorScheme || ['#2ecc71','#8e44ad','#d35400', '#27ae60','#e67e22','#9b59b6'];
         this._boundingBox = shapeBoundingBox(options.spec);
-        for(let [i, renderableName] of Object.keys(options.spec).entries()){
+        let i=0;
+        options.spec.forEach((renderableName) => {
             this.addRenderable(new options.renderableType({
                 properties: {
                     webkitBoxShadow: '1px 3px 37px 0px rgba(168,91,132,1)',
-                    backgroundColor: Array.isArray(options.colorScheme) ? options.colorScheme[i] : options.colorScheme
+                    backgroundColor: Array.isArray(options.colorScheme) ? options.colorScheme[i++] : options.colorScheme
                 }}),renderableName);
-        }
+        });
         this.renderables.background = new Surface({properties: {backgroundColor: 'white'}});
 
-        let specNames = Object.keys(options.spec).sort();
 
         this.layouts.push((context) => {
             let contextSize = context.size;
-            let sizeDistortion = this.getSizeDistortion(contextSize);   
+            let sizeDistortion = this.getSizeDistortion(contextSize);
 
-            for(let renderableName of specNames){
+            options.spec.forEach((renderableName, item) => {
                 let spec = {};
                 for(let [specAttribute,{defaultValue,dimensions}] of Object.entries(specAttributes)){
-                    let attribute = options.spec[renderableName][specAttribute] || defaultValue;
+                    let attribute = item[specAttribute] || defaultValue;
                     if(specAttribute === 'align'){
                         attribute = [0, 0];
                     } else if(specAttribute === 'size'){
@@ -50,7 +50,7 @@ export class Shape extends View{
                     spec[specAttribute] =  attribute;
                 }
                 context.set(renderableName, spec);
-            }
+            });
 
         });
     }
