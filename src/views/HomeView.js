@@ -41,10 +41,11 @@ export class HomeView extends View {
         this.instructions = {
             initial: "Tap the highlighted grids to configure your complete sequence.",
             selected: "Rotate the shape as you want by tapping the arrows.",
+            choose: "Choose the shape to appear in the sequence.",
             encouragement: "Well done! Continue like this until you are satisfied with your sequence.",
-            choose: "Please choose the shape to appear in the sequence.",
             swipe: "Now swipe to the right to see the result of what you made.",
-            collision: "Oh snapidoodle! There was a collision. You better reconfigure..."
+            collision: "Oh snapidoodle! There was a collision. You better reconfigure...",
+            levelComplete: "You made it. Let's see if you can complete the other levels..."
         };
         return new Text({content: this.instructions.initial, properties: {textAlign: 'center', color: 'white'}});
     }
@@ -175,7 +176,7 @@ export class HomeView extends View {
             });
 
             if (this.renderables.snappable) {
-                let inputPosition = this.renderables.snappable.getPosition();
+                let inputPosition = this.renderables.snappable.getPosition()[0];
 
 
                 this._drawGuides(context);
@@ -188,9 +189,13 @@ export class HomeView extends View {
 
                 context.set('snappable', draggableSpec);
 
-                if(!associateShapesInInterval(inputPosition[0], this._selectedShapeSequence, context, this.maxRange, this._isDead)){
+                if(!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead)){
                     this._isDead = true;
                     this.instruction.setContent(this.instructions.collision);
+                } else if(!this._isDead) {
+                    if(inputPosition === this.maxRange){
+                        this.instruction.setContent(this.instructions.levelComplete);
+                    }
                 }
             }
         });
