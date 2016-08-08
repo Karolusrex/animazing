@@ -22,8 +22,9 @@ export class ShapeSelector extends View {
     @layout.animate({showInitially: false})
     @layout.origin(0.8, 1)
     @layout.align(0.8, 1)
-    @layout.size(100, 30)
+    @layout.size(100, 40)
     okButton = new OutlineTextButton({variation: 'bold', content: 'OK'});
+
 
 
     constructor(options = {}) {
@@ -44,17 +45,7 @@ export class ShapeSelector extends View {
             }, this._transition.duration);
         });
 
-        let shapeSpecEntries = options.shapeSpecs.entries();
-        for (let [i, shapeSpec] of shapeSpecEntries) {
-            let shapeRenderable = new ShapeWithGrid({
-                colorScheme: 'transparent',
-                autoSpin: false,
-                shapeSpec,
-                startRotation: i * Math.PI / 2
-            });
-            this.addRenderable(shapeRenderable, `shape${i}`);
-            shapeRenderable.on('click', this._onShapeClicked.bind(this, i, shapeRenderable));
-        }
+
         this._arrowSpace = 40;
         this._arrowMargin = 5;
         let arrowSize = [this._arrowSpace - this._arrowMargin, this._arrowSpace - this._arrowMargin];
@@ -77,6 +68,8 @@ export class ShapeSelector extends View {
                 }
             }));
         }
+        this.setSelection(options.shapeSpecs);
+
         options.margins = options.margins || [10, 10, 10, 10];
         this._displaySpacing = Settings.shapeSpacing;
         this.layouts.push((context)=> {
@@ -123,6 +116,28 @@ export class ShapeSelector extends View {
     offerSelection() {
         this._selectedShape = null;
         this.expand();
+    }
+
+    setSelection(shapeSpecs){
+        if(this.options.shapeSpecs){
+            this._clearSelection();
+        }
+        this.options.shapeSpecs = shapeSpecs;
+        let shapeSpecEntries = shapeSpecs.entries();
+        for (let [i, shapeSpec] of shapeSpecEntries) {
+            let shapeRenderable = new ShapeWithGrid({
+                colorScheme: 'transparent',
+                autoSpin: false,
+                shapeSpec,
+                startRotation: i * Math.PI / 2
+            });
+            this.addRenderable(shapeRenderable, `shape${i}`);
+            shapeRenderable.on('click', this._onShapeClicked.bind(this, i, shapeRenderable));
+        }
+    }
+
+    _clearSelection() {
+        //TODO Remove all shape0, shape1, etc.
     }
 
     _collapse(shouldCollapse) {

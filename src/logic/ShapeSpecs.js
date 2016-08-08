@@ -202,7 +202,7 @@ export class ShapeSpecCollection {
     twistedMenu = new ShapeSpec({
         topBar: Object.assign({}, this.upPointArrow.bottomBar, {translate: [this.upPointArrow.bottomBar.translate[0] + 40, 0, 0]}),
         midBar: Object.assign({}, this.upPointArrow.bottomBar, {translate: [this.upPointArrow.bottomBar.translate[0] - 40, 0, 0]}),
-        bottomBar: Object.assign({}, this.upPointArrow.bottomBar, {translate: [this.upPointArrow.bottomBar.translate[0], 0, 0]}),
+        bottomBar: Object.assign({}, this.upPointArrow.bottomBar, {translate: [this.upPointArrow.bottomBar.translate[0], 0, 0]})
     })
 }
 

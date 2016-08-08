@@ -1,10 +1,11 @@
 import Surface              from 'famous/core/Surface.js';
+import AnimationController  from 'famous-flex/AnimationController.js';
 
 import {View}               from 'arva-js/core/View.js';
 import {layout, options}    from 'arva-js/layout/decorators.js';
 import insertRule               from 'insert-rule';
 import {Snappable}              from '../components/Snappable.js';
-import {ShapeSpecs}              from '../components/ShapeSpecs.js';
+import {ShapeSpecs}              from '../logic/ShapeSpecs.js';
 import {
     associateShapesInInterval,
     turnShape,
@@ -15,6 +16,8 @@ import {ShapeSelector}          from '../components/ShapeSelector.js';
 import {ShapeGrid}              from '../components/ShapeGrid.js';
 import {ShapeSlider}            from '../components/ShapeSlider.js';
 import {Text}                   from 'arva-kit/text/Text.js';
+import {levels}                 from '../logic/Levels.js';
+import {OutlineTextButton}      from 'arva-kit/buttons/OutlineTextButton.js'
 
 insertRule('.bar::after', {
     webkitBoxShadow: '1px 30px 47px 0px rgba(178,97,137,1)',
@@ -26,13 +29,22 @@ insertRule('.bar:hover::after', {
     opacity: 1
 });
 
-@layout.margins([30, 50, 50, 50])
+@layout.margins([30, 10, 50, 10])
 export class HomeView extends View {
 
 
     @layout.translate(0, 0, -10)
     @layout.fullscreen
     background = new Surface({properties: {backgroundColor: '#2F2F40'}});
+
+    @layout.animate({
+        showInitially: false,
+        animation: function() {return ({...AnimationController.Animation.Slide.Down(...arguments), opacity: 0})}
+    })
+    @layout.size(~100, 40)
+    @layout.translate(0, 230, 0)
+    @layout.place('center')
+    nextLevelButton = new OutlineTextButton({variation: 'bold',clickEventName: 'nextLevel',content: 'NEXT LEVEL'});
 
     @layout.size(undefined, ~30)
     @layout.translate(0, 0, 10)
@@ -45,17 +57,40 @@ export class HomeView extends View {
             encouragement: "Well done! Continue like this until you are satisfied with your sequence.",
             swipe: "Now swipe to the right to see the result of what you made.",
             collision: "Oh snapidoodle! There was a collision. You better reconfigure...",
-            levelComplete: "You made it. Let's see if you can complete the other levels..."
+            levelComplete: "You made it. Let's see if you can complete the other levels...",
+            newLevel: "Enjoy this new level!",
+            lastLevel: "This was the last level of the game. Wanna play more? Send me suggestions on new levels!"
         };
         return new Text({content: this.instructions.initial, properties: {textAlign: 'center', color: 'white'}});
     }
 
+    @layout.animate({animation: function() {return ({...AnimationController.Animation.Slide.Down(...arguments), opacity: 0})}})
     @layout.dock("top", 150)
-    shapeSlider = new ShapeSlider({shapeSpecs: [ShapeSpecs.hamburger, , , , ShapeSpecs.fallenHamburger]});
+    shapeSlider = this._createShapeSliderFromLevel(0);
+
+
+    @layout.size(undefined, 1 / 3)
+    @layout.align(0.5, 0.75)
+    @layout.origin(0.5, 0.5)
+    @layout.translate(0, 0, 30)
+    shapeSelector = this._createShapeSelectorFromLevel(0);
 
     constructor(options = {}) {
         super(options);
         this.layout.options.alwaysLayout = true;
+        this._currentLevelIndex = 0;
+
+        this.on('nextLevel', () => {
+            let newLevel = levels[++this._currentLevelIndex];
+            this.shapeSelector.setSelection(newLevel.availableShapes);
+            this.hideRenderable('shapeSlider');
+            this.replaceRenderable('shapeSlider', this._createShapeSliderFromLevel(this._currentLevelIndex));
+            this.showRenderable('shapeSlider');
+            this._cancelSlide();
+            this.instruction.setContent(this.instructions.newLevel);
+            this.hideRenderable('nextLevelButton');
+        });
+
         for (let [i,bar] of this._getBarNames().entries()) {
             this.addRenderable(new Surface({
                 content: '',
@@ -68,58 +103,28 @@ export class HomeView extends View {
             }), bar);
         }
 
-        this.renderables.shapeSelector = new ShapeSelector({
-            showInitially: false,
-            shapeSpecs: [ShapeSpecs.upPointArrow, ShapeSpecs.upArrow]
-        });
-        this.renderables.shapeSelectorBackground = new Surface({properties: {backgroundColor: 'white'}});
-        this.renderables.shape = new Shape({spec: ShapeSpecs.upPointArrow});
-        this.renderables.box = new Surface({properties: {backgroundColor: 'black'}});
-        this.renderables.boundingBox = new Surface({properties: {backgroundColor: 'white'}});
-        this.renderables.shapeGrid = new ShapeGrid();
-        for (let i = 0; i < 200; i++) {
-            this.renderables[`debug${i}`] = new Surface({properties: {backgroundColor: 'black'}});
-            this.renderables[`debugColor${i}`] = new Surface({
-                properties: {
-                    borderRadius: '100%',
-                    backgroundColor: ['red', 'blue', 'green', 'yellow', 'magenta', 'yellow', 'green', 'green'][i]
-                }
-            });
-            this.renderables[`redDebug${i}`] = new Surface({
-                properties: {
-                    borderRadius: '100%',
-                    backgroundColor: 'red'
-                }
-            });
-            this.renderables[`blueDebug${i}`] = new Surface({
-                properties: {
-                    borderRadius: '100%',
-                    backgroundColor: 'blue'
-                }
-            });
-        }
         let firstSelection = true;
-        this.shapeSlider.on('modifyShape', (index) => {
-            if(this._sliding){
+        /* Use the 'renderables' to listen for the animationcontroller since the shapeslider itself changes when the level changes */
+        this.renderables.shapeSlider.on('modifyShape', (index) => {
+            /* If we are already running a sequence, then cancel this and go into choosing mode again */
+            if (this._sliding) {
                 this._cancelSlide();
-                delete this.renderables.snappable;
             }
             this.instruction.setContent(this.instructions.choose);
-            this.renderables.shapeSelector.offerSelection();
-            this.renderables.shapeSelector.once('shapeSelected', (spec) => {
+            this.shapeSelector.offerSelection();
+            this.shapeSelector.once('shapeSelected', (spec) => {
                 this.instruction.setContent(firstSelection ? this.instructions.encouragement : this.instructions.initial);
                 firstSelection = false;
                 this.shapeSlider.setSelection(index, spec);
             });
         });
 
-        this._selectedShapeSequence = [ShapeSpecs.hamburger, turnShape(3, ShapeSpecs.upPointArrow), ShapeSpecs.upArrow, turnShape(2, ShapeSpecs.upArrow), ShapeSpecs.upPointArrow];
-
         this.renderables.shapeSelector.on('rotatingShape', (shape) => {
             this.instruction.setContent(this.instructions.selected);
         });
 
-        this.shapeSlider.on('selectionComplete', (sequence) => {
+        this.renderables.shapeSlider.on('selectionComplete', (sequence) => {
+            /* Go into slide mode */
             this._sliding = true;
             this.instruction.setContent(this.instructions.swipe);
             this.instruction.decorations.translate[1] += 150;
@@ -142,7 +147,7 @@ export class HomeView extends View {
 
     _initDraggable() {
 
-        this.maxRange = 100;
+        this.maxRange = 200;
 
 
         let guideLineProperties = {
@@ -166,14 +171,19 @@ export class HomeView extends View {
     }
 
 
+    _createShapeSelectorFromLevel(levelIndex) {
+        return new ShapeSelector({
+            showInitially: false,
+            shapeSpecs: levels[levelIndex].availableShapes
+        });
+    }
+
+    _createShapeSliderFromLevel(levelIndex) {
+        return new ShapeSlider({shapeSpecs: [levels[levelIndex].startShape, ...new Array(levels[levelIndex].inbetweenSpaces), levels[levelIndex].endShape]});
+    }
+
     _initAnimationBehaviour() {
         this.layouts.push((context) => {
-            context.set('shapeSelector', {
-                size: [undefined, context.size[1]/3],
-                align: [0.5, 0.75],
-                origin: [0.5, 0.5],
-                translate: [0, 0, 30]
-            });
 
             if (this.renderables.snappable) {
                 let inputPosition = this.renderables.snappable.getPosition()[0];
@@ -189,12 +199,18 @@ export class HomeView extends View {
 
                 context.set('snappable', draggableSpec);
 
-                if(!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead)){
+                /* If there is a collision, go into dead mode */
+                if (!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead)) {
                     this._isDead = true;
                     this.instruction.setContent(this.instructions.collision);
-                } else if(!this._isDead) {
-                    if(inputPosition === this.maxRange){
-                        this.instruction.setContent(this.instructions.levelComplete);
+                } else if (!this._isDead) {
+                    if (inputPosition === this.maxRange) {
+                        let isLastLevel = this._currentLevelIndex === levels.length - 1;
+                        if(!isLastLevel){
+                            this.showRenderable('nextLevelButton');
+                        }
+                        this.instruction.setContent(isLastLevel ? this.instructions.lastLevel : this.instructions.levelComplete);
+
                     }
                 }
             }
@@ -205,6 +221,7 @@ export class HomeView extends View {
         this.instruction.decorations.translate[1] = 0;
         this._sliding = false;
         this._isDead = false;
+        delete this.renderables.snappable;
     }
 
 
@@ -241,7 +258,7 @@ export class HomeView extends View {
 
 
     _getBarNames() {
-        return ['topBar', 'midBar', 'bottomBar'];
+        return ['topBar', 'midBar', 'bottomBar'].sort();
     }
 
 }

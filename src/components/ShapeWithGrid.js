@@ -43,7 +43,7 @@ export class ShapeWithGrid extends View {
     })
     @layout.origin(0.5, 0.5)
     @layout.rotate(0, 0, 0)
-    @layout.translate(0, 0, 30)
+    @layout.translate(0, 0, 50)
     shape = this.options.shapeSpec ? new Shape({spec: this.options.shapeSpec}) : {};
 
     @layout.animate({showInitially: false})

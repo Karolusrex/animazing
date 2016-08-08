@@ -2,7 +2,7 @@
  * Created by lundfall on 5/31/16.
  */
 
-import {ShapeSpec}      from '../components/ShapeSpecs.js';
+import {ShapeSpec}      from '../logic/ShapeSpecs.js';
 
 export let specAttributes = {
     rotate: {dimensions: 3, defaultValue: [0, 0, 0]},
