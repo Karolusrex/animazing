@@ -7,7 +7,7 @@ import {turnShape}  from '../util/SpecProcessing.js';
 export class ShapeSpec {
     constructor(specs){
         this._specs = specs;
-        this._keys = Object.keys(specs).sort()
+        this._keys = Object.keys(specs).sort();
         /* for ease of use and backwards compatibility */
         this.forEach((name, spec) => {
             this[name] = spec;
@@ -152,6 +152,48 @@ export class ShapeSpecCollection {
         }
     });
 
+    line = new ShapeSpec({
+        topBar: {
+            rotate: [0, 0, -Math.PI / 4],
+            align: [0.5, 0.5],
+            translate: [-60, 60, 0],
+            size: this.stickDimensions
+        },
+        bottomBar: {
+            rotate: [0, 0, - Math.PI / 4],
+            align: [0.5, 0.5],
+            translate: [60, -60, 0],
+            size: this.stickDimensions
+        },
+        midBar: {
+            rotate: [0, 0,  Math.PI / 4],
+            align: [0.5, 0.5],
+            translate: [0, 0, 0],
+            size: this.stickDimensions
+        }
+    });
+    
+    stairs = new ShapeSpec({
+        topBar: {
+            rotate: [0, 0, 0],
+            align: [0.5, 0.5],
+            translate: [-85, -85, 0],
+            size: this.stickDimensions
+        },
+        bottomBar: {
+            rotate: [0, 0, 0],
+            align: [0.5, 0.5],
+            translate: [85, 85, 0],
+            size: this.stickDimensions
+        },
+        midBar: {
+            rotate: [0, 0, Math.PI /2],
+            align: [0.5, 0.5],
+            translate: [10, 60, 0],
+            size: this.stickDimensions
+        }
+    });
+
     xButton = new ShapeSpec({
         topBar: {
             rotate: [0, 0, Math.PI / 4],
@@ -174,7 +216,6 @@ export class ShapeSpecCollection {
         }
     });
 
-
     upPointArrow = new ShapeSpec({
         topBar: Object.assign({}, this.upArrow.midBar, {translate: [this.upArrow.midBar.translate[0], ...this.upArrow.midBar.translate.slice(1)]}),
         midBar: {
@@ -186,7 +227,6 @@ export class ShapeSpecCollection {
         bottomBar: Object.assign({}, this.upArrow.topBar, {translate: [this.upArrow.topBar.translate[0], ...this.upArrow.topBar.translate.slice(1)]})
     });
 
-
     shuffledUpPointArrow = new ShapeSpec({
         topBar: Object.assign({}, this.upArrow.midBar, {translate: [this.upArrow.midBar.translate[0], ...this.upArrow.midBar.translate.slice(1)]}),
         midBar: Object.assign({}, this.upArrow.topBar, {translate: [this.upArrow.topBar.translate[0], ...this.upArrow.topBar.translate.slice(1)]}),
@@ -197,7 +237,6 @@ export class ShapeSpecCollection {
             size: this.stickDimensions
         }
     });
-
 
     twistedMenu = new ShapeSpec({
         topBar: Object.assign({}, this.upPointArrow.bottomBar, {translate: [this.upPointArrow.bottomBar.translate[0] + 40, 0, 0]}),

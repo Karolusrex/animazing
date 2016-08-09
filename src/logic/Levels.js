@@ -1,9 +1,8 @@
 /**
  * Created by lundfall on 08/08/16.
  */
-import {ShapeSpecs}     from './ShapeSpecs.js';
-
-
+import {ShapeSpecs, ShapeSpec}     from './ShapeSpecs.js';
+import {turnShape}      from '../util/SpecProcessing.js';
 
 export let levels = [
     {
@@ -17,5 +16,12 @@ export let levels = [
         startShape: ShapeSpecs.fallenHamburger,
         endShape: ShapeSpecs.shuffledHamburger,
         inbetweenSpaces: 4
+    },
+    {
+        availableShapes: [ShapeSpecs.insect, ShapeSpecs.line, ShapeSpecs.shuffledHamburger],
+        startShape: turnShape(3,new ShapeSpec(ShapeSpecs.stairs)),
+        endShape: turnShape(2,new ShapeSpec(ShapeSpecs.upArrow)),
+        inbetweenSpaces: 4
     }
 ];
+
