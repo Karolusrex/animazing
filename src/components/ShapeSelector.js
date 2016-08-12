@@ -77,7 +77,7 @@ export class ShapeSelector extends View {
             this.hideAll();
             Timer.setTimeout(() => {
                 /* The turn shape calculates the rotation backwards from what famous does, so it's inverted here */
-                this._eventOutput.emit('shapeSelected', turnShape(Math.round((4 - (rotation % (Math.PI * 2)) / (Math.PI / 2)) % 4), shapeSpec));
+                this._eventOutput.emit('shapeSelected', turnShape(Math.round((4 - (rotation % (Math.PI * 2)) / (Math.PI / 2))) % 4, shapeSpec));
             }, this._transition.duration);
         });
         this.on('cancel', () => {
