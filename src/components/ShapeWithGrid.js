@@ -27,9 +27,10 @@ export class ShapeWithGrid extends View {
     @layout.translate(0, 0, 30)
     overlay = new Surface({
         properties: {
-            backgroundColor: this.options.enabled ? 'none' : Settings.transparentBackgroundColor
+            backgroundColor: this.options.enabled ? 'inherit' : Settings.transparentBackgroundColor
         }
     });
+
 
     @layout.animate({
         transition: {duration: 0}, animation: function () {
@@ -56,7 +57,7 @@ export class ShapeWithGrid extends View {
         super(combineOptions(
             {enabled: true}
             , options));
-        this._enabled = options.enabled;
+        this._enabled = this.options.enabled;
         this.setAutoSpin(options.autoSpin);
         this._rotationTransitionable = new Transitionable(0);
         this._spinSpeed = options.spinSpeed || 0.0225;
@@ -125,6 +126,21 @@ export class ShapeWithGrid extends View {
         return this._currentRotation;
     }
 
+    enable() {
+        this._setEnabled(true);
+    }
+
+    disable() {
+        this._setEnabled(false);
+    }
+
+    _setEnabled(enabled) {
+        this._enabled = enabled;
+        this.overlay.setProperties({
+            backgroundColor: enabled ? 'inherit' : Settings.transparentBackgroundColor
+        });
+    }
+
 
     showShape(spec) {
         this.hideRenderable('shape');
@@ -158,6 +174,13 @@ export class ShapeWithGrid extends View {
     hideShape() {
         this.hideRenderable('shape');
         this.showRenderable('placeholder');
+    }
+
+    makeEmpty() {
+        this.hideRenderable('placeholder');
+        this.hideRenderable('shape');
+        this.replaceRenderable('shape', {});
+        this.layout.reflowLayout();
     }
 
 }

@@ -25,7 +25,7 @@ export class Shape extends View{
         options.spec.forEach((renderableName) => {
             this.addRenderable(new options.renderableType({
                 properties: {
-                    webkitBoxShadow: '1px 3px 37px 0px rgba(168,91,132,1)',
+                    boxShadow: '1px 3px 37px 0px rgba(168,91,132,1)',
                     backgroundColor: Array.isArray(options.colorScheme) ? options.colorScheme[i++] : options.colorScheme
                 }}),renderableName);
         });
@@ -74,4 +74,10 @@ export class Shape extends View{
         return this.options.spec;
     }
 
+
+    glow() {
+        options.spec.forEach((renderableName) => {
+            this[renderableName].setProperties({boxShadow: '1px 3px 97px 10px rgba(168,91,132,1)'});
+        });
+    }
 }

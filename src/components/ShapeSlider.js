@@ -21,10 +21,11 @@ export class ShapeSlider extends View {
     });
 
     /*@layout.fullscreen
-    bg = new Surface({properties: {backgroundColor: 'red'}})*/
+     bg = new Surface({properties: {backgroundColor: 'red'}})*/
 
     setSelection(index, shapeSpec) {
         this[`circle${index}`].showShape(shapeSpec);
+        this._selectedShape = undefined;
         this._eventOutput.emit('shapeChanged', index, shapeSpec);
         let chosenSpecSequence = this.getChosenSpecSequence();
         this._requestSelection = false;
@@ -59,7 +60,7 @@ export class ShapeSlider extends View {
             let circleWidth = 100;
             let circleSize = [circleWidth, circleWidth];
             circle.on('click', () => {
-                if(circle.shapeWithGrid.isEnabled()) {
+                if (circle.shapeWithGrid.isEnabled()) {
                     this._eventOutput.emit('shapeSelected', index);
                 }
             });
@@ -74,19 +75,34 @@ export class ShapeSlider extends View {
             }
         }
         this.on('shapeSelected', (index) => {
-            if (!this._offerSelection && !this._requestSelection) {
-                this[`circle${index}`].hideShape();
-                this._eventOutput.emit('modifyShape', index);
-                this._requestSelection = true;
+            let previouslySelectedShape = this._selectedShape;
+            if (previouslySelectedShape) {
+                previouslySelectedShape.makeEmpty();
             }
+            let selectedShape = this[`circle${index}`];
+            selectedShape.hideShape();
+            let forbiddenShapes = [];
+            for (let neighbourIndex of [index - 1, index + 1]) {
+                if (this[`circle${neighbourIndex}`]) {
+                    let spec = this[`circle${neighbourIndex}`].shapeWithGrid.getSpec();
+                    if (spec) {
+                        forbiddenShapes.push(spec);
+                    }
+                }
+            }
+            this.getChosenSpecSequence();
+            this._eventOutput.emit('modifyShape', index, forbiddenShapes);
+            this._selectedShape = selectedShape;
+            this._requestSelection = true;
+
         });
         this.layout.on('layoutstart', ({size}) => {
-            let circleWidth = Math.min(180, (size[0] - (Settings.shapeSpacing*(sequenceLength-1)))/(sequenceLength));
+            let circleWidth = Math.min(180, (size[0] - (Settings.shapeSpacing * (sequenceLength - 1))) / (sequenceLength));
             this.path.decorations.size[0] = size[0] - circleWidth;
             this.path.decorations.translate[1] = circleWidth - size[1] + 20;
             for (let i = 0; i < options.shapeSpecs.length; i++) {
                 let {decorations} = this[`circle${i}`];
-                decorations.size = [circleWidth, circleWidth+30];
+                decorations.size = [circleWidth, circleWidth + 30];
                 if (decorations.dock) {
                     decorations.dock.size[0] = size[0] / lastShapeIndex - circleWidth / lastShapeIndex;
                 }
@@ -107,7 +123,7 @@ class ShapeSelection extends View {
         }
     });
 
-    
+
     @layout.dock('fill')
     shapeWithGrid = new ShapeWithGrid(this.options);
 
@@ -117,5 +133,9 @@ class ShapeSelection extends View {
 
     hideShape() {
         return this.shapeWithGrid.hideShape(...arguments);
+    }
+
+    makeEmpty(){
+        return this.shapeWithGrid.makeEmpty(...arguments);
     }
 }

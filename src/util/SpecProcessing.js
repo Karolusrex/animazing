@@ -13,19 +13,19 @@ export let specAttributes = {
     opacity: {dimensions: 1, defaultValue: 1}
 };
 
-export function doBoxesCollide(box1, box2){
+export function doBoxesCollide(box1, box2) {
     let boxes = [box1, box2];
     let axes = [];
     let boxCorners = [];
     let hasOverlap = true;
 
-    for(let box of boxes){
+    for (let box of boxes) {
         let cornerCoordinates = calcSpecCorners(box, true);
         /* Adjust corners to take the different origin into account. We're basically doing an inverse rotation matrix (I think) */
         let {rotate = specAttributes.rotate.defaultValue, size, origin = specAttributes.origin.defaultValue} = box;
-        for(let [cornerName, corner] of Object.entries(cornerCoordinates)){
-            corner[0] = corner[0] - Math.cos(rotate[2])*size[0]*origin[0] + Math.sin(rotate[2])*size[1]*origin[1];
-            corner[1]  = corner[1] - Math.cos(rotate[2])*size[1]*origin[1] - Math.sin(rotate[2])*size[0]*origin[0];
+        for (let [cornerName, corner] of Object.entries(cornerCoordinates)) {
+            corner[0] = corner[0] - Math.cos(rotate[2]) * size[0] * origin[0] + Math.sin(rotate[2]) * size[1] * origin[1];
+            corner[1] = corner[1] - Math.cos(rotate[2]) * size[1] * origin[1] - Math.sin(rotate[2]) * size[0] * origin[0];
         }
 
         cornerCoordinates = [[cornerCoordinates['topLeft'], cornerCoordinates['bottomLeft']], [cornerCoordinates['topRight'], cornerCoordinates['bottomRight']]];
@@ -33,28 +33,28 @@ export function doBoxesCollide(box1, box2){
 
             return axisDirection === 0 ? cornerCoordinates[1][0][dimension] - cornerCoordinates[0][0][dimension] :
             cornerCoordinates[1][1][dimension] - cornerCoordinates[1][0][dimension]
-            };
+        };
 
 
-        for(let axisDirection of [0,1]){
+        for (let axisDirection of [0, 1]) {
             //http://www.gamedev.net/page/resources/_/technical/game-programming/2d-rotated-rectangle-collision-r2604
-            let xAxis = generateAxisDimension(cornerCoordinates, axisDirection,0);
-            let yAxis = generateAxisDimension(cornerCoordinates, axisDirection,1);
+            let xAxis = generateAxisDimension(cornerCoordinates, axisDirection, 0);
+            let yAxis = generateAxisDimension(cornerCoordinates, axisDirection, 1);
 
             /*debugContext.set(`debugColor${debugCounter++}`,{
-                size: [10, 100],
-                origin: [0, 0],
-                rotate: [0,0,Math.atan(yAxis/xAxis)],
-                align: [0.5, 0.5],
-                translate: [0, 0, 30]
-            });*/
+             size: [10, 100],
+             origin: [0, 0],
+             rotate: [0,0,Math.atan(yAxis/xAxis)],
+             align: [0.5, 0.5],
+             translate: [0, 0, 30]
+             });*/
 
             /*debugContext.set(`debugColor${debugCounter++}`,{
-                size: [7, 7],
-                origin: [0.5, 0.5],
-                align: [0.5, 0.5],
-                translate: [xAxis, yAxis, 30]
-            });*/
+             size: [7, 7],
+             origin: [0.5, 0.5],
+             align: [0.5, 0.5],
+             translate: [xAxis, yAxis, 30]
+             });*/
 
             axes.push([xAxis, yAxis]);
         }
@@ -62,41 +62,41 @@ export function doBoxesCollide(box1, box2){
     }
 
     /* We have the axes, go on to step 2 and calc projections */
-    for(let axis of axes){
+    for (let axis of axes) {
         let minMaxCornerValues = [[Infinity, -Infinity], [Infinity, -Infinity]];
-        for(let [boxNo, corners] of boxCorners.entries()){
-            for(let cornerPair of corners){
-                for(let corner of cornerPair){
+        for (let [boxNo, corners] of boxCorners.entries()) {
+            for (let cornerPair of corners) {
+                for (let corner of cornerPair) {
 
                     let {translate = specAttributes.translate.defaultValue} = boxes[boxNo];
-                    let adjustedCorner = [corner[0]+ translate[0], corner[1] + translate[1]];
+                    let adjustedCorner = [corner[0] + translate[0], corner[1] + translate[1]];
 
                     /*debugContext.set(`debug${debugCounter++}`,{
-                        size: [10, 10],
-                        origin: [0.5, 0.5],
-                        align: [0.5, 0.5],
-                        translate: [adjustedCorner[0], adjustedCorner[1], 30]
-                    });*/
+                     size: [10, 10],
+                     origin: [0.5, 0.5],
+                     align: [0.5, 0.5],
+                     translate: [adjustedCorner[0], adjustedCorner[1], 30]
+                     });*/
 
-                    let cornerProjectionBase = (adjustedCorner[0]*axis[0] + adjustedCorner[1]*axis[1]) / (Math.pow(axis[0], 2) + Math.pow(axis[1], 2));
+                    let cornerProjectionBase = (adjustedCorner[0] * axis[0] + adjustedCorner[1] * axis[1]) / (Math.pow(axis[0], 2) + Math.pow(axis[1], 2));
                     /* Step 3 */
-                    let cornerProjection = [cornerProjectionBase*axis[0], cornerProjectionBase*axis[1]];
+                    let cornerProjection = [cornerProjectionBase * axis[0], cornerProjectionBase * axis[1]];
 
                     /*debugContext.set(`${boxNo === 0 ? 'red' : 'blue'}Debug${debugCounter++}`,{
-                        size: [10, 10],
-                        origin: [0.5, 0.5],
-                        align: [0.5, 0.5],
-                        translate: [cornerProjection[0], cornerProjection[1], 30]
-                    });*/
+                     size: [10, 10],
+                     origin: [0.5, 0.5],
+                     align: [0.5, 0.5],
+                     translate: [cornerProjection[0], cornerProjection[1], 30]
+                     });*/
 
-                    let scalarValue = cornerProjection[0]*Math.abs(axis[0]) + cornerProjection[1]*Math.abs(axis[1]);
+                    let scalarValue = cornerProjection[0] * Math.abs(axis[0]) + cornerProjection[1] * Math.abs(axis[1]);
                     minMaxCornerValues[boxNo][0] = Math.min(minMaxCornerValues[boxNo][0], scalarValue);
                     minMaxCornerValues[boxNo][1] = Math.max(minMaxCornerValues[boxNo][1], scalarValue);
                 }
             }
         }
         /* Step 4 */
-        if(!(minMaxCornerValues[0][0] < minMaxCornerValues[1][1] && minMaxCornerValues[1][0] < minMaxCornerValues[0][1])) {
+        if (!(minMaxCornerValues[0][0] < minMaxCornerValues[1][1] && minMaxCornerValues[1][0] < minMaxCornerValues[0][1])) {
             for (let boxNo of [0, 1]) {
                 if (!(minMaxCornerValues[boxNo][0] > minMaxCornerValues[+!boxNo][0] && minMaxCornerValues[boxNo][0] < minMaxCornerValues[+!boxNo][1]) ||
                     (minMaxCornerValues[boxNo][1] < minMaxCornerValues[+!boxNo][1] && minMaxCornerValues[boxNo][1] > minMaxCornerValues[+!boxNo][0])) {
@@ -120,6 +120,7 @@ export function turnShape(quarterCycles, shape) {
         if (objectName === 'size') {
             turnedShape.size = quarterTurn || threeQuarterTurn ? [object[1], object[0]] : object;
         } else if (quarterTurn || threeQuarterTurn) {
+
             /* Deduced from wolfram alpha */
             let rotateZ = quarterTurn ? -Math.PI / 2 : Math.PI / 2;
             let origin = object.origin || specAttributes.origin.defaultValue;
@@ -145,7 +146,7 @@ export function turnShape(quarterCycles, shape) {
             )
         }
     });
-    return new ShapeSpec(turnedShape);
+    return new ShapeSpec({shape: turnedShape, isRotationOf: shape, quarterCycles});
 }
 //For actual shapes
 export function shapeBoundingBox(shape) {
@@ -153,14 +154,14 @@ export function shapeBoundingBox(shape) {
     shape.forEach((name, spec) => {
         let specBoundingBox = specBoundingBoxSize(spec);
         let {origin = specAttributes.origin.defaultValue, translate = specAttributes.translate.defaultValue} = spec;
-        let absolutePosition = [translate[0] - specBoundingBox[0]*origin[0], translate[1] - specBoundingBox[1]*origin[1]];
+        let absolutePosition = [translate[0] - specBoundingBox[0] * origin[0], translate[1] - specBoundingBox[1] * origin[1]];
         minPos = [Math.min(absolutePosition[0], minPos[0]), Math.min(absolutePosition[1], minPos[1])];
         maxPos = [Math.max(absolutePosition[0] + specBoundingBox[0], maxPos[0]), Math.max(absolutePosition[1] + specBoundingBox[1], maxPos[1])];
     });
-    return {size:[maxPos[0] - minPos[0], maxPos[1] - minPos[1]], topLeftCorner: [minPos[0], minPos[1]]};
+    return {size: [maxPos[0] - minPos[0], maxPos[1] - minPos[1]], topLeftCorner: [minPos[0], minPos[1]]};
 }
 
-export function calcSpecCorners(spec, doBackwardsRotation = false){
+export function calcSpecCorners(spec, doBackwardsRotation = false) {
     let {size} = spec;
     let {rotate = specAttributes.rotate.defaultValue, origin = specAttributes.origin.defaultValue} = spec;
     /* It seems like famous is treating the rotation as going backwards...TODO: Verify this*/
@@ -186,7 +187,7 @@ export function specBoundingBoxSize(spec) {
     let {rotate = specAttributes.rotate.defaultValue} = spec;
     let corners = calcSpecCorners(spec);
 
-    let normalizedRotation = rotate[2] > 0 ? (rotate[2] % (Math.PI * 2)) : (rotate[2] - Math.PI*2*(Math.floor(rotate[2]/(Math.PI*2))));
+    let normalizedRotation = rotate[2] > 0 ? (rotate[2] % (Math.PI * 2)) : (rotate[2] - Math.PI * 2 * (Math.floor(rotate[2] / (Math.PI * 2))));
 
     let width = normalizedRotation < Math.PI / 2 ?
     corners['bottomRight'][0] - corners['topLeft'][0] : (
@@ -218,12 +219,14 @@ export function specBoundingBoxSize(spec) {
  * @param shapes
  * @param context
  * @param maxRange
+ * @param displayOpaque if the shapes should be displayed with an opacity
+ * @param clockwiseRotateSpecialCases Different combination that overrides standard behaviour of rotation
  * @returns {boolean} collisionFree if there was no collision
  */
-export function associateShapesInInterval(input, shapes, context, maxRange, displayOpaque = false) {
+export function associateShapesInInterval(input, shapes, context, maxRange, displayOpaque = false, clockwiseRotateSpecialCases) {
 
     let allSpecs = [];
-    let i=0;
+    let i = 0;
     shapes[0].forEach((bar) => {
         let specCombo = [];
         let j;
@@ -235,14 +238,25 @@ export function associateShapesInInterval(input, shapes, context, maxRange, disp
             }
         }
         if (!inbetween) j--;
-        specCombo.push(shapes[j][bar]);
-        specCombo.push(shapes[j + 1][bar]);
+        let shapeCombo = [shapes[j], shapes[j + 1]];
+        specCombo.push(shapeCombo[0][bar]);
+        specCombo.push(shapeCombo[1][bar]);
         let targetValue = maxRange / (shapes.length - 1);
+        let clockwiseRotate = false;
+        if (clockwiseRotateSpecialCases) {
+            clockwiseRotate = !!clockwiseRotateSpecialCases.find((specialCase) => {
+                let [startShape, endShape, rotationState, renderableName] = specialCase;
+                let shapesForCase = [startShape, endShape];
+                if (!rotationState && !renderableName) {
+                    return [0, 1].every((index) => shapesForCase[index].isSameUnrotated(shapeCombo[index]));
+                }
+            });
+        }
         let spec = mergeSpecs(...specCombo,
             inbetween ? input - Math.min(Math.floor(input / (targetValue)), shapes.length - 2) * (targetValue) : targetValue,
-            targetValue, (t) => t);
+            targetValue, (t) => t, clockwiseRotate);
         allSpecs.push(spec);
-        if(displayOpaque){
+        if (displayOpaque) {
             spec.opacity = 0.5;
         }
         context.set(bar, spec);
@@ -265,7 +279,7 @@ let _normalizeWeights = (weights, goalT, easing) => {
     return normalizedWeights;
 };
 
-export function mergeSpecs(startSpec, endSpec, t, goalT, easing) {
+export function mergeSpecs(startSpec, endSpec, t, goalT, easing, clockwiseRotate) {
     let [normalizedT] = _normalizeWeights([t], goalT, easing);
     let spec = {};
     for (let [attribute, {dimensions, defaultValue}] of Object.entries(specAttributes)) {
@@ -277,24 +291,10 @@ export function mergeSpecs(startSpec, endSpec, t, goalT, easing) {
             let endSpecAttribute = _ensureNewArray(endSpec[attribute] !== undefined ? endSpec[attribute] : defaultValue);
             if (attribute === 'rotate') {
                 /* Rotate the shortest way */
-                startSpecAttribute[2] = normalizeRotationToOther(endSpecAttribute[2], startSpecAttribute[2], Math.PI);
+                startSpecAttribute[2] = normalizeRotationToOther(endSpecAttribute[2], startSpecAttribute[2], Math.PI, clockwiseRotate);
             }
 
             let addition = (endSpecAttribute[i] - startSpecAttribute[i]) * normalizedT;
-
-
-            /*if (attribute === 'rotate') {
-
-                let hasDifferentSigns = Math.sign(endSpecAttribute[i]) !== Math.sign(startSpecAttribute[i]);
-                if(!hasDifferentSigns && Math.abs(Math.abs(endSpecAttribute[i] - startSpecAttribute[i]) - Math.PI / 2) <= Number.EPSILON){
-                    endSpecAttribute[i] += Math.sign(startSpecAttribute[i] - endSpecAttribute[i]) * Math.PI;
-                }
-                else if ((hasDifferentSigns && Math.abs(endSpecAttribute[i]) + Math.abs(startSpecAttribute[i]) > Math.PI / 2) ||
-                    (!hasDifferentSigns && Math.abs(endSpecAttribute[i] - startSpecAttribute[i]) > Math.PI / 2)) {
-                    endSpecAttribute[i] += Math.sign(startSpecAttribute[i]) * Math.PI;
-                    addition = (endSpecAttribute[i] - startSpecAttribute[i]) * normalizedT;
-                }
-            }*/
             sumOfAttributeDimension += addition;
             let specAttribute = startSpecAttribute[i] + sumOfAttributeDimension;
             if (dimensions > 1) {
@@ -313,20 +313,24 @@ export function mergeSpecs(startSpec, endSpec, t, goalT, easing) {
  * @param otherRotation
  * @param maxRotation
  */
-export function normalizeRotationToOther(rotation, otherRotation, maxRotation = Math.PI*2) {
-    let numberOfTurns = Math.floor(rotation/(maxRotation));
+export function normalizeRotationToOther(rotation, otherRotation, maxRotation = Math.PI * 2, clockwiseRotate = false) {
+    let numberOfTurns = Math.floor(rotation / (maxRotation));
     /* rotate the shortest way */
     let rotationDiff = otherRotation - rotation;
     /* If it needs to be normalized... */
-    if(Math.abs(rotationDiff) > (maxRotation/2)){
-        otherRotation = otherRotation % (maxRotation) + numberOfTurns*maxRotation;
+    if (biggerOrPotentiallyEqual(Math.abs(rotationDiff), (maxRotation / 2), clockwiseRotate)) {
+        otherRotation = otherRotation % (maxRotation) + numberOfTurns * maxRotation;
         /* If it needs to rotate the other way... */
         let normalizedDiff = otherRotation - rotation;
-        if(Math.abs(normalizedDiff) > (maxRotation/2)){
-            otherRotation -= Math.sign(normalizedDiff)*maxRotation;
+        if (biggerOrPotentiallyEqual(Math.abs(normalizedDiff), (maxRotation / 2), clockwiseRotate)) {
+            otherRotation -= Math.sign(normalizedDiff) * maxRotation;
         }
     }
     return otherRotation;
+}
+
+function biggerOrPotentiallyEqual(biggerValue, smallerValue, doEqual) {
+    return doEqual ? biggerValue >= smallerValue : biggerValue > smallerValue;
 }
 
 /* Deprecated, but might be useul in the future for more advanced 2d animation spaces */

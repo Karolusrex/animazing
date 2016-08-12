@@ -32,10 +32,14 @@ insertRule('.bar:hover::after', {
 @layout.margins([30, 10, 50, 10])
 export class HomeView extends View {
 
-
     @layout.translate(0, 0, -10)
     @layout.fullscreen
     background = new Surface({properties: {backgroundColor: '#2F2F40'}});
+
+    @layout.animate({showInitially: false,show: {transition:{duration:10}},hide: {transition:{duration:500}}, animation: AnimationController.Animation.Fade})
+    @layout.translate(0, 0, 0)
+    @layout.fullscreen
+    isDeadIndication = new Surface({properties: {backgroundColor: '#722F37'}});
 
     @layout.animate({
         showInitially: false,
@@ -58,8 +62,9 @@ export class HomeView extends View {
             swipe: "Now swipe to the right to see the result of what you made.",
             collision: "Oh snapidoodle! There was a collision. You better reconfigure...",
             levelComplete: "You made it. Let's see if you can complete the other levels...",
-            newLevel: "Enjoy this new level!",
-            lastLevel: "This was the last level of the game. Wanna play more? Send me suggestions on new levels!"
+            newLevel: "Go ahead, continue in the same manner and it well get increasingly difficult.",
+            lastLevel: "This was the last level of the game. Wanna play more? Send me suggestions on new levels!",
+            attemptSameSubsequent: "You are unable to pick two subsequent shapes of the same kind. Pick another one or revisit previous choices."
         };
         return new Text({content: this.instructions.initial, properties: {textAlign: 'center', color: 'white'}});
     }
@@ -89,7 +94,11 @@ export class HomeView extends View {
             this._cancelSlide();
             this.instruction.setContent(this.instructions.newLevel);
             this.hideRenderable('nextLevelButton');
+            this._setBoxShadow(this._standardBoxShadow);
         });
+
+        this._standardBoxShadow = '1px 3px 37px 0px rgba(168,91,132,1)';
+        this._glowingBoxShadow = '1px 3px 97px 5px rgba(168,91,132,1)';
 
         for (let [i,bar] of this._getBarNames().entries()) {
             this.addRenderable(new Surface({
@@ -98,27 +107,41 @@ export class HomeView extends View {
                 properties: {
                     backgroundColor: ['#2ecc71', '#8e44ad', '#d35400', '#27ae60', '#e67e22', '#9b59b6'][i],
                     /*borderRadius: '15px',*/
-                    webkitBoxShadow: '1px 3px 37px 0px rgba(168,91,132,1)'
+                    boxShadow: this._standardBoxShadow
                 }
             }), bar);
         }
 
         let firstSelection = true;
         /* Use the 'renderables' to listen for the animationcontroller since the shapeslider itself changes when the level changes */
-        this.renderables.shapeSlider.on('modifyShape', (index) => {
+        this.renderables.shapeSlider.on('modifyShape', (index, forbiddenShapes) => {
+
             /* If we are already running a sequence, then cancel this and go into choosing mode again */
             if (this._sliding) {
                 this._cancelSlide();
             }
-            this.instruction.setContent(this.instructions.choose);
-            this.shapeSelector.offerSelection();
-            this.shapeSelector.once('shapeSelected', (spec) => {
-                this.instruction.setContent(firstSelection ? this.instructions.encouragement : this.instructions.initial);
-                firstSelection = false;
-                this.shapeSlider.setSelection(index, spec);
-            });
+
+            this.shapeSelector.offerSelection(forbiddenShapes);
+            /* We store the variable this._modifyingShapeIndex to take into account that the user can cancel */
+            if(!this._modifyingShapeIndex){
+                this.shapeSelector.once('shapeSelected', (spec) => {
+                    this.instruction.setContent(firstSelection ? this.instructions.encouragement : this.instructions.initial);
+                    firstSelection = false;
+                    this.shapeSlider.setSelection(this._modifyingShapeIndex, spec);
+                    this._modifyingShapeIndex = undefined;
+                });
+            }
+            this._modifyingShapeIndex = index;
         });
 
+        this.renderables.shapeSelector.on('offerSelection', (shape) => {
+            this.instruction.setContent(this.instructions.choose);
+        });
+        
+        this.renderables.shapeSelector.on('invalidSelection', (shape) => {
+            this.instruction.setContent(this.instructions.attemptSameSubsequent);
+        });
+        
         this.renderables.shapeSelector.on('rotatingShape', (shape) => {
             this.instruction.setContent(this.instructions.selected);
         });
@@ -145,9 +168,15 @@ export class HomeView extends View {
         this._initAnimationBehaviour();
     }
 
+    _setBoxShadow(boxShadow) {
+        for(let renderableName of this._getBarNames()){
+            this[renderableName].setProperties({boxShadow});
+        }
+    }
+
     _initDraggable() {
 
-        this.maxRange = 200;
+        this.maxRange = 280;
 
 
         let guideLineProperties = {
@@ -200,11 +229,16 @@ export class HomeView extends View {
                 context.set('snappable', draggableSpec);
 
                 /* If there is a collision, go into dead mode */
-                if (!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead)) {
+                if (!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead, levels[this._currentLevelIndex].clockwiseRotate)) {
+                    if(!this._isDead){
+                        this.showRenderable('isDeadIndication');
+                        this.hideRenderable('isDeadIndication');
+                    }
                     this._isDead = true;
                     this.instruction.setContent(this.instructions.collision);
                 } else if (!this._isDead) {
                     if (inputPosition === this.maxRange) {
+                        this._setBoxShadow(this._glowingBoxShadow);
                         let isLastLevel = this._currentLevelIndex === levels.length - 1;
                         if(!isLastLevel){
                             this.showRenderable('nextLevelButton');
@@ -239,14 +273,14 @@ export class HomeView extends View {
     _drawGuides(context) {
 
         context.set('verticalGuideLine', {
-            size: [1, this.maxRange * 2],
+            size: [1, 250],
             align: [0.5, 0.5],
             origin: [0.5, 0.5],
             translate: [0, 0, 0],
             opacity: 0.8
         });
         context.set('horizontalGuideLine', {
-            size: [this.maxRange * 2, 1],
+            size: [250, 1],
             align: [0.5, 0.5],
             origin: [0.5, 0.5],
             translate: [0, 0, 0],

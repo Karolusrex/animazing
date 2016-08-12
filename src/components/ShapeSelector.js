@@ -26,26 +26,44 @@ export class ShapeSelector extends View {
     @layout.origin(0.8, 1)
     @layout.align(0.8, 1)
     @layout.size(100, 40)
-    okButton = new OutlineTextButton({variation: 'bold', content: 'OK'});
+    okButton = new OutlineTextButton({variation: 'bold', clickEventName: 'accept', content: 'OK'});
 
     @layout.animate({showInitially: false})
-    @layout.origin(1,0.5)
+    @layout.origin(0.2, 1)
+    @layout.align(0.2, 1)
+    @layout.size(100, 40)
+    cancelButton = new OutlineTextButton({variation: 'bold', clickEventName: 'cancel', content: 'CANCEL'});
+
+    @layout.animate({showInitially: false})
+    @layout.origin(1, 0.5)
     @layout.align(0.5, 0)
     @layout.size(40, 40)
-    rotateRightButton = new ImageButton({imageOnly: true, alwaysEnabled: true, clickEventName: 'rotate', clickEventData: ['right'], icon: RotateRightIcon});
+    rotateRightButton = new ImageButton({
+        imageOnly: true,
+        alwaysEnabled: true,
+        clickEventName: 'rotate',
+        clickEventData: ['right'],
+        icon: RotateRightIcon
+    });
 
     @layout.animate({showInitially: false})
     @layout.origin(0, 0.5)
     @layout.align(0.5, 0)
     @layout.size(40, 40)
-    rotateLeftButton = new ImageButton({imageOnly: true, alwaysEnabled: true, clickEventName: 'rotate', clickEventData: ['left'], icon: RotateLeftIcon});
+    rotateLeftButton = new ImageButton({
+        imageOnly: true,
+        alwaysEnabled: true,
+        clickEventName: 'rotate',
+        clickEventData: ['left'],
+        icon: RotateLeftIcon
+    });
 
 
     constructor(options = {}) {
         super(options);
         this.layout.on('layoutstart', ({size: [width, height]}) => {
-            this.rotateRightButton.decorations.translate = [-height/2, 0, 0];
-            this.rotateLeftButton.decorations.translate = [height/2, 0, 0];
+            this.rotateRightButton.decorations.translate = [-height / 2, 0, 0];
+            this.rotateLeftButton.decorations.translate = [height / 2, 0, 0];
         });
         this._transition = {
             duration: 500,
@@ -53,7 +71,7 @@ export class ShapeSelector extends View {
         };
         this._fading = new Transitionable(options.showInitally ? 1 : 0);
         this._sliding = new Transitionable(options.showInitially ? 0 : 1);
-        this.okButton.on('buttonClick', () => {
+        this.on('accept', () => {
             let rotation = this._selectedShape.getDeterminedRotation();
             let {shapeSpec} = this._selectedShape.options;
             this.hideAll();
@@ -62,13 +80,17 @@ export class ShapeSelector extends View {
                 this._eventOutput.emit('shapeSelected', turnShape(Math.round((4 - (rotation % (Math.PI * 2)) / (Math.PI / 2)) % 4), shapeSpec));
             }, this._transition.duration);
         });
+        this.on('cancel', () => {
+            this.offerSelection();
+        });
+
         this.on('rotate', (direction) => {
             let selectedShape = this._selectedShape;
             let currentRotation = selectedShape.getDeterminedRotation();
-            if(direction === 'right'){
-                selectedShape.setRotation(currentRotation + Math.PI/2);
+            if (direction === 'right') {
+                selectedShape.setRotation(currentRotation + Math.PI / 2);
             } else {
-                selectedShape.setRotation(currentRotation - Math.PI/2);
+                selectedShape.setRotation(currentRotation - Math.PI / 2);
             }
 
         });
@@ -85,7 +107,6 @@ export class ShapeSelector extends View {
             let betweenSpace = Math.max(gridLength + this._displaySpacing, (contextSize[0] - options.margins[3] - options.margins[1]) / (noRenderables - 1) - gridLength / (noRenderables - 1));
             let xOffset = options.margins[3];
             for (let i = 0; i < noRenderables; i++) {
-                let gridName = `shapeGrid${i}`;
                 let shapeName = `shape${i}`;
                 let isChosen = this.renderables[shapeName] === this._selectedShape;
                 let size = [gridLength, gridLength];
@@ -109,9 +130,23 @@ export class ShapeSelector extends View {
         });
     }
 
-    offerSelection() {
+    /**
+     * Shows the different renderables that can be chosen between, disabling certain ones possibly
+     */
+    offerSelection(exceptThese = this._previousExceptions) {
+        for (let i = 0; i < this.options.shapeSpecs.length; i++) {
+            let exception;
+            let shapeWithGrid = this[`shape${i}`];
+            if (exception = exceptThese.find((possibleException) => shapeWithGrid.getSpec().isSameUnrotated(possibleException))) {
+                shapeWithGrid.disable();
+            } else {
+                shapeWithGrid.enable();
+            }
+        }
+        this._previousExceptions = exceptThese;
         this._selectedShape = null;
         this.expand();
+        this._eventOutput.emit('offerSelection');
     }
 
     setSelection(shapeSpecs) {
@@ -143,9 +178,11 @@ export class ShapeSelector extends View {
         this.showRenderable('rotateRightButton', shouldCollapse);
         this.showRenderable('rotateLeftButton', shouldCollapse);
         this.showRenderable('okButton', shouldCollapse);
+        this.showRenderable('cancelButton', shouldCollapse);
         if (!shouldCollapse) {
             for (let i = 0; i < this.options.shapeSpecs.length; i++) {
-                this[`shape${i}`].setAutoSpin(true);
+                let shapeWithGrid = this[`shape${i}`];
+                shapeWithGrid.setAutoSpin(shapeWithGrid.isEnabled());
             }
         }
         this._isCollapsed = shouldCollapse;
@@ -156,6 +193,7 @@ export class ShapeSelector extends View {
         this.layout.reflowLayout();
         this._fading.set(0, this._transition);
         this.hideRenderable('okButton');
+        this.hideRenderable('cancelButton');
         this.hideRenderable('rotateRightButton');
         this.hideRenderable('rotateLeftButton');
         for (let i = 0; i < this.options.shapeSpecs.length; i++) {
@@ -173,6 +211,10 @@ export class ShapeSelector extends View {
     }
 
     _onShapeClicked(index, shapeRenderable) {
+        if (!shapeRenderable.isEnabled()) {
+            this._eventOutput.emit('invalidSelection', shapeRenderable.getSpec());
+            return;
+        }
         if (!this._isCollapsed) {
             this._selectedShape = shapeRenderable;
             this._selectedIndex = index;
