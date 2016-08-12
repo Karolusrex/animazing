@@ -105,7 +105,7 @@ export class ShapeWithGrid extends View {
         /* rotate the shortest way */
         let adjustedCurrentRotation = normalizeRotationToOther(rotation, this._rotationTransitionable.get());
         this._rotationTransitionable.set(adjustedCurrentRotation);
-        this._rotationTransitionable.set(rotation, {curve: Easing.inCubic, duration: 300});
+        this._rotationTransitionable.set(rotation, {curve: Easing.outCubic, duration: 300});
         this.layout.options.alwaysLayout = true;
     }
 
