@@ -37,19 +37,26 @@ export class HomeView extends View {
     @layout.fullscreen
     background = new Surface({properties: {backgroundColor: '#2F2F40'}});
 
-    @layout.animate({showInitially: false,show: {transition:{duration:10}},hide: {transition:{duration:500}}, animation: AnimationController.Animation.Fade})
+    @layout.animate({
+        showInitially: false,
+        show: {transition: {duration: 10}},
+        hide: {transition: {duration: 500}},
+        animation: AnimationController.Animation.Fade
+    })
     @layout.translate(0, 0, 0)
     @layout.fullscreen
     isDeadIndication = new Surface({properties: {backgroundColor: '#722F37'}});
 
     @layout.animate({
         showInitially: false,
-        animation: function() {return ({...AnimationController.Animation.Slide.Down(...arguments), opacity: 0})}
+        animation: function () {
+            return ({...AnimationController.Animation.Slide.Down(...arguments), opacity: 0})
+        }
     })
     @layout.size(~100, 40)
     @layout.translate(0, 100, 0)
     @layout.place('top')
-    nextLevelButton = new OutlineTextButton({variation: 'bold',clickEventName: 'nextLevel',content: 'NEXT LEVEL'});
+    nextLevelButton = new OutlineTextButton({variation: 'bold', clickEventName: 'nextLevel', content: 'NEXT LEVEL'});
 
     @layout.translate(0, 0, 10)
     @layout.dock('top', ~27)
@@ -69,14 +76,18 @@ export class HomeView extends View {
         return new Text({content: this.instructions.initial, properties: {textAlign: 'center', color: 'white'}});
     }
 
-    @layout.animate({animation: function() {return ({...AnimationController.Animation.Slide.Up(...arguments), opacity: 0})}})
+    @layout.animate({
+        animation: function () {
+            return ({...AnimationController.Animation.Slide.Up(...arguments), opacity: 0})
+        }
+    })
     @layout.dock("top", 0.4, 10)
     shapeSlider = this._createShapeSliderFromLevel(0);
 
     /*@layout.size(undefined, 1 / 3)
-    @layout.align(0.5, 0.75)
-    @layout.origin(0.5, 0.5)
-    @layout.translate(0, 0, 30)*/
+     @layout.align(0.5, 0.75)
+     @layout.origin(0.5, 0.5)
+     @layout.translate(0, 0, 30)*/
     @layout.dock("fill")
     shapeSelector = this._createShapeSelectorFromLevel(0);
 
@@ -122,7 +133,7 @@ export class HomeView extends View {
 
             this.shapeSelector.offerSelection(forbiddenShapes);
             /* We store the variable this._modifyingShapeIndex to take into account that the user can cancel */
-            if(!this._modifyingShapeIndex){
+            if (!this._modifyingShapeIndex) {
                 this.shapeSelector.once('shapeSelected', (spec) => {
                     this.instruction.setContent(firstSelection ? this.instructions.encouragement : this.instructions.initial);
                     firstSelection = false;
@@ -136,11 +147,11 @@ export class HomeView extends View {
         this.renderables.shapeSelector.on('offerSelection', (shape) => {
             this.instruction.setContent(this.instructions.choose);
         });
-        
+
         this.renderables.shapeSelector.on('invalidSelection', (shape) => {
             this.instruction.setContent(this.instructions.attemptSameSubsequent);
         });
-        
+
         this.renderables.shapeSelector.on('rotatingShape', (shape) => {
             this.instruction.setContent(this.instructions.selected);
         });
@@ -167,7 +178,7 @@ export class HomeView extends View {
     }
 
     _setBoxShadow(boxShadow) {
-        for(let renderableName of this._getBarNames()){
+        for (let renderableName of this._getBarNames()) {
             this[renderableName].setProperties({boxShadow});
         }
     }
@@ -226,32 +237,31 @@ export class HomeView extends View {
 
                 context.set('snappable', draggableSpec);
 
-                let animatingShapeSize = Math.min(context.size[1]/2, 300);
+                let animatingShapeSize = Math.min(context.size[1] / 2, 300);
                 /* If there is a collision, go into dead mode */
-                if (!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead, levels[this._currentLevelIndex].clockwiseRotate, [0, context.size[1]*0.65+10+this.getResolvedSize('instruction')[1], 0], [animatingShapeSize, animatingShapeSize])) {
-                    if(!this._isDead){
+                if (!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead, levels[this._currentLevelIndex].clockwiseRotate, [0, context.size[1] * 0.65 + 10 + this.getResolvedSize('instruction')[1], 0], [animatingShapeSize, animatingShapeSize])) {
+                    if (!this._isDead) {
                         this.showRenderable('isDeadIndication');
                         this.hideRenderable('isDeadIndication');
                     }
                     this._isDead = true;
                     this.instruction.setContent(this.instructions.collision);
-                } else if (!this._isDead) {
-                    if (inputPosition === this.maxRange) {
-                        this._setBoxShadow(this._glowingBoxShadow);
-                        let isLastLevel = this._currentLevelIndex === levels.length - 1;
-                        this.hideRenderable('shapeSlider');
-                        if(!isLastLevel){
-                            Timer.setTimeout(this.showRenderable.bind(this,'nextLevelButton'),500);
-                        }
-                        this.instruction.setContent(isLastLevel ? this.instructions.lastLevel : this.instructions.levelComplete);
-
+                } else if (!this._isDead && inputPosition === this.maxRange && !this._levelComplete) {
+                    this._levelComplete = true;
+                    this._setBoxShadow(this._glowingBoxShadow);
+                    let isLastLevel = this._currentLevelIndex === levels.length - 1;
+                    this.hideRenderable('shapeSlider');
+                    if (!isLastLevel) {
+                        Timer.setTimeout(this.showRenderable.bind(this, 'nextLevelButton'), 500);
                     }
+                    this.instruction.setContent(isLastLevel ? this.instructions.lastLevel : this.instructions.levelComplete);
                 }
             }
         });
     }
 
     _cancelSlide() {
+        this._levelComplete = false;
         this._sliding = false;
         this._isDead = false;
         delete this.renderables.snappable;
@@ -272,19 +282,19 @@ export class HomeView extends View {
     _drawGuides(context) {
 
         /*context.set('verticalGuideLine', {
-            size: [1, 100],
-            align: [0.5, 0.5],
-            origin: [0.5, 0.5],
-            translate: [0, 70, 0],
-            opacity: 0.8
-        });
-        context.set('horizontalGuideLine', {
-            size: [100, 1],
-            align: [0.5, 0.5],
-            origin: [0.5, 0.5],
-            translate: [0, 10, 0],
-            opacity: 0.8
-        });*/
+         size: [1, 100],
+         align: [0.5, 0.5],
+         origin: [0.5, 0.5],
+         translate: [0, 70, 0],
+         opacity: 0.8
+         });
+         context.set('horizontalGuideLine', {
+         size: [100, 1],
+         align: [0.5, 0.5],
+         origin: [0.5, 0.5],
+         translate: [0, 10, 0],
+         opacity: 0.8
+         });*/
 
 
     }
