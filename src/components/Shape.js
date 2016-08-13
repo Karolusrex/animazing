@@ -14,7 +14,9 @@ import {associateShapesInInterval,
 
 
 export class Shape extends View{
-    
+    /*@layout.fullscreen
+    bg = new Surface({properties: {backgroundColor: 'red'}});*/
+
 
     constructor(options){
         super(options);
@@ -29,8 +31,6 @@ export class Shape extends View{
                     backgroundColor: Array.isArray(options.colorScheme) ? options.colorScheme[i++] : options.colorScheme
                 }}),renderableName);
         });
-        this.renderables.background = new Surface({properties: {backgroundColor: 'white'}});
-
 
         this.layouts.push((context) => {
             let contextSize = context.size;
@@ -53,6 +53,14 @@ export class Shape extends View{
             });
 
         });
+    }
+
+    /**
+     * Changes the spec and makes the assumption that the spec displays the same type of renderables
+     * @param spec
+     */
+    adjustSpec(spec) {
+        options.spec = spec;
     }
 
     enableRotation() {

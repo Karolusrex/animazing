@@ -29,7 +29,7 @@ insertRule('.bar:hover::after', {
     opacity: 1
 });
 
-@layout.margins([30, 10, 50, 10])
+@layout.margins([5, 10, 10, 10])
 export class HomeView extends View {
 
     @layout.translate(0, 0, -10)
@@ -46,13 +46,12 @@ export class HomeView extends View {
         animation: function() {return ({...AnimationController.Animation.Slide.Down(...arguments), opacity: 0})}
     })
     @layout.size(~100, 40)
-    @layout.translate(0, 230, 0)
-    @layout.place('center')
+    @layout.translate(0, 100, 0)
+    @layout.place('top')
     nextLevelButton = new OutlineTextButton({variation: 'bold',clickEventName: 'nextLevel',content: 'NEXT LEVEL'});
 
-    @layout.size(undefined, ~30)
     @layout.translate(0, 0, 10)
-    @layout.place('center')
+    @layout.dock('top', ~27)
     get instruction() {
         this.instructions = {
             initial: "Tap the highlighted grids to configure your complete sequence.",
@@ -70,14 +69,14 @@ export class HomeView extends View {
     }
 
     @layout.animate({animation: function() {return ({...AnimationController.Animation.Slide.Up(...arguments), opacity: 0})}})
-    @layout.dock("top", 150)
+    @layout.dock("top", 0.4, 10)
     shapeSlider = this._createShapeSliderFromLevel(0);
 
-
-    @layout.size(undefined, 1 / 3)
+    /*@layout.size(undefined, 1 / 3)
     @layout.align(0.5, 0.75)
     @layout.origin(0.5, 0.5)
-    @layout.translate(0, 0, 30)
+    @layout.translate(0, 0, 30)*/
+    @layout.dock("fill")
     shapeSelector = this._createShapeSelectorFromLevel(0);
 
     constructor(options = {}) {
@@ -149,7 +148,6 @@ export class HomeView extends View {
             /* Go into slide mode */
             this._sliding = true;
             this.instruction.setContent(this.instructions.swipe);
-            this.instruction.decorations.translate[1] += 150;
             this._selectedShapeSequence = sequence;
             let sequenceLength = sequence.length;
             this.renderables.snappable = new Snappable({
@@ -227,8 +225,9 @@ export class HomeView extends View {
 
                 context.set('snappable', draggableSpec);
 
+                let animatingShapeSize = Math.min(context.size[1]/2, 300);
                 /* If there is a collision, go into dead mode */
-                if (!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead, levels[this._currentLevelIndex].clockwiseRotate)) {
+                if (!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead, levels[this._currentLevelIndex].clockwiseRotate, [0, context.size[1]*0.65+10+this.getResolvedSize('instruction')[1], 0], [animatingShapeSize, animatingShapeSize])) {
                     if(!this._isDead){
                         this.showRenderable('isDeadIndication');
                         this.hideRenderable('isDeadIndication');
@@ -252,7 +251,6 @@ export class HomeView extends View {
     }
 
     _cancelSlide() {
-        this.instruction.decorations.translate[1] = 0;
         this._sliding = false;
         this._isDead = false;
         delete this.renderables.snappable;
@@ -272,20 +270,20 @@ export class HomeView extends View {
 
     _drawGuides(context) {
 
-        context.set('verticalGuideLine', {
-            size: [1, 250],
+        /*context.set('verticalGuideLine', {
+            size: [1, 100],
             align: [0.5, 0.5],
             origin: [0.5, 0.5],
-            translate: [0, 0, 0],
+            translate: [0, 70, 0],
             opacity: 0.8
         });
         context.set('horizontalGuideLine', {
-            size: [250, 1],
+            size: [100, 1],
             align: [0.5, 0.5],
             origin: [0.5, 0.5],
-            translate: [0, 0, 0],
+            translate: [0, 10, 0],
             opacity: 0.8
-        });
+        });*/
 
 
     }

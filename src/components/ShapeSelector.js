@@ -23,19 +23,19 @@ import {RotateLeftIcon}             from './icons/RotateLeftIcon.js';
 export class ShapeSelector extends View {
 
     @layout.animate({showInitially: false})
-    @layout.origin(0.8, 1)
-    @layout.align(0.8, 1)
+    @layout.origin(0, 1)
+    @layout.align(0.5, 1)
     @layout.size(100, 40)
     okButton = new OutlineTextButton({variation: 'bold', clickEventName: 'accept', content: 'OK'});
 
     @layout.animate({showInitially: false})
-    @layout.origin(0.2, 1)
-    @layout.align(0.2, 1)
+    @layout.origin(1, 1)
+    @layout.align(0.5, 1)
     @layout.size(100, 40)
     cancelButton = new OutlineTextButton({variation: 'bold', clickEventName: 'cancel', content: 'CANCEL'});
 
     @layout.animate({showInitially: false})
-    @layout.origin(1, 0.5)
+    @layout.origin(1, 0.2)
     @layout.align(0.5, 0)
     @layout.size(40, 40)
     rotateRightButton = new ImageButton({
@@ -47,7 +47,7 @@ export class ShapeSelector extends View {
     });
 
     @layout.animate({showInitially: false})
-    @layout.origin(0, 0.5)
+    @layout.origin(0, 0.2)
     @layout.align(0.5, 0)
     @layout.size(40, 40)
     rotateLeftButton = new ImageButton({
@@ -58,12 +58,15 @@ export class ShapeSelector extends View {
         icon: RotateLeftIcon
     });
 
+    /*@layout.fullscreen
+    bg = new Surface({properties: {backgroundColor: 'red'}});*/
+
 
     constructor(options = {}) {
         super(options);
         this.layout.on('layoutstart', ({size: [width, height]}) => {
-            this.rotateRightButton.decorations.translate = [-height / 2, 0, 0];
-            this.rotateLeftButton.decorations.translate = [height / 2, 0, 0];
+            this.rotateRightButton.decorations.translate = this.cancelButton.decorations.translate = [-height / 2, 0, 0];
+            this.rotateLeftButton.decorations.translate = this.okButton.decorations.translate =  [height / 2, 0, 0];
         });
         this._transition = {
             duration: 500,
@@ -112,7 +115,7 @@ export class ShapeSelector extends View {
                 let size = [gridLength, gridLength];
                 if (isChosen) {
                     for (let i of [0, 1]) {
-                        size[i] = size[i] - (size[i] - (contextSize[1])) * this._sliding.get();
+                        size[i] = size[i] - (size[i] - (contextSize[1] - options.margins[0] - options.margins[2])) * this._sliding.get();
                     }
                 }
                 let opacity = isChosen ? 1 : this._fading.get();

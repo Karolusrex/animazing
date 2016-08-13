@@ -20,8 +20,9 @@ export class ShapeSlider extends View {
         }
     });
 
-    /*@layout.fullscreen
-     bg = new Surface({properties: {backgroundColor: 'red'}})*/
+    /*@layout.translate(0, 0, -20)
+    @layout.fullscreen
+    bg = new Surface({properties: {backgroundColor: 'red'}});*/
 
     setSelection(index, shapeSpec) {
         this[`circle${index}`].showShape(shapeSpec);
@@ -97,12 +98,22 @@ export class ShapeSlider extends View {
 
         });
         this.layout.on('layoutstart', ({size}) => {
-            let circleWidth = Math.min(180, (size[0] - (Settings.shapeSpacing * (sequenceLength - 1))) / (sequenceLength));
+            let maxHeight = size[1] - 30;
+            let circleWidth = Math.min(Math.min(180, maxHeight), (size[0] - (Settings.shapeSpacing * (sequenceLength - 1))) / (sequenceLength));
+
             this.path.decorations.size[0] = size[0] - circleWidth;
-            this.path.decorations.translate[1] = circleWidth - size[1] + 20;
+            let withinHeight = circleWidth < maxHeight;
+            let circleHeight = circleWidth + 30;
+            // let circleYOffset = withinHeight ? size[1] / 2 - circleWidth / 2 : 0;
+            let circleYOffset = 0;
+            this.path.decorations.translate[1] = circleYOffset + circleWidth - size[1] + 20;
+
+            /*this.path.decorations.translate[1] = [-10 - (withinHeight ? 0 : (size[1] / 2 - circleWidth / 2))];*/
             for (let i = 0; i < options.shapeSpecs.length; i++) {
                 let {decorations} = this[`circle${i}`];
-                decorations.size = [circleWidth, circleWidth + 30];
+                decorations.size = [circleWidth, circleHeight];
+                decorations.translate = [0, circleYOffset, 0];
+                /* For all except the last one */
                 if (decorations.dock) {
                     decorations.dock.size[0] = size[0] / lastShapeIndex - circleWidth / lastShapeIndex;
                 }
@@ -135,7 +146,7 @@ class ShapeSelection extends View {
         return this.shapeWithGrid.hideShape(...arguments);
     }
 
-    makeEmpty(){
+    makeEmpty() {
         return this.shapeWithGrid.makeEmpty(...arguments);
     }
 }

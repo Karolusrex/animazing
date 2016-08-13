@@ -7,7 +7,7 @@ import {turnShape}      from '../util/SpecProcessing.js';
 export let levels = [
     {
         availableShapes: [ShapeSpecs.sauron, ShapeSpecs.insect],
-        startShape: turnShape(2,ShapeSpecs.fallenHamburger),
+        startShape: turnShape(2, ShapeSpecs.fallenHamburger),
         endShape: ShapeSpecs.hamburger,
         inbetweenSpaces: 1,
         clockwiseRotate: [
@@ -17,7 +17,7 @@ export let levels = [
     {
         availableShapes: [ShapeSpecs.pi, ShapeSpecs.upPointArrow],
         startShape: ShapeSpecs.sauron,
-        endShape: turnShape(2,ShapeSpecs.upArrow),
+        endShape: turnShape(2, ShapeSpecs.upArrow),
         inbetweenSpaces: 1,
         clockwiseRotate: [
             [ShapeSpecs.sauron, ShapeSpecs.hamburger]
@@ -31,9 +31,13 @@ export let levels = [
     },
     {
         availableShapes: [ShapeSpecs.insect, ShapeSpecs.line, ShapeSpecs.shuffledHamburger],
-        startShape: turnShape(3,ShapeSpecs.mess),
-        endShape: turnShape(2,ShapeSpecs.upArrow),
-        inbetweenSpaces: 4
+        startShape: turnShape(3, ShapeSpecs.mess),
+        endShape: turnShape(2, ShapeSpecs.upArrow),
+        inbetweenSpaces: 4,
+        clockwiseRotate: [
+            /* To make it harder another option is available at first */
+            [ShapeSpecs.mess, ShapeSpecs.shuffledHamburger]
+        ]
     },
     {
         availableShapes: [ShapeSpecs.upPointArrow, ShapeSpecs.pi, ShapeSpecs.insect, ShapeSpecs.shuffledUpPointArrow],

@@ -3,10 +3,11 @@
  */
 
 import {ShapeSpec}      from '../logic/ShapeSpecs.js';
+import {ShapeGrid}      from '../components/ShapeGrid.js';
 
 export let specAttributes = {
     rotate: {dimensions: 3, defaultValue: [0, 0, 0]},
-    align: {dimensions: 2, defaultValue: [0.5, 0.5]},
+    align: {dimensions: 2, defaultValue: [0.5, 0]},
     origin: {dimensions: 2, defaultValue: [0.5, 0.5]},
     size: {dimensions: 2, defaultValue: [100, 10]},
     translate: {dimensions: 3, defaultValue: [0, 0, 0]},
@@ -148,7 +149,7 @@ export function turnShape(quarterCycles, shape) {
     });
     return new ShapeSpec({shape: turnedShape, isRotationOf: shape, quarterCycles});
 }
-//For actual shapes
+//For actual ShapeSpecs
 export function shapeBoundingBox(shape) {
     let minPos = [Infinity, Infinity], maxPos = [0, 0];
     shape.forEach((name, spec) => {
@@ -221,11 +222,13 @@ export function specBoundingBoxSize(spec) {
  * @param maxRange
  * @param displayOpaque if the shapes should be displayed with an opacity
  * @param clockwiseRotateSpecialCases Different combination that overrides standard behaviour of rotation
+ * @param extraTranslate Adds an extra translate
  * @returns {boolean} collisionFree if there was no collision
  */
-export function associateShapesInInterval(input, shapes, context, maxRange, displayOpaque = false, clockwiseRotateSpecialCases) {
+export function associateShapesInInterval(input, shapes, context, maxRange, displayOpaque = false, clockwiseRotateSpecialCases, extraTranslate = [0, 0, 0], size) {
 
     let allSpecs = [];
+    let resultingSpec = {};
     let i = 0;
     shapes[0].forEach((bar) => {
         let specCombo = [];
@@ -254,12 +257,14 @@ export function associateShapesInInterval(input, shapes, context, maxRange, disp
         }
         let spec = mergeSpecs(...specCombo,
             inbetween ? input - Math.min(Math.floor(input / (targetValue)), shapes.length - 2) * (targetValue) : targetValue,
-            targetValue, (t) => t, clockwiseRotate);
+            targetValue, (t) => t, clockwiseRotate, size[0]/ShapeGrid.getSize()[0]);
         allSpecs.push(spec);
         if (displayOpaque) {
             spec.opacity = 0.5;
         }
-        context.set(bar, spec);
+        let specWithTranslation = Object.assign(spec,{translate: extraTranslate.map((translation, index)=> translation+spec.translate[index])});
+        resultingSpec[bar] = specWithTranslation;
+        context.set(bar, specWithTranslation);
         i++;
     });
     /* For collision handling */
@@ -279,7 +284,7 @@ let _normalizeWeights = (weights, goalT, easing) => {
     return normalizedWeights;
 };
 
-export function mergeSpecs(startSpec, endSpec, t, goalT, easing, clockwiseRotate) {
+export function mergeSpecs(startSpec, endSpec, t, goalT, easing, clockwiseRotate, sizeDistortion) {
     let [normalizedT] = _normalizeWeights([t], goalT, easing);
     let spec = {};
     for (let [attribute, {dimensions, defaultValue}] of Object.entries(specAttributes)) {
@@ -297,6 +302,11 @@ export function mergeSpecs(startSpec, endSpec, t, goalT, easing, clockwiseRotate
             let addition = (endSpecAttribute[i] - startSpecAttribute[i]) * normalizedT;
             sumOfAttributeDimension += addition;
             let specAttribute = startSpecAttribute[i] + sumOfAttributeDimension;
+
+            if (attribute === 'translate' || attribute === 'size') {
+                /* Shrink or expand the shape */
+                specAttribute *= sizeDistortion;
+            }
             if (dimensions > 1) {
                 spec[attribute][i] = specAttribute;
             } else {
@@ -322,7 +332,8 @@ export function normalizeRotationToOther(rotation, otherRotation, maxRotation = 
         otherRotation = otherRotation % (maxRotation) + numberOfTurns * maxRotation;
         /* If it needs to rotate the other way... */
         let normalizedDiff = otherRotation - rotation;
-        if (biggerOrPotentiallyEqual(Math.abs(normalizedDiff), (maxRotation / 2), clockwiseRotate)) {
+        /* If we explicitly request a clockwise rotation, and that's what we're getting, don't rotate the other way */
+        if (!(clockwiseRotate && normalizedDiff === -maxRotation / 2) && biggerOrPotentiallyEqual(Math.abs(normalizedDiff), (maxRotation / 2), clockwiseRotate)) {
             otherRotation -= Math.sign(normalizedDiff) * maxRotation;
         }
     }

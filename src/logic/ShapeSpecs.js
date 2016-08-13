@@ -49,19 +49,16 @@ export class ShapeSpecCollection {
         shape: {
             topBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
                 translate: [0, -40, 0],
                 size: this.stickDimensions
             },
             midBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
                 translate: [0, 0, 0],
                 size: this.stickDimensions
             },
             bottomBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
                 translate: [0, 40, 0],
                 size: this.stickDimensions
             }
@@ -72,19 +69,16 @@ export class ShapeSpecCollection {
         shape: {
             topBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
                 translate: [0, 40, 0],
                 size: this.stickDimensions
             },
             midBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
                 translate: [0, 0, 0],
                 size: this.stickDimensions
             },
             bottomBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
                 translate: [0, -40, 0],
                 size: this.stickDimensions
             }
@@ -95,19 +89,16 @@ export class ShapeSpecCollection {
         shape: {
             topBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
                 translate: [-70, 20, 0],
                 size: this.stickDimensions
             },
             midBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
                 translate: [-70, -20, 0],
                 size: this.stickDimensions
             },
             bottomBar: {
                 rotate: [0, 0, Math.PI / 2],
-                align: [0.5, 0.5],
                 translate: [30, 0, 0],
                 size: this.stickDimensions
             }
@@ -138,19 +129,16 @@ export class ShapeSpecCollection {
         shape: {
             topBar: {
                 rotate: [0, 0, Math.PI / 3],
-                align: [0.5, 0.5],
                 translate: [35, -30, 0],
                 size: this.stickDimensions
             },
             midBar: {
                 rotate: [0, 0, -Math.PI / 3],
-                align: [0.5, 0.5],
                 translate: [-35, -30, 0],
                 size: this.stickDimensions
             },
             bottomBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
                 translate: [0, 30, 0],
                 size: this.stickDimensions
             }
@@ -161,19 +149,16 @@ export class ShapeSpecCollection {
         shape: {
             topBar: {
                 rotate: [0, 0, -Math.PI / 3],
-                align: [0.5, 0.5],
                 translate: [35, -70, 0],
                 size: this.stickDimensions
             },
             midBar: {
                 rotate: [0, 0, Math.PI / 3],
-                align: [0.5, 0.5],
                 translate: [-35, -70, 0],
                 size: this.stickDimensions
             },
             bottomBar: {
                 rotate: [0, 0, Math.PI / 2],
-                align: [0.5, 0.5],
                 translate: [0, 50, 0],
                 size: this.stickDimensions
             }
@@ -185,19 +170,16 @@ export class ShapeSpecCollection {
         shape: {
             topBar: {
                 rotate: [0, 0, -Math.PI / 4],
-                align: [0.5, 0.5],
                 translate: [-60, 60, 0],
                 size: this.stickDimensions
             },
             bottomBar: {
                 rotate: [0, 0, -Math.PI / 4],
-                align: [0.5, 0.5],
                 translate: [60, -60, 0],
                 size: this.stickDimensions
             },
             midBar: {
                 rotate: [0, 0, Math.PI / 4],
-                align: [0.5, 0.5],
                 translate: [0, 0, 0],
                 size: this.stickDimensions
             }
@@ -207,20 +189,17 @@ export class ShapeSpecCollection {
         shape: {
             topBar: {
                 rotate: [0, 0, Math.PI/5],
-                align: [0.5, 0.5],
                 translate: [-30, 30, 0],
                 size: this.stickDimensions
             },
             midBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
                 translate: [0, 0, 0],
                 size: this.stickDimensions
             },
 
             bottomBar: {
                 rotate: [0, 0, Math.PI/5],
-                align: [0.5, 0.5],
                 translate: [30, -30, 0],
                 size: this.stickDimensions
             }
@@ -231,20 +210,17 @@ export class ShapeSpecCollection {
         shape: {
             topBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
-                translate: [-85, -85, 0],
+                translate: [-75, -55, 0],
                 size: this.stickDimensions
             },
             bottomBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
-                translate: [85, 85, 0],
+                translate: [65, 65, 0],
                 size: this.stickDimensions
             },
             midBar: {
                 rotate: [0, 0, Math.PI / 2],
-                align: [0.5, 0.5],
-                translate: [10, 60, 0],
+                translate: [0, 40, 0],
                 size: this.stickDimensions
             }
         }
@@ -254,20 +230,17 @@ export class ShapeSpecCollection {
         shape: {
             topBar: {
                 rotate: [0, 0, Math.PI / 4],
-                align: [0.5, 0.5],
                 translate: [0, 0, 0],
                 size: this.stickDimensions
             },
             midBar: {
                 rotate: [0, 0, 0],
-                align: [0.5, 0.5],
                 translate: [100, 0, 0],
                 size: [200, 10],
                 opacity: 0
             },
             bottomBar: {
                 rotate: [0, 0, -Math.PI / 4],
-                align: [0.5, 0.5],
                 translate: [0, 0, 0],
                 size: this.stickDimensions
             }
@@ -280,7 +253,6 @@ export class ShapeSpecCollection {
             midBar: {
                 rotate: [0, 0, Math.PI / 2],
                 translate: [0, 55, 0],
-                align: [0.5, 0.5],
                 size: this.stickDimensions
             },
             bottomBar: Object.assign({}, this.upArrow.topBar, {translate: [this.upArrow.topBar.translate[0], ...this.upArrow.topBar.translate.slice(1)]})
@@ -294,7 +266,6 @@ export class ShapeSpecCollection {
             bottomBar: {
                 rotate: [0, 0, Math.PI / 2],
                 translate: [0, 55, 0],
-                align: [0.5, 0.5],
                 size: this.stickDimensions
             }
         }

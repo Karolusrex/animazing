@@ -22,6 +22,10 @@ export class ShapeGrid extends View {
     vertical = new VerticalGrid(gridOptions);
 
     getSize() {
+        return ShapeGrid.getSize()
+    }
+    /* So it can be reused in other places */
+    static getSize() {
         return [250, 250]
     }
 

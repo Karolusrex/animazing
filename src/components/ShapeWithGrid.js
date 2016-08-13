@@ -51,7 +51,7 @@ export class ShapeWithGrid extends View {
     @layout.size(undefined, 30)
     @layout.translate(0, 0, 30)
     @layout.place('top')
-    placeholder = new Surface({content: '?', properties: {fontSize: '100px', textAlign: 'center'}});
+    placeholder = new Surface({content: '?', properties: {fontSize: '80px', textAlign: 'center', color: 'rgba(255,255,255,0.6)'}});
 
     constructor(options) {
         super(combineOptions(
@@ -146,7 +146,7 @@ export class ShapeWithGrid extends View {
         this.hideRenderable('shape');
         this.replaceRenderable('shape', new Shape({spec}));
         this.layout.reflowLayout();
-        this.renderables.shape.show(this.shape, {transition: {duration: 250}})
+        this.renderables.shape.show(this.shape, {transition: {duration: 250}});
         this.hideRenderable('placeholder');
     }
 
