@@ -47,6 +47,7 @@ System.config({
     "fastclick": "npm:fastclick@1.0.6",
     "insert-rule": "npm:insert-rule@2.1.0",
     "lodash": "npm:lodash@3.10.1",
+    "text": "github:systemjs/plugin-text@0.0.8",
     "traceur": "github:jmcriffey/bower-traceur@0.0.90",
     "traceur-runtime": "github:jmcriffey/bower-traceur-runtime@0.0.90",
     "bitbucket:bizboard/arva-kit@master": {

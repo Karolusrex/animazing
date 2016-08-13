@@ -49,9 +49,13 @@ export class HomeView extends View {
 
     @layout.animate({
         showInitially: false,
-        animation: function () {
-            return ({...AnimationController.Animation.Slide.Down(...arguments), opacity: 0})
-        }
+        show: {
+            animation: function () {
+                return ({...AnimationController.Animation.Slide.Down(...arguments), opacity: 0})
+            }
+        },
+        /* Hide animation gives the app a slow feel */
+        hide: {transition: {duration: 0}}
     })
     @layout.size(~100, 40)
     @layout.translate(0, 100, 0)
@@ -62,23 +66,34 @@ export class HomeView extends View {
     @layout.dock('top', ~27)
     get instruction() {
         this.instructions = {
-            initial: "Tap the highlighted grids to configure your complete sequence.",
+            initial: "Tap grid in the middle and see what fits inbetween.",
+            multiple: "Tap one of the highlighted grids to continue.",
             selected: "Rotate the shape as you want by tapping the arrows.",
             choose: "Choose the shape to appear in the sequence.",
             encouragement: "Well done! Continue like this until you are satisfied with your sequence.",
             swipe: "Now swipe to the right to see the result of what you made.",
             collision: "Oh snapidoodle! There was a collision. You better reconfigure...",
+            firstLevelComplete: "Great. Was that too easy? The levels will surely get harder!",
             levelComplete: "You made it. Let's see if you can complete the other levels...",
-            newLevel: "Go ahead, continue in the same manner and it well get increasingly more difficult.",
+            newLevel: "The levels always have one unique solution.",
             lastLevel: "This was the last level of the game. Wanna play more? Send me suggestions on new levels!",
             attemptSameSubsequent: "You are unable to pick two subsequent shapes of the same kind. Pick another one or revisit previous choices."
         };
-        return new Text({content: this.instructions.initial, properties: {textAlign: 'center', color: 'white'}});
+        return new Text({
+            content: this.instructions.initial,
+            properties: {fontFamily: 'avenir-light', textAlign: 'center', color: 'white'}
+        });
     }
 
     @layout.animate({
-        animation: function () {
-            return ({...AnimationController.Animation.Slide.Up(...arguments), opacity: 0})
+        hide: {
+            animation: function () {
+                return ({...AnimationController.Animation.Slide.Up(...arguments), opacity: 0})
+            }
+        }, show: {
+            animation: function () {
+                return ({...AnimationController.Animation.Slide.Down(...arguments), opacity: 0})
+            }
         }
     })
     @layout.dock("top", 0.4, 10)
@@ -94,6 +109,7 @@ export class HomeView extends View {
     constructor(options = {}) {
         super(options);
         this.layout.options.alwaysLayout = true;
+        let firstNewLevel = true;
         this._currentLevelIndex = 0;
 
         this.on('nextLevel', () => {
@@ -102,7 +118,8 @@ export class HomeView extends View {
             this.replaceRenderable('shapeSlider', this._createShapeSliderFromLevel(this._currentLevelIndex));
             this.showRenderable('shapeSlider');
             this._cancelSlide();
-            this.instruction.setContent(this.instructions.newLevel);
+            this.instruction.setContent(firstNewLevel ? this.instructions.newLevel : (newLevel.inbetweenSpaces === 1 ? this.instructions.initial : this.instructions.multiple));
+            firstNewLevel = false;
             this.hideRenderable('nextLevelButton');
             this._setBoxShadow(this._standardBoxShadow);
         });
@@ -122,8 +139,16 @@ export class HomeView extends View {
             }), bar);
         }
 
-        let firstSelection = true;
+        let firstPartialSelection = true;
         /* Use the 'renderables' to listen for the animationcontroller since the shapeslider itself changes when the level changes */
+        this.renderables.shapeSlider.on('shapeChanged', (index, spec, completeSequence) => {
+            if (completeSequence) {
+                this._onSelectionComplete(completeSequence);
+            } else {
+                firstPartialSelection = false;
+                this.instruction.setContent(firstPartialSelection ? this.instructions.encouragement : this.instructions.initial);
+            }
+        });
         this.renderables.shapeSlider.on('modifyShape', (index, forbiddenShapes) => {
 
             /* If we are already running a sequence, then cancel this and go into choosing mode again */
@@ -135,8 +160,6 @@ export class HomeView extends View {
             /* We store the variable this._modifyingShapeIndex to take into account that the user can cancel */
             if (!this._modifyingShapeIndex) {
                 this.shapeSelector.once('shapeSelected', (spec) => {
-                    this.instruction.setContent(firstSelection ? this.instructions.encouragement : this.instructions.initial);
-                    firstSelection = false;
                     this.shapeSlider.setSelection(this._modifyingShapeIndex, spec);
                     this._modifyingShapeIndex = undefined;
                 });
@@ -156,22 +179,6 @@ export class HomeView extends View {
             this.instruction.setContent(this.instructions.selected);
         });
 
-        this.renderables.shapeSlider.on('selectionComplete', (sequence) => {
-            /* Go into slide mode */
-            this._sliding = true;
-            this.instruction.setContent(this.instructions.swipe);
-            this._selectedShapeSequence = sequence;
-            let sequenceLength = sequence.length;
-            this.renderables.snappable = new Snappable({
-                projection: 'x',
-                /*surfaceOptions: {properties: {backgroundColor: 'red'}},*/
-                snapPoints: [...Array(sequenceLength).keys()].map((index) => [this.maxRange / (sequenceLength - 1) * (index), 0]),
-                xRange: [0, this.maxRange],
-                /*yRange: [-this.maxRange - 8, this.maxRange + 8],*/
-                scale: 1, restrictFunction: this._restrictController,
-                snapOnDrop: false
-            });
-        });
 
         this._initDraggable();
         this._initAnimationBehaviour();
@@ -181,6 +188,23 @@ export class HomeView extends View {
         for (let renderableName of this._getBarNames()) {
             this[renderableName].setProperties({boxShadow});
         }
+    }
+
+    _onSelectionComplete(sequence) {
+        /* Go into slide mode */
+        this._sliding = true;
+        this.instruction.setContent(this.instructions.swipe);
+        this._selectedShapeSequence = sequence;
+        let sequenceLength = sequence.length;
+        this.renderables.snappable = new Snappable({
+            projection: 'x',
+            /*surfaceOptions: {properties: {backgroundColor: 'red'}},*/
+            snapPoints: [...Array(sequenceLength).keys()].map((index) => [this.maxRange / (sequenceLength - 1) * (index), 0]),
+            xRange: [0, this.maxRange],
+            /*yRange: [-this.maxRange - 8, this.maxRange + 8],*/
+            scale: 1, restrictFunction: this._restrictController,
+            snapOnDrop: false
+        });
     }
 
     _initDraggable() {
@@ -229,7 +253,7 @@ export class HomeView extends View {
 
                 this._drawGuides(context);
                 let draggableSpec = {
-                    size: [context.size[0], context.size[1]],
+                    size: [context.size[0] + this.maxRange * 2, context.size[1]],
                     align: [0.5, 0.5],
                     origin: [0.5, 0.5],
                     translate: [0, 0, 0]
@@ -241,20 +265,25 @@ export class HomeView extends View {
                 /* If there is a collision, go into dead mode */
                 if (!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead, levels[this._currentLevelIndex].clockwiseRotate, [0, context.size[1] * 0.65 + 10 + this.getResolvedSize('instruction')[1], 0], [animatingShapeSize, animatingShapeSize])) {
                     if (!this._isDead) {
+                        if (window.navigator && navigator.vibrate) {
+                            navigator.vibrate(100);
+                        }
                         this.showRenderable('isDeadIndication');
                         this.hideRenderable('isDeadIndication');
                     }
+
                     this._isDead = true;
                     this.instruction.setContent(this.instructions.collision);
                 } else if (!this._isDead && inputPosition === this.maxRange && !this._levelComplete) {
                     this._levelComplete = true;
                     this._setBoxShadow(this._glowingBoxShadow);
                     let isLastLevel = this._currentLevelIndex === levels.length - 1;
+                    let isFirstLevel = this._currentLevelIndex === 0;
                     this.hideRenderable('shapeSlider');
                     if (!isLastLevel) {
                         Timer.setTimeout(this.showRenderable.bind(this, 'nextLevelButton'), 500);
                     }
-                    this.instruction.setContent(isLastLevel ? this.instructions.lastLevel : this.instructions.levelComplete);
+                    this.instruction.setContent(isFirstLevel ? this.instructions.firstLevelComplete : (isLastLevel ? this.instructions.lastLevel : this.instructions.levelComplete));
                 }
             }
         });

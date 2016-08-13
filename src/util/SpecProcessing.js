@@ -14,7 +14,7 @@ export let specAttributes = {
     opacity: {dimensions: 1, defaultValue: 1}
 };
 
-export function doBoxesCollide(box1, box2) {
+export function doBoxesCollide(box1, box2, debugContext) {
     let boxes = [box1, box2];
     let axes = [];
     let boxCorners = [];
@@ -262,8 +262,7 @@ export function associateShapesInInterval(input, shapes, context, maxRange, disp
         if (displayOpaque) {
             spec.opacity = 0.5;
         }
-        let specWithTranslation = Object.assign(spec,{translate: extraTranslate.map((translation, index)=> translation+spec.translate[index])});
-        resultingSpec[bar] = specWithTranslation;
+        let specWithTranslation = {...spec,translate: extraTranslate.map((translation, index)=> translation+spec.translate[index])};
         context.set(bar, specWithTranslation);
         i++;
     });

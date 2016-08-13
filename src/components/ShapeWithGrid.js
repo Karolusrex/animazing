@@ -51,7 +51,10 @@ export class ShapeWithGrid extends View {
     @layout.size(undefined, 30)
     @layout.translate(0, 0, 30)
     @layout.place('top')
-    placeholder = new Surface({content: '?', properties: {fontSize: '80px', textAlign: 'center', color: 'rgba(255,255,255,0.6)'}});
+    placeholder = new Surface({
+        content: '?',
+        properties: {fontSize: '80px', textAlign: 'center', color: 'rgba(255,255,255,0.6)'}
+    });
 
     constructor(options) {
         super(combineOptions(
@@ -60,7 +63,7 @@ export class ShapeWithGrid extends View {
         this._enabled = this.options.enabled;
         this.setAutoSpin(options.autoSpin);
         this._rotationTransitionable = new Transitionable(0);
-        this._spinSpeed = options.spinSpeed || 0.0225;
+        this._spinSpeed = options.spinSpeed || 0.00185;
         this._currentRotation = options.startRotation || 0;
         this.layout.on('layoutstart', ({size, oldSize}) => {
             if (size[0] !== oldSize[0] || size[1] !== oldSize[1]) {
@@ -76,9 +79,14 @@ export class ShapeWithGrid extends View {
 
 
         this.layouts.push((context) => {
+
             if (this._autoSpin) {
-                this.shape.decorations.rotate = [0, 0, this._currentRotation += this._spinSpeed];
-                this._rotationTransitionable.set(this._currentRotation);
+                let newDiff = getTime();
+                if (this._lastDiff) {
+                    this.shape.decorations.rotate = [0, 0, this._currentRotation += this._spinSpeed * (newDiff - this._lastDiff)];
+                    this._rotationTransitionable.set(this._currentRotation);
+                }
+                this._lastDiff = newDiff;
             } else {
                 let currentRotation = this._rotationTransitionable.get();
                 this.shape.decorations.rotate = [0, 0, currentRotation];
@@ -183,4 +191,7 @@ export class ShapeWithGrid extends View {
         this.layout.reflowLayout();
     }
 
+}
+function getTime() {
+    return (window.performance && window.performance.now) ? window.performance.now() : Date.now();
 }

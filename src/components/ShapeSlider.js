@@ -27,12 +27,14 @@ export class ShapeSlider extends View {
     setSelection(index, shapeSpec) {
         this[`circle${index}`].showShape(shapeSpec);
         this._selectedShape = undefined;
-        this._eventOutput.emit('shapeChanged', index, shapeSpec);
+
         let chosenSpecSequence = this.getChosenSpecSequence();
         this._requestSelection = false;
-        if (chosenSpecSequence.every((spec) => !!spec)) {
-            this._eventOutput.emit('selectionComplete', chosenSpecSequence);
-        }
+        let completeSequence;
+        if(chosenSpecSequence.every((spec) => !!spec)){
+            completeSequence = chosenSpecSequence;
+        };
+        this._eventOutput.emit('shapeChanged', index, shapeSpec, completeSequence);
     }
 
     getChosenSpecSequence() {
@@ -43,7 +45,7 @@ export class ShapeSlider extends View {
     offerSelection(shapeSpec) {
         this._offerSelection = true;
         this._requestSelection = false;
-        this.once('shapeSelected', (index) => {
+        this.once('shapeChosen', (index) => {
             this.setSelection(index, shapeSpec);
             this._offerSelection = false;
         });
@@ -62,7 +64,7 @@ export class ShapeSlider extends View {
             let circleSize = [circleWidth, circleWidth];
             circle.on('click', () => {
                 if (circle.shapeWithGrid.isEnabled()) {
-                    this._eventOutput.emit('shapeSelected', index);
+                    this._eventOutput.emit('shapeChosen', index);
                 }
             });
             if (index !== lastShapeIndex) {
@@ -75,7 +77,7 @@ export class ShapeSlider extends View {
                     layout.place('topright'))
             }
         }
-        this.on('shapeSelected', (index) => {
+        this.on('shapeChosen', (index) => {
             let previouslySelectedShape = this._selectedShape;
             if (previouslySelectedShape) {
                 previouslySelectedShape.makeEmpty();

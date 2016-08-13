@@ -16,7 +16,9 @@ import {HomeController}             from './controllers/HomeController.js';
 export class App extends ArvaApp {
 
     constructor(router, context) {
-
+        if(window.StatusBar){
+            window.StatusBar.hide();
+        }
         /* Allow user taps to emit immediately as click events,
          * instead of the default 300ms delay. */
         FastClick(document.body);
@@ -24,6 +26,7 @@ export class App extends ArvaApp {
         /* Make one of the controllers default, so the router
          * navigates to it if no route is given. */
         router.setDefault(HomeController, 'Index');
+
 
         /* Initialize the app with the Router and Famous Context */
         super(router, context);
