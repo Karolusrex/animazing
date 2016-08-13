@@ -182,7 +182,12 @@ export class ShapeSelector extends View {
         if (!shouldCollapse) {
             for (let i = 0; i < this.options.shapeSpecs.length; i++) {
                 let shapeWithGrid = this[`shape${i}`];
-                shapeWithGrid.setAutoSpin(shapeWithGrid.isEnabled());
+                if(shapeWithGrid.isEnabled()){
+                    shapeWithGrid.setAutoSpin(true);
+                } else {
+                    shapeWithGrid.setAutoSpin(false);
+                    shapeWithGrid.setRotation(0, true);
+                }
             }
         }
         this._isCollapsed = shouldCollapse;

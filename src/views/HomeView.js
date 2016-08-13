@@ -62,14 +62,14 @@ export class HomeView extends View {
             swipe: "Now swipe to the right to see the result of what you made.",
             collision: "Oh snapidoodle! There was a collision. You better reconfigure...",
             levelComplete: "You made it. Let's see if you can complete the other levels...",
-            newLevel: "Go ahead, continue in the same manner and it well get increasingly difficult.",
+            newLevel: "Go ahead, continue in the same manner and it well get increasingly more difficult.",
             lastLevel: "This was the last level of the game. Wanna play more? Send me suggestions on new levels!",
             attemptSameSubsequent: "You are unable to pick two subsequent shapes of the same kind. Pick another one or revisit previous choices."
         };
         return new Text({content: this.instructions.initial, properties: {textAlign: 'center', color: 'white'}});
     }
 
-    @layout.animate({animation: function() {return ({...AnimationController.Animation.Slide.Down(...arguments), opacity: 0})}})
+    @layout.animate({animation: function() {return ({...AnimationController.Animation.Slide.Up(...arguments), opacity: 0})}})
     @layout.dock("top", 150)
     shapeSlider = this._createShapeSliderFromLevel(0);
 
@@ -88,7 +88,6 @@ export class HomeView extends View {
         this.on('nextLevel', () => {
             let newLevel = levels[++this._currentLevelIndex];
             this.shapeSelector.setSelection(newLevel.availableShapes);
-            this.hideRenderable('shapeSlider');
             this.replaceRenderable('shapeSlider', this._createShapeSliderFromLevel(this._currentLevelIndex));
             this.showRenderable('shapeSlider');
             this._cancelSlide();
@@ -160,7 +159,7 @@ export class HomeView extends View {
                 xRange: [0, this.maxRange],
                 /*yRange: [-this.maxRange - 8, this.maxRange + 8],*/
                 scale: 1, restrictFunction: this._restrictController,
-                snapOnDrop: true
+                snapOnDrop: false
             });
         });
 
@@ -240,6 +239,7 @@ export class HomeView extends View {
                     if (inputPosition === this.maxRange) {
                         this._setBoxShadow(this._glowingBoxShadow);
                         let isLastLevel = this._currentLevelIndex === levels.length - 1;
+                        this.hideRenderable('shapeSlider');
                         if(!isLastLevel){
                             this.showRenderable('nextLevelButton');
                         }
