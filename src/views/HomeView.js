@@ -1,4 +1,5 @@
 import Surface              from 'famous/core/Surface.js';
+import Timer                from 'famous/utilities/Timer.js';
 import AnimationController  from 'famous-flex/AnimationController.js';
 
 import {View}               from 'arva-js/core/View.js';
@@ -240,7 +241,7 @@ export class HomeView extends View {
                         let isLastLevel = this._currentLevelIndex === levels.length - 1;
                         this.hideRenderable('shapeSlider');
                         if(!isLastLevel){
-                            this.showRenderable('nextLevelButton');
+                            Timer.setTimeout(this.showRenderable.bind(this,'nextLevelButton'),500);
                         }
                         this.instruction.setContent(isLastLevel ? this.instructions.lastLevel : this.instructions.levelComplete);
 
