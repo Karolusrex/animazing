@@ -202,9 +202,14 @@ export class HomeView extends View {
             snapPoints: [...Array(sequenceLength).keys()].map((index) => [this.maxRange / (sequenceLength - 1) * (index), 0]),
             xRange: [0, this.maxRange],
             /*yRange: [-this.maxRange - 8, this.maxRange + 8],*/
-            scale: 1, restrictFunction: this._restrictController,
+            scale: 1, restrictFunction: this._restrictSlider,
             snapOnDrop: false
         });
+        this._slideEndedOnPosition = [0,0];
+        this.renderables.snappable.on('end', () => {
+            this._slideEndedOnPosition = this.renderables.snappable.getPosition();
+        });
+
     }
 
     _initDraggable() {
@@ -262,14 +267,21 @@ export class HomeView extends View {
                 context.set('snappable', draggableSpec);
 
                 let animatingShapeSize = Math.min(context.size[1] / 2, 300);
-                /* If there is a collision, go into dead mode */
-                if (!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead, levels[this._currentLevelIndex].clockwiseRotate, [0, context.size[1] * 0.65 + 10 + this.getResolvedSize('instruction')[1], 0], [animatingShapeSize, animatingShapeSize])) {
-                    if (!this._isDead) {
-                        if (window.navigator && navigator.vibrate) {
-                            navigator.vibrate(100);
+                this.shapeSlider.setSlideRatio(inputPosition / this.maxRange);
+                if(this._isDead){
+                    if(inputPosition >= this._diedAtPosition){
+                        if(!this._isAtDeadPosition){
+                            this._makeDeadAnimation();
                         }
-                        this.showRenderable('isDeadIndication');
-                        this.hideRenderable('isDeadIndication');
+                    } else {
+                        this._isAtDeadPosition = false;
+                    }
+                }
+                /* If there is a collision, go into dead mode */
+                if (!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead ? inputPosition > this._diedAtPosition : false, levels[this._currentLevelIndex].clockwiseRotate, [0, context.size[1] * 0.65 + 10 + this.getResolvedSize('instruction')[1], 0], [animatingShapeSize, animatingShapeSize])) {
+                    if (!this._isDead) {
+                        this._diedAtPosition = inputPosition;
+                        this._makeDeadAnimation();
                     }
 
                     this._isDead = true;
@@ -289,6 +301,15 @@ export class HomeView extends View {
         });
     }
 
+    _makeDeadAnimation() {
+        this._isAtDeadPosition = true;
+        if (window.navigator && navigator.vibrate) {
+            navigator.vibrate(100);
+        }
+        this.showRenderable('isDeadIndication');
+        this.hideRenderable('isDeadIndication');
+    }
+
     _cancelSlide() {
         this._levelComplete = false;
         this._sliding = false;
@@ -296,8 +317,23 @@ export class HomeView extends View {
         delete this.renderables.snappable;
     }
 
+    _restrictSlider([x,y]) {
+        return [this._restrictToInbetweenValueRoundUp(this._dontGoFurtherIfDead(x),this._slideEndedOnPosition[0]), y];
+    }
 
-    _restrictController(controllerPosition) {
+    _dontGoFurtherIfDead(position) {
+        return this._isDead ? this._restrictToInbetweenValueRoundUp(position, this._diedAtPosition) : position;
+    }
+
+    _restrictToInbetweenValueRoundUp(position, inbetweenValue) {
+        let noShapeSpace = levels[this._currentLevelIndex].inbetweenSpaces + 1;
+        let distancePerShape = this.maxRange / noShapeSpace;
+        /* Do floor +1 in order to get the exact value also to round up */
+        let furthestPoint = Math.floor(1 + inbetweenValue / (distancePerShape))*(distancePerShape);
+        return Math.min(position, furthestPoint);
+    }
+
+    /*_restrictController(controllerPosition) {
         let restrictedPosition = [...controllerPosition];
         let angle = Math.atan(controllerPosition[1] / controllerPosition[0]);
         let radius = Math.sqrt(Math.pow(controllerPosition[0], 2) + Math.pow(controllerPosition[1], 2));
@@ -306,7 +342,7 @@ export class HomeView extends View {
             restrictedPosition[1] = Math.sin(angle) * this.maxRange * Math.sign(controllerPosition[0]);
         }
         return restrictedPosition;
-    }
+    }*/
 
     _drawGuides(context) {
 

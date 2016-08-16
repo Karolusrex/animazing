@@ -43,6 +43,12 @@ export class Snappable extends View {
             this._closestSnapPoint = this._snapPoints[0];
             this._snapThreshold = options.snapThreshold || 12;
             this._draggable.setPosition(this._snapPoints[0].concat(0), {duration: 450, curve: Easing.outBack});
+            this._draggable.on('end', (dragEvent) => {
+                this._eventOutput.emit('end', dragEvent);
+            });
+            this._draggable.on('update', (dragEvent) => {
+                this._eventOutput.emit('update', dragEvent);
+            });
             if(options.snapOnDrop){
                 this._draggable.on('end', (dragEvent) => {
                     this._draggableFollowSnap = true;

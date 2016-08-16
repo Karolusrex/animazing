@@ -20,6 +20,16 @@ export class ShapeSlider extends View {
         }
     });
 
+    @layout.size(18, 18)
+    @layout.align(0, 1)
+    @layout.origin(0.5, 0.5)
+    @layout.translate(0, 0, 20)
+    slide = new Surface({
+        properties: {
+            borderRadius: '50%',
+            backgroundColor: 'rgba(255, 255, 255, 0.9)'
+        }
+    });
     /*@layout.translate(0, 0, -20)
     @layout.fullscreen
     bg = new Surface({properties: {backgroundColor: 'red'}});*/
@@ -99,19 +109,22 @@ export class ShapeSlider extends View {
             this._requestSelection = true;
 
         });
+        this._slidedRatio = 0;
         this.layout.on('layoutstart', ({size}) => {
             let maxHeight = size[1] - 30;
             let circleWidth = Math.min(Math.min(180, maxHeight), (size[0] - (Settings.shapeSpacing * (sequenceLength - 1))) / (sequenceLength));
-
+            let noCircles = options.shapeSpecs.length;
             this.path.decorations.size[0] = size[0] - circleWidth;
             let withinHeight = circleWidth < maxHeight;
             let circleHeight = circleWidth + 30;
             // let circleYOffset = withinHeight ? size[1] / 2 - circleWidth / 2 : 0;
             let circleYOffset = 0;
             this.path.decorations.translate[1] = circleYOffset + circleWidth - size[1] + 20;
+            this.slide.decorations.translate[0] = this._slidedRatio * (size[0] - circleWidth) + circleWidth/2;
+            this.slide.decorations.translate[1] = circleYOffset + circleWidth - size[1] + 20;
 
             /*this.path.decorations.translate[1] = [-10 - (withinHeight ? 0 : (size[1] / 2 - circleWidth / 2))];*/
-            for (let i = 0; i < options.shapeSpecs.length; i++) {
+            for (let i = 0; i < noCircles; i++) {
                 let {decorations} = this[`circle${i}`];
                 decorations.size = [circleWidth, circleHeight];
                 decorations.translate = [0, circleYOffset, 0];
@@ -121,6 +134,10 @@ export class ShapeSlider extends View {
                 }
             }
         });
+    }
+    setSlideRatio(ratio) {
+        this._slidedRatio = ratio;
+        this.layout.reflowLayout();
     }
 }
 

@@ -30,16 +30,6 @@ export let levels = [
         inbetweenSpaces: 3
     },
     {
-        availableShapes: [ShapeSpecs.insect, ShapeSpecs.line, ShapeSpecs.shuffledHamburger],
-        startShape: turnShape(3, ShapeSpecs.mess),
-        endShape: turnShape(2, ShapeSpecs.upArrow),
-        inbetweenSpaces: 4,
-        clockwiseRotate: [
-            /* To make it harder another option is available at first */
-            [ShapeSpecs.mess, ShapeSpecs.shuffledHamburger]
-        ]
-    },
-    {
         availableShapes: [ShapeSpecs.upPointArrow, ShapeSpecs.pi, ShapeSpecs.insect, ShapeSpecs.shuffledUpPointArrow],
         startShape: ShapeSpecs.fallenHamburger,
         endShape: ShapeSpecs.shuffledHamburger,
@@ -47,6 +37,16 @@ export let levels = [
         clockwiseRotate: [
             /* Not necessary but just nice to have */
             [ShapeSpecs.pi, ShapeSpecs.shuffledHamburger]
+        ]
+    },
+    {
+        availableShapes: [ShapeSpecs.insect, ShapeSpecs.line, ShapeSpecs.shuffledHamburger],
+        startShape: turnShape(3, ShapeSpecs.mess),
+        endShape: turnShape(2, ShapeSpecs.upArrow),
+        inbetweenSpaces: 4,
+        clockwiseRotate: [
+            /* To make it harder another option is available at first */
+            [ShapeSpecs.mess, ShapeSpecs.shuffledHamburger]
         ]
     }
 ];
