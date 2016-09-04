@@ -250,7 +250,7 @@ export function associateShapesInInterval(input, shapes, context, maxRange, disp
             clockwiseRotate = !!clockwiseRotateSpecialCases.find((specialCase) => {
                 let [startShape, endShape, rotationState, renderableName] = specialCase;
                 let shapesForCase = [startShape, endShape];
-                if (!rotationState && !renderableName) {
+                if (!rotationState && !renderableName && shapesForCase[0] !== undefined) {
                     return [0, 1].every((index) => shapesForCase[index].isSameUnrotated(shapeCombo[index]));
                 }
             });
@@ -327,14 +327,17 @@ export function normalizeRotationToOther(rotation, otherRotation, maxRotation = 
     /* rotate the shortest way */
     let rotationDiff = otherRotation - rotation;
     /* If it needs to be normalized... */
+    let normalizedOtherRotation = otherRotation = otherRotation % (maxRotation) + numberOfTurns * maxRotation;
+    let normalizedDiff = normalizedOtherRotation - rotation;
     if (biggerOrPotentiallyEqual(Math.abs(rotationDiff), (maxRotation / 2), clockwiseRotate)) {
-        otherRotation = otherRotation % (maxRotation) + numberOfTurns * maxRotation;
         /* If it needs to rotate the other way... */
-        let normalizedDiff = otherRotation - rotation;
         /* If we explicitly request a clockwise rotation, and that's what we're getting, don't rotate the other way */
-        if (!(clockwiseRotate && normalizedDiff === -maxRotation / 2) && biggerOrPotentiallyEqual(Math.abs(normalizedDiff), (maxRotation / 2), clockwiseRotate)) {
+        if (!(clockwiseRotate && normalizedDiff === maxRotation / 2) && biggerOrPotentiallyEqual(Math.abs(normalizedDiff), (maxRotation / 2), clockwiseRotate)) {
             otherRotation -= Math.sign(normalizedDiff) * maxRotation;
         }
+        /* On the other hand, if we have counter clock wise, if we should have clockwise ...*/
+    } else if (!clockwiseRotate && rotationDiff === maxRotation / 2){
+        otherRotation -= Math.sign(normalizedDiff) * maxRotation;
     }
     return otherRotation;
 }
