@@ -46,7 +46,7 @@ System.config({
     "famous-flex": "github:bizboard/famous-flex@master",
     "fastclick": "npm:fastclick@1.0.6",
     "insert-rule": "npm:insert-rule@2.1.0",
-    "lodash": "npm:lodash@3.10.1",
+    "lodash": "npm:lodash@4.15.0",
     "text": "github:systemjs/plugin-text@0.0.8",
     "traceur": "github:jmcriffey/bower-traceur@0.0.90",
     "traceur-runtime": "github:jmcriffey/bower-traceur-runtime@0.0.90",
@@ -188,9 +188,6 @@ System.config({
     },
     "npm:isarray@1.0.0": {
       "systemjs-json": "github:systemjs/plugin-json@0.1.2"
-    },
-    "npm:lodash@3.10.1": {
-      "process": "github:jspm/nodelibs-process@0.1.2"
     },
     "npm:lodash@4.13.1": {
       "buffer": "github:jspm/nodelibs-buffer@0.1.0",

@@ -6,12 +6,23 @@ import {turnShape}      from '../util/SpecProcessing.js';
 
 export let levels = [
     {
+        availableShapes: [ShapeSpecs.mess, ShapeSpecs.fallenHamburger, ShapeSpecs.upArrow, ShapeSpecs.insect, ShapeSpecs.capitalN,  ShapeSpecs.shuffledUpPointArrow],
+        startShape: ShapeSpecs.hat,
+        endShape: turnShape(2, ShapeSpecs.hamburger),
+        inbetweenSpaces: 1,
+        clockwiseRotate: [
+            /* Not necessary but just nice to have */
+            [ShapeSpecs.pi, turnShape(2, ShapeSpecs.hamburger)],
+            [ShapeSpecs.fallenHamburger, turnShape(3, ShapeSpecs.pi)]
+        ]
+    },
+    {
         availableShapes: [ShapeSpecs.sauron, ShapeSpecs.insect],
         startShape: turnShape(2, ShapeSpecs.fallenHamburger),
         endShape: ShapeSpecs.hamburger,
         inbetweenSpaces: 1,
         clockwiseRotate: [
-            [ShapeSpecs.sauron, ShapeSpecs.hamburger]
+            [ShapeSpecs.fallenHamburger, ShapeSpecs.sauron]
         ]
     },
     {
@@ -28,16 +39,6 @@ export let levels = [
         startShape: ShapeSpecs.hamburger,
         endShape: ShapeSpecs.fallenHamburger,
         inbetweenSpaces: 3
-    },
-    {
-        availableShapes: [ShapeSpecs.upPointArrow, ShapeSpecs.pi, ShapeSpecs.insect, ShapeSpecs.shuffledUpPointArrow],
-        startShape: ShapeSpecs.fallenHamburger,
-        endShape: ShapeSpecs.shuffledHamburger,
-        inbetweenSpaces: 4,
-        clockwiseRotate: [
-            /* Not necessary but just nice to have */
-            [ShapeSpecs.pi, ShapeSpecs.shuffledHamburger]
-        ]
     },
     {
         availableShapes: [ShapeSpecs.insect, ShapeSpecs.line, ShapeSpecs.shuffledHamburger],

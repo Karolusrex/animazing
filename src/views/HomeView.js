@@ -17,8 +17,11 @@ import {ShapeSelector}          from '../components/ShapeSelector.js';
 import {ShapeGrid}              from '../components/ShapeGrid.js';
 import {ShapeSlider}            from '../components/ShapeSlider.js';
 import {Text}                   from 'arva-kit/text/Text.js';
-import {levels}                 from '../logic/Levels.js';
+import {LevelStorage}           from '../logic/LevelStorage.js';
+/*import {levels}                 from '../logic/Levels.js';*/
 import {OutlineTextButton}      from 'arva-kit/buttons/OutlineTextButton.js'
+
+let levels = LevelStorage.getLevels();
 
 insertRule('.bar::after', {
     webkitBoxShadow: '1px 30px 47px 0px rgba(178,97,137,1)',
@@ -32,6 +35,8 @@ insertRule('.bar:hover::after', {
 
 @layout.margins([5, 10, 10, 10])
 export class HomeView extends View {
+
+
 
     @layout.translate(0, 0, -10)
     @layout.fullscreen
@@ -318,7 +323,7 @@ export class HomeView extends View {
     }
 
     _restrictSlider([x,y]) {
-        return [this._restrictToInbetweenValueRoundUp(this._dontGoFurtherIfDead(x),this._slideEndedOnPosition[0]), y];
+        return [this._dontGoFurtherIfDead(x), y];
     }
 
     _dontGoFurtherIfDead(position) {
@@ -333,16 +338,6 @@ export class HomeView extends View {
         return Math.min(position, furthestPoint);
     }
 
-    /*_restrictController(controllerPosition) {
-        let restrictedPosition = [...controllerPosition];
-        let angle = Math.atan(controllerPosition[1] / controllerPosition[0]);
-        let radius = Math.sqrt(Math.pow(controllerPosition[0], 2) + Math.pow(controllerPosition[1], 2));
-        if (radius > this.maxRange) {
-            restrictedPosition[0] = Math.cos(angle) * this.maxRange * Math.sign(controllerPosition[0]);
-            restrictedPosition[1] = Math.sin(angle) * this.maxRange * Math.sign(controllerPosition[0]);
-        }
-        return restrictedPosition;
-    }*/
 
     _drawGuides(context) {
 
