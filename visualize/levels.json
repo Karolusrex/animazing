@@ -1,0 +1,1407 @@
+{
+  "nodes": [
+    {
+      "id": "hamburger_0",
+      "group": 1
+    },
+    {
+      "id": "hamburger_1",
+      "group": 1
+    },
+    {
+      "id": "hamburger_2",
+      "group": 1
+    },
+    {
+      "id": "hamburger_3",
+      "group": 1
+    },
+    {
+      "id": "shuffledHamburger_0",
+      "group": 2
+    },
+    {
+      "id": "shuffledHamburger_1",
+      "group": 2
+    },
+    {
+      "id": "shuffledHamburger_2",
+      "group": 2
+    },
+    {
+      "id": "shuffledHamburger_3",
+      "group": 2
+    },
+    {
+      "id": "pi_0",
+      "group": 3
+    },
+    {
+      "id": "pi_1",
+      "group": 3
+    },
+    {
+      "id": "pi_2",
+      "group": 3
+    },
+    {
+      "id": "pi_3",
+      "group": 3
+    },
+    {
+      "id": "fallenHamburger_0",
+      "group": 4
+    },
+    {
+      "id": "fallenHamburger_1",
+      "group": 4
+    },
+    {
+      "id": "fallenHamburger_2",
+      "group": 4
+    },
+    {
+      "id": "fallenHamburger_3",
+      "group": 4
+    },
+    {
+      "id": "upArrow_0",
+      "group": 5
+    },
+    {
+      "id": "upArrow_1",
+      "group": 5
+    },
+    {
+      "id": "upArrow_2",
+      "group": 5
+    },
+    {
+      "id": "upArrow_3",
+      "group": 5
+    },
+    {
+      "id": "insect_0",
+      "group": 6
+    },
+    {
+      "id": "insect_1",
+      "group": 6
+    },
+    {
+      "id": "insect_2",
+      "group": 6
+    },
+    {
+      "id": "insect_3",
+      "group": 6
+    },
+    {
+      "id": "line_0",
+      "group": 7
+    },
+    {
+      "id": "line_1",
+      "group": 7
+    },
+    {
+      "id": "line_2",
+      "group": 7
+    },
+    {
+      "id": "line_3",
+      "group": 7
+    },
+    {
+      "id": "sauron_0",
+      "group": 8
+    },
+    {
+      "id": "sauron_1",
+      "group": 8
+    },
+    {
+      "id": "sauron_2",
+      "group": 8
+    },
+    {
+      "id": "sauron_3",
+      "group": 8
+    },
+    {
+      "id": "mess_0",
+      "group": 9
+    },
+    {
+      "id": "mess_1",
+      "group": 9
+    },
+    {
+      "id": "mess_2",
+      "group": 9
+    },
+    {
+      "id": "mess_3",
+      "group": 9
+    },
+    {
+      "id": "upPointArrow_0",
+      "group": 10
+    },
+    {
+      "id": "upPointArrow_1",
+      "group": 10
+    },
+    {
+      "id": "upPointArrow_2",
+      "group": 10
+    },
+    {
+      "id": "upPointArrow_3",
+      "group": 10
+    },
+    {
+      "id": "shuffledUpPointArrow_0",
+      "group": 11
+    },
+    {
+      "id": "shuffledUpPointArrow_1",
+      "group": 11
+    },
+    {
+      "id": "shuffledUpPointArrow_2",
+      "group": 11
+    },
+    {
+      "id": "shuffledUpPointArrow_3",
+      "group": 11
+    }
+  ],
+  "links": [
+    {
+      "source": "hamburger_0",
+      "target": "shuffledHamburger_2",
+      "value": 2
+    },
+    {
+      "source": "hamburger_1",
+      "target": "shuffledHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "hamburger_2",
+      "target": "shuffledHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "hamburger_3",
+      "target": "shuffledHamburger_0",
+      "value": 1
+    },
+    {
+      "source": "hamburger_0",
+      "target": "pi_3",
+      "value": 2
+    },
+    {
+      "source": "hamburger_1",
+      "target": "pi_0",
+      "value": 2
+    },
+    {
+      "source": "hamburger_2",
+      "target": "pi_1",
+      "value": 2
+    },
+    {
+      "source": "hamburger_3",
+      "target": "pi_2",
+      "value": 2
+    },
+    {
+      "source": "hamburger_0",
+      "target": "fallenHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "hamburger_1",
+      "target": "fallenHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "hamburger_2",
+      "target": "fallenHamburger_0",
+      "value": 1
+    },
+    {
+      "source": "hamburger_3",
+      "target": "fallenHamburger_1",
+      "value": 1
+    },
+    {
+      "source": "hamburger_0",
+      "target": "insect_0",
+      "value": 2
+    },
+    {
+      "source": "hamburger_2",
+      "target": "insect_2",
+      "value": 2
+    },
+    {
+      "source": "hamburger_0",
+      "target": "line_2",
+      "value": 2
+    },
+    {
+      "source": "hamburger_1",
+      "target": "line_3",
+      "value": 2
+    },
+    {
+      "source": "hamburger_2",
+      "target": "line_0",
+      "value": 2
+    },
+    {
+      "source": "hamburger_3",
+      "target": "line_1",
+      "value": 2
+    },
+    {
+      "source": "hamburger_0",
+      "target": "sauron_2",
+      "value": 2
+    },
+    {
+      "source": "hamburger_1",
+      "target": "sauron_0",
+      "value": 2
+    },
+    {
+      "source": "hamburger_2",
+      "target": "sauron_0",
+      "value": 2
+    },
+    {
+      "source": "hamburger_3",
+      "target": "sauron_1",
+      "value": 2
+    },
+    {
+      "source": "hamburger_0",
+      "target": "mess_0",
+      "value": 2
+    },
+    {
+      "source": "hamburger_1",
+      "target": "mess_0",
+      "value": 2
+    },
+    {
+      "source": "hamburger_2",
+      "target": "mess_1",
+      "value": 2
+    },
+    {
+      "source": "hamburger_3",
+      "target": "mess_2",
+      "value": 2
+    },
+    {
+      "source": "hamburger_0",
+      "target": "upPointArrow_3",
+      "value": 2
+    },
+    {
+      "source": "hamburger_3",
+      "target": "upPointArrow_2",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_0",
+      "target": "hamburger_2",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_1",
+      "target": "hamburger_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_2",
+      "target": "hamburger_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_3",
+      "target": "hamburger_0",
+      "value": 1
+    },
+    {
+      "source": "shuffledHamburger_0",
+      "target": "pi_1",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_1",
+      "target": "pi_2",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_2",
+      "target": "pi_3",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_3",
+      "target": "pi_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_0",
+      "target": "fallenHamburger_0",
+      "value": 1
+    },
+    {
+      "source": "shuffledHamburger_1",
+      "target": "fallenHamburger_1",
+      "value": 1
+    },
+    {
+      "source": "shuffledHamburger_2",
+      "target": "fallenHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_3",
+      "target": "fallenHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_0",
+      "target": "insect_2",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_2",
+      "target": "insect_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_0",
+      "target": "line_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_2",
+      "target": "line_2",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_3",
+      "target": "line_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_0",
+      "target": "sauron_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_1",
+      "target": "sauron_2",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_2",
+      "target": "sauron_2",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_3",
+      "target": "sauron_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_0",
+      "target": "mess_1",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_1",
+      "target": "mess_2",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_2",
+      "target": "mess_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_3",
+      "target": "mess_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_2",
+      "target": "upPointArrow_3",
+      "value": 2
+    },
+    {
+      "source": "shuffledHamburger_3",
+      "target": "upPointArrow_0",
+      "value": 2
+    },
+    {
+      "source": "pi_1",
+      "target": "hamburger_2",
+      "value": 1
+    },
+    {
+      "source": "pi_2",
+      "target": "hamburger_3",
+      "value": 1
+    },
+    {
+      "source": "pi_3",
+      "target": "hamburger_0",
+      "value": 1
+    },
+    {
+      "source": "pi_0",
+      "target": "shuffledHamburger_3",
+      "value": 1
+    },
+    {
+      "source": "pi_1",
+      "target": "shuffledHamburger_0",
+      "value": 1
+    },
+    {
+      "source": "pi_3",
+      "target": "shuffledHamburger_2",
+      "value": 1
+    },
+    {
+      "source": "pi_0",
+      "target": "fallenHamburger_0",
+      "value": 1
+    },
+    {
+      "source": "pi_1",
+      "target": "fallenHamburger_1",
+      "value": 1
+    },
+    {
+      "source": "pi_2",
+      "target": "fallenHamburger_2",
+      "value": 1
+    },
+    {
+      "source": "pi_3",
+      "target": "fallenHamburger_3",
+      "value": 1
+    },
+    {
+      "source": "pi_0",
+      "target": "line_0",
+      "value": 2
+    },
+    {
+      "source": "pi_2",
+      "target": "line_2",
+      "value": 2
+    },
+    {
+      "source": "pi_3",
+      "target": "line_3",
+      "value": 2
+    },
+    {
+      "source": "pi_0",
+      "target": "sauron_0",
+      "value": 2
+    },
+    {
+      "source": "pi_2",
+      "target": "sauron_2",
+      "value": 2
+    },
+    {
+      "source": "pi_3",
+      "target": "sauron_3",
+      "value": 2
+    },
+    {
+      "source": "pi_0",
+      "target": "shuffledUpPointArrow_1",
+      "value": 2
+    },
+    {
+      "source": "pi_2",
+      "target": "shuffledUpPointArrow_3",
+      "value": 2
+    },
+    {
+      "source": "pi_3",
+      "target": "shuffledUpPointArrow_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_0",
+      "target": "hamburger_0",
+      "value": 1
+    },
+    {
+      "source": "fallenHamburger_1",
+      "target": "hamburger_2",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_2",
+      "target": "hamburger_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_3",
+      "target": "hamburger_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_0",
+      "target": "shuffledHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_1",
+      "target": "shuffledHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_2",
+      "target": "shuffledHamburger_0",
+      "value": 1
+    },
+    {
+      "source": "fallenHamburger_3",
+      "target": "shuffledHamburger_2",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_0",
+      "target": "pi_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_1",
+      "target": "pi_1",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_2",
+      "target": "pi_2",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_3",
+      "target": "pi_3",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_1",
+      "target": "insect_2",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_3",
+      "target": "insect_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_0",
+      "target": "line_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_1",
+      "target": "line_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_2",
+      "target": "line_1",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_3",
+      "target": "line_2",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_0",
+      "target": "sauron_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_1",
+      "target": "sauron_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_2",
+      "target": "sauron_1",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_3",
+      "target": "sauron_2",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_0",
+      "target": "mess_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_1",
+      "target": "mess_1",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_2",
+      "target": "mess_2",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_3",
+      "target": "mess_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_0",
+      "target": "upPointArrow_0",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_2",
+      "target": "upPointArrow_2",
+      "value": 2
+    },
+    {
+      "source": "fallenHamburger_3",
+      "target": "upPointArrow_3",
+      "value": 2
+    },
+    {
+      "source": "upArrow_0",
+      "target": "insect_0",
+      "value": 2
+    },
+    {
+      "source": "upArrow_1",
+      "target": "insect_1",
+      "value": 2
+    },
+    {
+      "source": "upArrow_2",
+      "target": "insect_2",
+      "value": 2
+    },
+    {
+      "source": "upArrow_3",
+      "target": "insect_3",
+      "value": 2
+    },
+    {
+      "source": "upArrow_0",
+      "target": "mess_3",
+      "value": 2
+    },
+    {
+      "source": "upArrow_1",
+      "target": "mess_0",
+      "value": 2
+    },
+    {
+      "source": "upArrow_2",
+      "target": "mess_1",
+      "value": 2
+    },
+    {
+      "source": "upArrow_3",
+      "target": "mess_2",
+      "value": 2
+    },
+    {
+      "source": "upArrow_0",
+      "target": "upPointArrow_2",
+      "value": 2
+    },
+    {
+      "source": "upArrow_1",
+      "target": "upPointArrow_3",
+      "value": 2
+    },
+    {
+      "source": "upArrow_2",
+      "target": "upPointArrow_0",
+      "value": 2
+    },
+    {
+      "source": "upArrow_3",
+      "target": "upPointArrow_1",
+      "value": 2
+    },
+    {
+      "source": "insect_0",
+      "target": "upArrow_0",
+      "value": 2
+    },
+    {
+      "source": "insect_1",
+      "target": "upArrow_1",
+      "value": 2
+    },
+    {
+      "source": "insect_2",
+      "target": "upArrow_2",
+      "value": 2
+    },
+    {
+      "source": "insect_3",
+      "target": "upArrow_3",
+      "value": 2
+    },
+    {
+      "source": "insect_0",
+      "target": "line_2",
+      "value": 2
+    },
+    {
+      "source": "insect_1",
+      "target": "line_3",
+      "value": 2
+    },
+    {
+      "source": "insect_2",
+      "target": "line_0",
+      "value": 2
+    },
+    {
+      "source": "insect_3",
+      "target": "line_1",
+      "value": 2
+    },
+    {
+      "source": "insect_0",
+      "target": "sauron_2",
+      "value": 2
+    },
+    {
+      "source": "insect_2",
+      "target": "sauron_0",
+      "value": 2
+    },
+    {
+      "source": "insect_0",
+      "target": "mess_3",
+      "value": 2
+    },
+    {
+      "source": "insect_1",
+      "target": "mess_0",
+      "value": 2
+    },
+    {
+      "source": "insect_2",
+      "target": "mess_1",
+      "value": 2
+    },
+    {
+      "source": "insect_3",
+      "target": "mess_2",
+      "value": 2
+    },
+    {
+      "source": "insect_0",
+      "target": "upPointArrow_3",
+      "value": 2
+    },
+    {
+      "source": "insect_1",
+      "target": "upPointArrow_3",
+      "value": 2
+    },
+    {
+      "source": "insect_2",
+      "target": "upPointArrow_1",
+      "value": 2
+    },
+    {
+      "source": "insect_3",
+      "target": "upPointArrow_2",
+      "value": 2
+    },
+    {
+      "source": "insect_1",
+      "target": "shuffledUpPointArrow_3",
+      "value": 2
+    },
+    {
+      "source": "insect_3",
+      "target": "shuffledUpPointArrow_1",
+      "value": 2
+    },
+    {
+      "source": "line_0",
+      "target": "hamburger_1",
+      "value": 2
+    },
+    {
+      "source": "line_1",
+      "target": "hamburger_2",
+      "value": 2
+    },
+    {
+      "source": "line_2",
+      "target": "hamburger_0",
+      "value": 2
+    },
+    {
+      "source": "line_3",
+      "target": "hamburger_0",
+      "value": 2
+    },
+    {
+      "source": "line_0",
+      "target": "shuffledHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "line_1",
+      "target": "shuffledHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "line_2",
+      "target": "shuffledHamburger_1",
+      "value": 2
+    },
+    {
+      "source": "line_3",
+      "target": "shuffledHamburger_2",
+      "value": 2
+    },
+    {
+      "source": "line_0",
+      "target": "pi_0",
+      "value": 2
+    },
+    {
+      "source": "line_2",
+      "target": "pi_2",
+      "value": 2
+    },
+    {
+      "source": "line_3",
+      "target": "pi_3",
+      "value": 2
+    },
+    {
+      "source": "line_0",
+      "target": "fallenHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "line_1",
+      "target": "fallenHamburger_1",
+      "value": 2
+    },
+    {
+      "source": "line_2",
+      "target": "fallenHamburger_2",
+      "value": 2
+    },
+    {
+      "source": "line_3",
+      "target": "fallenHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "line_0",
+      "target": "insect_2",
+      "value": 2
+    },
+    {
+      "source": "line_1",
+      "target": "insect_3",
+      "value": 2
+    },
+    {
+      "source": "line_2",
+      "target": "insect_0",
+      "value": 2
+    },
+    {
+      "source": "line_3",
+      "target": "insect_1",
+      "value": 2
+    },
+    {
+      "source": "line_0",
+      "target": "sauron_0",
+      "value": 2
+    },
+    {
+      "source": "line_2",
+      "target": "sauron_1",
+      "value": 2
+    },
+    {
+      "source": "line_3",
+      "target": "sauron_3",
+      "value": 2
+    },
+    {
+      "source": "line_0",
+      "target": "mess_0",
+      "value": 2
+    },
+    {
+      "source": "line_1",
+      "target": "mess_1",
+      "value": 2
+    },
+    {
+      "source": "line_2",
+      "target": "mess_2",
+      "value": 2
+    },
+    {
+      "source": "line_3",
+      "target": "mess_0",
+      "value": 2
+    },
+    {
+      "source": "line_0",
+      "target": "upPointArrow_0",
+      "value": 2
+    },
+    {
+      "source": "line_1",
+      "target": "upPointArrow_1",
+      "value": 2
+    },
+    {
+      "source": "line_2",
+      "target": "upPointArrow_2",
+      "value": 2
+    },
+    {
+      "source": "sauron_0",
+      "target": "hamburger_2",
+      "value": 2
+    },
+    {
+      "source": "sauron_1",
+      "target": "hamburger_2",
+      "value": 1
+    },
+    {
+      "source": "sauron_2",
+      "target": "hamburger_0",
+      "value": 2
+    },
+    {
+      "source": "sauron_3",
+      "target": "hamburger_0",
+      "value": 1
+    },
+    {
+      "source": "sauron_0",
+      "target": "shuffledHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "sauron_1",
+      "target": "shuffledHamburger_0",
+      "value": 1
+    },
+    {
+      "source": "sauron_2",
+      "target": "shuffledHamburger_2",
+      "value": 2
+    },
+    {
+      "source": "sauron_3",
+      "target": "shuffledHamburger_2",
+      "value": 1
+    },
+    {
+      "source": "sauron_0",
+      "target": "pi_0",
+      "value": 2
+    },
+    {
+      "source": "sauron_2",
+      "target": "pi_2",
+      "value": 2
+    },
+    {
+      "source": "sauron_3",
+      "target": "pi_3",
+      "value": 2
+    },
+    {
+      "source": "sauron_0",
+      "target": "fallenHamburger_0",
+      "value": 1
+    },
+    {
+      "source": "sauron_1",
+      "target": "fallenHamburger_1",
+      "value": 1
+    },
+    {
+      "source": "sauron_2",
+      "target": "fallenHamburger_2",
+      "value": 1
+    },
+    {
+      "source": "sauron_3",
+      "target": "fallenHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "sauron_0",
+      "target": "insect_2",
+      "value": 2
+    },
+    {
+      "source": "sauron_1",
+      "target": "insect_3",
+      "value": 2
+    },
+    {
+      "source": "sauron_2",
+      "target": "insect_0",
+      "value": 2
+    },
+    {
+      "source": "sauron_3",
+      "target": "insect_1",
+      "value": 2
+    },
+    {
+      "source": "sauron_0",
+      "target": "line_0",
+      "value": 2
+    },
+    {
+      "source": "sauron_2",
+      "target": "line_1",
+      "value": 2
+    },
+    {
+      "source": "sauron_3",
+      "target": "line_3",
+      "value": 2
+    },
+    {
+      "source": "sauron_2",
+      "target": "upPointArrow_3",
+      "value": 2
+    },
+    {
+      "source": "sauron_3",
+      "target": "upPointArrow_0",
+      "value": 2
+    },
+    {
+      "source": "mess_0",
+      "target": "hamburger_0",
+      "value": 1
+    },
+    {
+      "source": "mess_1",
+      "target": "hamburger_2",
+      "value": 2
+    },
+    {
+      "source": "mess_2",
+      "target": "hamburger_2",
+      "value": 1
+    },
+    {
+      "source": "mess_3",
+      "target": "hamburger_0",
+      "value": 2
+    },
+    {
+      "source": "mess_0",
+      "target": "shuffledHamburger_2",
+      "value": 1
+    },
+    {
+      "source": "mess_1",
+      "target": "shuffledHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "mess_2",
+      "target": "shuffledHamburger_0",
+      "value": 1
+    },
+    {
+      "source": "mess_3",
+      "target": "shuffledHamburger_2",
+      "value": 2
+    },
+    {
+      "source": "mess_0",
+      "target": "fallenHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "mess_1",
+      "target": "fallenHamburger_0",
+      "value": 1
+    },
+    {
+      "source": "mess_2",
+      "target": "fallenHamburger_1",
+      "value": 1
+    },
+    {
+      "source": "mess_3",
+      "target": "fallenHamburger_2",
+      "value": 1
+    },
+    {
+      "source": "mess_2",
+      "target": "upArrow_3",
+      "value": 2
+    },
+    {
+      "source": "mess_0",
+      "target": "insect_1",
+      "value": 2
+    },
+    {
+      "source": "mess_1",
+      "target": "insect_2",
+      "value": 2
+    },
+    {
+      "source": "mess_2",
+      "target": "insect_3",
+      "value": 2
+    },
+    {
+      "source": "mess_3",
+      "target": "insect_0",
+      "value": 2
+    },
+    {
+      "source": "mess_0",
+      "target": "line_0",
+      "value": 2
+    },
+    {
+      "source": "mess_1",
+      "target": "line_0",
+      "value": 2
+    },
+    {
+      "source": "mess_2",
+      "target": "line_1",
+      "value": 2
+    },
+    {
+      "source": "mess_3",
+      "target": "line_1",
+      "value": 2
+    },
+    {
+      "source": "mess_2",
+      "target": "sauron_1",
+      "value": 2
+    },
+    {
+      "source": "mess_0",
+      "target": "upPointArrow_3",
+      "value": 1
+    },
+    {
+      "source": "mess_1",
+      "target": "upPointArrow_0",
+      "value": 1
+    },
+    {
+      "source": "mess_2",
+      "target": "upPointArrow_1",
+      "value": 2
+    },
+    {
+      "source": "mess_3",
+      "target": "upPointArrow_2",
+      "value": 1
+    },
+    {
+      "source": "upPointArrow_1",
+      "target": "hamburger_2",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_2",
+      "target": "hamburger_3",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_3",
+      "target": "hamburger_0",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_0",
+      "target": "shuffledHamburger_3",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_1",
+      "target": "shuffledHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_3",
+      "target": "shuffledHamburger_2",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_0",
+      "target": "fallenHamburger_0",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_1",
+      "target": "fallenHamburger_1",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_2",
+      "target": "fallenHamburger_2",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_3",
+      "target": "fallenHamburger_3",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_0",
+      "target": "upArrow_2",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_1",
+      "target": "upArrow_2",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_2",
+      "target": "upArrow_0",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_3",
+      "target": "upArrow_0",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_0",
+      "target": "insect_1",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_1",
+      "target": "insect_3",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_2",
+      "target": "insect_3",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_3",
+      "target": "insect_0",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_1",
+      "target": "line_0",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_0",
+      "target": "sauron_3",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_1",
+      "target": "sauron_0",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_3",
+      "target": "sauron_2",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_1",
+      "target": "mess_1",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_2",
+      "target": "mess_3",
+      "value": 2
+    },
+    {
+      "source": "upPointArrow_3",
+      "target": "mess_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledUpPointArrow_0",
+      "target": "pi_3",
+      "value": 2
+    },
+    {
+      "source": "shuffledUpPointArrow_1",
+      "target": "pi_0",
+      "value": 2
+    },
+    {
+      "source": "shuffledUpPointArrow_2",
+      "target": "pi_1",
+      "value": 2
+    },
+    {
+      "source": "shuffledUpPointArrow_3",
+      "target": "pi_2",
+      "value": 2
+    },
+    {
+      "source": "shuffledUpPointArrow_1",
+      "target": "insect_3",
+      "value": 2
+    },
+    {
+      "source": "shuffledUpPointArrow_3",
+      "target": "insect_1",
+      "value": 2
+    }
+  ]
+}
