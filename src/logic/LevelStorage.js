@@ -3,6 +3,7 @@
  */
 
 import {ShapeSpecs}     from './ShapeSpecs.js';
+import _           from 'lodash';
 import {
     turnShape,
     associateShapesInInterval
@@ -26,13 +27,17 @@ export class LevelStorage {
 
     static getLevels() {
         let rawLevels = JSON.parse(localStorage.getItem("levels"));
-        let processedLevels = rawLevels.reverse()/*.sort(({inbetweenSpaces}, {inbetweenSpaces: otherNoSpaces}) => inbetweenSpaces - otherNoSpaces)*/
-            .map(({availableShapes, startShape, endShape, inbetweenSpaces, clockwiseRotate}) => {
+        if(!rawLevels) return [];
+        console.log(`Number of levels in storage: ${rawLevels.length}`);
+        let processedLevels = rawLevels
+            .sort(({inbetweenSpaces: otherNoSpaces, availableShapes: {length: otherNoAvailableShapes}}, {inbetweenSpaces, availableShapes: {length: noAvailableShapes}}) => ((inbetweenSpaces - noAvailableShapes) - (otherNoSpaces - otherNoAvailableShapes)))
+            .map(({availableShapes, startShape, endShape, inbetweenSpaces, clockwiseRotate, cheatAnswer}) => {
             return {
                 availableShapes: availableShapes.map((shapeName) => ShapeSpecs[shapeName]),
                 startShape: LevelStorage.getShapeFromStored(startShape),
                 endShape: LevelStorage.getShapeFromStored(endShape),
                 inbetweenSpaces,
+                cheatAnswer,
                 clockwiseRotate: clockwiseRotate.map((pair) => pair.map((storedShape) => LevelStorage.getShapeFromStored(storedShape)))
             };
         });

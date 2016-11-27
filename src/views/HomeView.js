@@ -116,9 +116,13 @@ export class HomeView extends View {
         this.layout.options.alwaysLayout = true;
         let firstNewLevel = true;
         this._currentLevelIndex = 0;
-
+        window.currentLevel = levels[0];
+        this.instruction.on('click', () => {
+            this._eventOutput.emit('nextLevel');
+        });
         this.on('nextLevel', () => {
             let newLevel = levels[++this._currentLevelIndex];
+            window.currentLevel = newLevel;
             this.shapeSelector.setSelection(newLevel.availableShapes);
             this.replaceRenderable('shapeSlider', this._createShapeSliderFromLevel(this._currentLevelIndex));
             this.showRenderable('shapeSlider');
@@ -175,6 +179,8 @@ export class HomeView extends View {
         this.renderables.shapeSelector.on('offerSelection', (shape) => {
             this.instruction.setContent(this.instructions.choose);
         });
+
+
 
         this.renderables.shapeSelector.on('invalidSelection', (shape) => {
             this.instruction.setContent(this.instructions.attemptSameSubsequent);
