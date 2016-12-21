@@ -29,8 +29,11 @@ export class LevelStorage {
         let rawLevels = JSON.parse(localStorage.getItem("levels"));
         if(!rawLevels) return [];
         console.log(`Number of levels in storage: ${rawLevels.length}`);
-        let processedLevels = rawLevels
-            .sort(({inbetweenSpaces: otherNoSpaces, availableShapes: {length: otherNoAvailableShapes}}, {inbetweenSpaces, availableShapes: {length: noAvailableShapes}}) => ((inbetweenSpaces - noAvailableShapes) - (otherNoSpaces - otherNoAvailableShapes)))
+        let interestingRawLevels = rawLevels
+            .filter(({inbetweenSpaces, availableShapes: {length: noAvailableShapes}}) => inbetweenSpaces >= 4 ? (inbetweenSpaces - noAvailableShapes) : true);
+        let processedLevels =
+            _.uniqBy(_.shuffle(interestingRawLevels), 'inbetweenSpaces').concat(_.uniqBy(_.shuffle(interestingRawLevels), 'inbetweenSpaces'))
+            .sort(({inbetweenSpaces: otherNoSpaces, availableShapes: {length: otherNoAvailableShapes}}, {inbetweenSpaces, availableShapes: {length: noAvailableShapes}}) => ((otherNoSpaces) - (inbetweenSpaces)))
             .map(({availableShapes, startShape, endShape, inbetweenSpaces, clockwiseRotate, cheatAnswer}) => {
             return {
                 availableShapes: availableShapes.map((shapeName) => ShapeSpecs[shapeName]),
