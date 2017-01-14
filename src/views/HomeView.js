@@ -71,18 +71,18 @@ export class HomeView extends View {
     @layout.dock('top', ~27)
     get instruction() {
         this.instructions = {
-            initial: "Tap grid in the middle and see what fits inbetween.",
-            multiple: "Tap one of the highlighted grids to continue.",
-            selected: "Rotate the shape as you want by tapping the arrows.",
-            choose: "Choose the shape to appear in the sequence.",
-            encouragement: "Well done! Continue like this until you are satisfied with your sequence.",
-            swipe: "Now swipe to the right to see the result of what you made.",
-            collision: "Oh snapidoodle! There was a collision. You better reconfigure...",
-            firstLevelComplete: "Great. Was that too easy? The levels will surely get harder!",
-            levelComplete: "You made it. Let's see if you can complete the other levels...",
-            newLevel: "The levels always have one unique solution.",
-            lastLevel: "This was the last level of the game. Wanna play more? Send me suggestions on new levels!",
-            attemptSameSubsequent: "You are unable to pick two subsequent shapes of the same kind. Pick another one or revisit previous choices."
+            initial: 'Tap grid in the middle and see what fits inbetween.',
+            multiple: 'Tap one of the highlighted grids to continue.',
+            selected: 'Rotate the shape as you want by tapping the arrows.',
+            choose: 'Choose the shape to appear in the sequence.',
+            encouragement: 'Well done! Continue like this until you are satisfied with your sequence',
+            swipe: 'Now swipe to the right to see the result of what you made.',
+            collision: 'Oh snapidoodle! There was a collision. You better reconfigure...',
+            firstLevelComplete: 'Great. Was that too easy? The levels will surely get harder!',
+            levelComplete: 'You made it. Let\'s see if you can complete the other levels...',
+            newLevel:'The levels always have one unique solution.',
+            lastLevel: 'This was the last level of the game. Wanna play more? Send me suggestions on new levels!',
+            attemptSameSubsequent: 'You are unable to pick two subsequent shapes of the same kind. Pick another one or revisit previous choices.'
         };
         return new Text({
             content: this.instructions.initial,
