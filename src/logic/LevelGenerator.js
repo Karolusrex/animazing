@@ -14,8 +14,7 @@ import Surface              from 'famous/core/Surface.js';
 import {layout, options}    from 'arva-js/layout/decorators.js';
 
 
-//TODO There is still a bug in the clockwiserotate that you can see by trying to complete the second level
-
+/* We extend view because of possibility of debugging by seeing the different collision modes possible */
 export class LevelGenerator extends View {
 
     @layout.translate(0, 0, -10)
@@ -227,6 +226,7 @@ export class LevelGenerator extends View {
             foundLevels.push(newLevels);
             console.groupEnd(startNode.shapeName);
         }
+        /* The levels are going to be nested and nasty, can have undefined things so filter that out */
         foundLevels = _.flattenDeep(foundLevels).filter((level) => !!level);
         console.log(`Found ${foundLevels.length} levels`);
         localStorage.setItem("levels", JSON.stringify(foundLevels));
@@ -383,6 +383,11 @@ export class LevelGenerator extends View {
     }
 
 
+    /**
+     * Sorts a list of links by their least number of outgoing links
+     * @param {Array} links
+     * @param {Object} linkDict
+     */
     static sortLinksForRareFirst(links, linkDict) {
         return links.sort((link, otherLink) => (linkDict[link.target] || []).length - (linkDict[otherLink.target] || []).length);
     }
@@ -409,16 +414,17 @@ export class LevelGenerator extends View {
      * @returns {Array}
      */
     static createAvailableShapesForLevel(availableShapes, startNode, endNode, linksById, nodesById) {
-        let availableShapesForLevel = _.shuffle(_.uniq(availableShapes.slice(0, -1))); /* Slice to remve last shape (the final one) */
+        let availableShapesForLevel = _.shuffle(_.uniq(availableShapes.slice(0, -1)));
+        /* Slice to remove last shape (the final one) */
         let edgeNodes = [startNode, endNode];
-        if(availableShapesForLevel.length === 1){
+        if (availableShapesForLevel.length === 1) {
             /* Add a joker to confuse player */
-            for(let nodeId of Object.keys(nodesById)){
-                if(edgeNodes.find((edgeNode) => edgeNode.id == nodeId)){
+            for (let nodeId of Object.keys(nodesById)) {
+                if (edgeNodes.find((edgeNode) => edgeNode.id == nodeId)) {
                     continue;
                 }
-                for(let nodeThatShouldNotHaveLinkWithJoker of edgeNodes){
-                    if(LevelGenerator.getNodesOfSameRotation(nodeThatShouldNotHaveLinkWithJoker, nodesById).every((potentialCollisionFreeNode) => linksById[nodeId].every((link) => link.target !== potentialCollisionFreeNode.id))){
+                for (let nodeThatShouldNotHaveLinkWithJoker of edgeNodes) {
+                    if (LevelGenerator.getNodesOfSameRotation(nodeThatShouldNotHaveLinkWithJoker, nodesById).every((potentialCollisionFreeNode) => linksById[nodeId].every((link) => link.target !== potentialCollisionFreeNode.id))) {
                         availableShapesForLevel.push(nodesById[nodeId].shapeName);
                         return _.shuffle(availableShapesForLevel);
                     }
