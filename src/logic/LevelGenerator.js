@@ -25,7 +25,7 @@ export class LevelGenerator extends View {
 
     constructor(options) {
         super(options);
-        for (let [i,bar] of this._getBarNames().entries()) {
+        for (let [i, bar] of this._getBarNames().entries()) {
             this.addRenderable(new Surface({
                 content: '',
                 classes: ['bar'],
@@ -50,7 +50,7 @@ export class LevelGenerator extends View {
         return debugView;
     }
 
-    static async generateCollisionGraph(getNextContextEmitter = null, speed =  0.01) {
+    static async generateCollisionGraph(getNextContextEmitter = null, speed = 0.01) {
         let outputGraph = {};
         outputGraph.nodes = [];
         outputGraph.links = [];
@@ -104,12 +104,14 @@ export class LevelGenerator extends View {
                 /* Since collisions are symmetrical in different rotation state, we'll deduce what more valid collision-
                  * free paths are available from what we did
                  */
-                for(let {source:
-                    {shapeName, quarterRotation},
-                    target: {shapeName: otherShapeName, quarterRotation: otherQuarterRotation},
-                    clockwiseRotate}
-                    of resultingLinksFromShapeCombination){
-                    for(let rotation of [0, 1, 2, 3]){
+                for (let {
+                    source:
+                        { shapeName, quarterRotation },
+                    target: { shapeName: otherShapeName, quarterRotation: otherQuarterRotation },
+                    clockwiseRotate
+                }
+                    of resultingLinksFromShapeCombination) {
+                    for (let rotation of [0, 1, 2, 3]) {
                         let newLink = {
                             source: `${shapeName}_${(quarterRotation + rotation) % 4}`,
                             target: `${otherShapeName}_${(otherQuarterRotation + rotation) % 4}`,
@@ -159,26 +161,35 @@ export class LevelGenerator extends View {
      * For debugging
      */
     static includeOnlyCertainNodesInCollisionGraph(collisionGraph, nodesToInclude) {
-        let {nodes, links} = collisionGraph;
-        let prunedCollisionGraph = {nodes: [], links: []};
-        for(let node of nodes){
+        let { nodes, links } = collisionGraph;
+        let prunedCollisionGraph = { nodes: [], links: [] };
+        for (let node of nodes) {
             console.log(`LevelGenerator.getUnrotatedId(node.id)): ${LevelGenerator.getUnrotatedId(node.id)}`);
-            if(nodesToInclude.includes(LevelGenerator.getUnrotatedId(node.id))){
+            if (nodesToInclude.includes(LevelGenerator.getUnrotatedId(node.id))) {
                 prunedCollisionGraph.nodes.push(node);
             }
         }
-        for(let link of links){
-            if(nodesToInclude.includes(LevelGenerator.getUnrotatedId(link.source)) &&
-                nodesToInclude.includes(LevelGenerator.getUnrotatedId(link.target))){
+        for (let link of links) {
+            if (nodesToInclude.includes(LevelGenerator.getUnrotatedId(link.source)) &&
+                nodesToInclude.includes(LevelGenerator.getUnrotatedId(link.target))) {
                 prunedCollisionGraph.links.push(link);
             }
         }
         return prunedCollisionGraph;
     }
 
+    /**
+     * @param {RotationMode} rotationMode The way each thing can rotate
+     * @returns {LevelGenerator}
+     */
+    static findLevels(rotationMode) {
+        console.time('Finding all levels');
+        let debugView = new LevelGenerator();
+        this._findLevels(rotationMode, debugView);
+        return debugView;
+    }
 
-
-    static async findLevels() {
+    static async _findLevels(rotationMode, debugView){
         LevelStorage.clearLevels();
         let collisionGraph = JSON.parse(localStorage.getItem("collisionGraph"));
         console.log(collisionGraph);
@@ -188,7 +199,7 @@ export class LevelGenerator extends View {
         let checkedShapeNames = {};
         for (let startNode of collisionGraph.nodes) {
             /* We don't have to do a new set of levels for each of the 4 rotation states */
-            if(checkedShapeNames[startNode.shapeName]){
+            if (checkedShapeNames[startNode.shapeName]) {
                 continue;
             }
             console.group(startNode.shapeName);
@@ -200,7 +211,18 @@ export class LevelGenerator extends View {
                 cheatAnswer: [startNode.id],
                 clockwiseRotate: []
             };
-            let newLevels = await LevelGenerator.searchForLevel(startNode, startNode, {}, checkedShapeNames, levelData, {[startNode.id]: true}, linksByStartNodeId, nodesById);
+            let newLevels = await LevelGenerator.searchForLevel(
+                startNode,
+                startNode,
+                {},                             //availableLinks, will become startNode
+                checkedShapeNames,              //Things to skip
+                levelData,
+                { [startNode.id]: true },
+                linksByStartNodeId,
+                nodesById,
+                rotationMode,
+                debugView
+            );
             checkedShapeNames[startNode.shapeName] = true;
             foundLevels.push(newLevels);
             console.groupEnd(startNode.shapeName);
@@ -216,7 +238,7 @@ export class LevelGenerator extends View {
         console.log("Searching for level from node " + currentNode.id + ", amount of spaces : " + levelData.inbetweenSpaces);
         /* Sort link and choose the target node that has the least amount of outgoing links */
         let outgoingLinks = LevelGenerator.sortLinksForRareFirst(unsortedOutgoingLinks, linksByStartNodeId);
-        let {availableShapes} = levelData;
+        let { availableShapes } = levelData;
         let availableShapesForLevel = LevelGenerator.createAvailableShapesForLevel(availableShapes, startNode, currentNode, linksByStartNodeId, nodesById);
         let levelDataInCaseOfBailOut = levelData.inbetweenSpaces > 0 ? {
             ...levelData,
@@ -248,7 +270,7 @@ export class LevelGenerator extends View {
             let nodesOfSameType = LevelGenerator.getNodesOfSameRotation(newPotentialNode, nodesById);
             let newLinksByNodeId = LevelGenerator.getListDictFromNodeList(nodesOfSameType, linksByStartNodeId);
             let linksToStartNode = LevelGenerator.getLinksFromNodeToNodeGroup(linksByStartNodeId, startNode, nodesOfSameType);
-            let potentialLinkCollection = LevelGenerator.mergeLinkDicts(availableLinks, newLinksByNodeId, {[currentNode.id]: [outgoingLink]}, linksToStartNode);
+            let potentialLinkCollection = LevelGenerator.mergeLinkDicts(availableLinks, newLinksByNodeId, { [currentNode.id]: [outgoingLink] }, linksToStartNode);
 
             let newAmountOfSpaces = levelData.inbetweenSpaces + 1;
             if (newAmountOfSpaces > 0 && LevelGenerator.nodesHaveUniquePath(potentialLinkCollection, startNode.id, newPotentialNode.id, newAmountOfSpaces + 1) !== 1) {
@@ -273,7 +295,7 @@ export class LevelGenerator extends View {
                 potentialLinkCollection,                                                //  "availableLinks"
                 skipList,                                                               //  Stays the same
                 newLevelData,                                                           //  "levelData"
-                {...visitedNodes, [newPotentialNode.id]: true},                         //  "visitedNodeTypes"
+                { ...visitedNodes, [newPotentialNode.id]: true },                       //  "visitedNodeTypes"
                 linksByStartNodeId,                                                     //  Stays the same
                 nodesById                                                               //  Stays the same
             );
@@ -304,23 +326,23 @@ export class LevelGenerator extends View {
     }
 
     static nodesHaveUniquePath(linkDict, sourceNodeId, targetNodeId, noSteps, visitedNodes = {}) {
-         //console.log("Checking " + sourceNodeId + "=>" + targetNodeId, noSteps);
+        //console.log("Checking " + sourceNodeId + "=>" + targetNodeId, noSteps);
 
         if (noSteps < 0) {
             return 0;
         }
         if (noSteps === 0) {
-            if(targetNodeId === sourceNodeId) {
+            if (targetNodeId === sourceNodeId) {
                 return 1;
             }
             return 0;
         }
         let noFoundPaths = 0;
-        let newVisitedNodes = {...visitedNodes, [sourceNodeId]: true};
+        let newVisitedNodes = { ...visitedNodes, [sourceNodeId]: true };
         let outgoingLinks = (linkDict[sourceNodeId] || []);
         //console.log(`outgoingLinks.length: ${outgoingLinks.length}`);
         outgoingLinks.every((link) => {
-            if(link.target in newVisitedNodes){
+            if (link.target in newVisitedNodes) {
                 return true;
             }
             //console.log(`From ${sourceNodeId}: ${link.target}`);
@@ -331,13 +353,10 @@ export class LevelGenerator extends View {
 
         return noFoundPaths > 1 ? Infinity : noFoundPaths;
     }
-/*
-    static nodesHaveUniquePath(linkDict, sourceNodeId, targetNodeId, noSteps, visitedNodes = {}) {
 
-    }*/
 
     static uniquifyLinksByShapeTargetName(links) {
-        return _.uniqBy(Object.keys(links).map((sourceNodeId)=> links[sourceNodeId]), (link) => link.target.substr(0, link.target.indexOf('_')));
+        return _.uniqBy(Object.keys(links).map((sourceNodeId) => links[sourceNodeId]), (link) => link.target.substr(0, link.target.indexOf('_')));
     }
 
     static getNodesOfSameRotation(node, nodesById) {
@@ -355,12 +374,12 @@ export class LevelGenerator extends View {
     }
 
     static getListDictFromNodeList(nodeList, linkDict) {
-        return nodeList.reduce((result, node) => Object.assign(result, {[node.id]: linkDict[node.id]}), {});
+        return nodeList.reduce((result, node) => Object.assign(result, { [node.id]: linkDict[node.id] }), {});
     }
 
     static getListDictFromNodeListWithReverse(nodeList, linkDict) {
         /*let nodeIds = nodeList.map((node) => node.id);*/
-        return nodeList.reduce((result, node) => Object.assign(result, {[node.id]: linkDict[node.id], ...linkDict[node.id].reduce((accumulator, {target}) => target !== node.id ? accumulator : Object.assign(accumulator, {[target]: linkDict[target]}), {})}), {});
+        return nodeList.reduce((result, node) => Object.assign(result, { [node.id]: linkDict[node.id], ...linkDict[node.id].reduce((accumulator, { target }) => target !== node.id ? accumulator : Object.assign(accumulator, { [target]: linkDict[target] }), {}) }), {});
     }
 
 
@@ -370,12 +389,12 @@ export class LevelGenerator extends View {
 
     static getLinksByStartNodeId(links) {
         let linksByStartNodeId = {};
-        for (let {source, target, value, clockwiseRotate} of links) {
+        for (let { source, target, value, clockwiseRotate } of links) {
             let refactoredLinks = linksByStartNodeId[source];
             if (!refactoredLinks) {
                 refactoredLinks = linksByStartNodeId[source] = [];
             }
-            refactoredLinks.push({source, target, value, clockwiseRotate});
+            refactoredLinks.push({ source, target, value, clockwiseRotate });
         }
         return linksByStartNodeId;
     }
@@ -422,7 +441,7 @@ export class LevelGenerator extends View {
     }
 
     static shapeFromNode(node) {
-        return {rotation: node.rotation, shapeName: node.shapeName};
+        return { rotation: node.rotation, shapeName: node.shapeName };
     }
 
     static mergeLinkDicts(...dicts) {
