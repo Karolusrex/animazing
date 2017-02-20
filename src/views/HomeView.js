@@ -44,8 +44,8 @@ export class HomeView extends View {
 
     @layout.animate({
         showInitially: false,
-        show: {transition: {duration: 10}},
-        hide: {transition: {duration: 500}},
+        show: { transition: { duration: 10 } },
+        hide: { transition: { duration: 500 } },
         animation: AnimationController.Animation.Fade
     })
     @layout.translate(0, 0, 0)
@@ -56,11 +56,11 @@ export class HomeView extends View {
         showInitially: false,
         show: {
             animation: function () {
-                return ({...AnimationController.Animation.Slide.Down(...arguments), opacity: 0})
+                return ({ ...AnimationController.Animation.Slide.Down(...arguments), opacity: 0 });
             }
         },
         /* Hide animation gives the app a slow feel */
-        hide: {transition: {duration: 0}}
+        hide: { transition: { duration: 0 } }
     })
     @layout.size(~100, 40)
     @layout.translate(0, 100, 0)
@@ -80,24 +80,24 @@ export class HomeView extends View {
             collision: 'Oh snapidoodle! There was a collision. You better reconfigure...',
             firstLevelComplete: 'Great. Was that too easy? The levels will surely get harder!',
             levelComplete: 'You made it. Let\'s see if you can complete the other levels...',
-            newLevel:'The levels always have one unique solution.',
+            newLevel: 'The levels always have one unique solution.',
             lastLevel: 'This was the last level of the game. Wanna play more? Send me suggestions on new levels!',
             attemptSameSubsequent: 'You are unable to pick two subsequent shapes of the same kind. Pick another one or revisit previous choices.'
         };
         return new Text({
             content: this.instructions.initial,
-            properties: {fontFamily: 'avenir-light', textAlign: 'center', color: 'white'}
+            properties: { fontFamily: 'avenir-light', textAlign: 'center', color: 'white' }
         });
     }
 
     @layout.animate({
         hide: {
             animation: function () {
-                return ({...AnimationController.Animation.Slide.Up(...arguments), opacity: 0})
+                return ({ ...AnimationController.Animation.Slide.Up(...arguments), opacity: 0 })
             }
         }, show: {
             animation: function () {
-                return ({...AnimationController.Animation.Slide.Down(...arguments), opacity: 0})
+                return ({ ...AnimationController.Animation.Slide.Down(...arguments), opacity: 0 })
             }
         }
     })
@@ -126,19 +126,19 @@ export class HomeView extends View {
             this.instruction.setContent(firstNewLevel ? this.instructions.newLevel : (newLevel.inbetweenSpaces === 1 ? this.instructions.initial : this.instructions.multiple));
             firstNewLevel = false;
             this.hideRenderable('nextLevelButton');
+            /* Change the box shadow back to less glow */
             this._setBoxShadow(this._standardBoxShadow);
         });
 
         this._standardBoxShadow = '1px 3px 37px 0px rgba(168,91,132,1)';
         this._glowingBoxShadow = '1px 3px 97px 5px rgba(168,91,132,1)';
 
-        for (let [i,bar] of this._getBarNames().entries()) {
+        for (let [i, bar] of this._getBarNames().entries()) {
             this.addRenderable(new Surface({
                 content: '',
                 classes: ['bar'],
                 properties: {
                     backgroundColor: ['#2ecc71', '#8e44ad', '#d35400', '#27ae60', '#e67e22', '#9b59b6'][i],
-                    /*borderRadius: '15px',*/
                     boxShadow: this._standardBoxShadow
                 }
             }), bar);
@@ -193,7 +193,7 @@ export class HomeView extends View {
 
     _setBoxShadow(boxShadow) {
         for (let renderableName of this._getBarNames()) {
-            this[renderableName].setProperties({boxShadow});
+            this[renderableName].setProperties({ boxShadow });
         }
     }
 
@@ -212,7 +212,7 @@ export class HomeView extends View {
             scale: 1, restrictFunction: this._restrictSlider,
             snapOnDrop: false
         });
-        this._slideEndedOnPosition = [0,0];
+        this._slideEndedOnPosition = [0, 0];
         this.renderables.snappable.on('end', () => {
             this._slideEndedOnPosition = this.renderables.snappable.getPosition();
         });
@@ -237,9 +237,9 @@ export class HomeView extends View {
                 borderRadius: '100%'
             }
         });
-        this.renderables.dragGuide = new Surface({properties: {backgroundColor: "green", borderRadius: '100%'}});
-        this.renderables.verticalGuideLine = new Surface({properties: guideLineProperties});
-        this.renderables.horizontalGuideLine = new Surface({properties: guideLineProperties});
+        this.renderables.dragGuide = new Surface({ properties: { backgroundColor: "green", borderRadius: '100%' } });
+        this.renderables.verticalGuideLine = new Surface({ properties: guideLineProperties });
+        this.renderables.horizontalGuideLine = new Surface({ properties: guideLineProperties });
 
 
     }
@@ -253,7 +253,7 @@ export class HomeView extends View {
     }
 
     _createShapeSliderFromLevel(levelIndex) {
-        return new ShapeSlider({shapeSpecs: [levels[levelIndex].startShape, ...new Array(levels[levelIndex].inbetweenSpaces), levels[levelIndex].endShape]});
+        return new ShapeSlider({ shapeSpecs: [levels[levelIndex].startShape, ...new Array(levels[levelIndex].inbetweenSpaces), levels[levelIndex].endShape] });
     }
 
     _initAnimationBehaviour() {
@@ -275,9 +275,9 @@ export class HomeView extends View {
 
                 let animatingShapeSize = Math.min(context.size[1] / 2, 300);
                 this.shapeSlider.setSlideRatio(inputPosition / this.maxRange);
-                if(this._isDead){
-                    if(inputPosition >= this._diedAtPosition){
-                        if(!this._isAtDeadPosition){
+                if (this._isDead) {
+                    if (inputPosition >= this._diedAtPosition) {
+                        if (!this._isAtDeadPosition) {
                             this._makeDeadAnimation();
                         }
                     } else {
@@ -324,7 +324,7 @@ export class HomeView extends View {
         delete this.renderables.snappable;
     }
 
-    _restrictSlider([x,y]) {
+    _restrictSlider([x, y]) {
         return [this._dontGoFurtherIfDead(x), y];
     }
 
@@ -336,7 +336,7 @@ export class HomeView extends View {
         let noShapeSpace = levels[this._currentLevelIndex].inbetweenSpaces + 1;
         let distancePerShape = this.maxRange / noShapeSpace;
         /* Do floor +1 in order to get the exact value also to round up */
-        let furthestPoint = Math.floor(1 + inbetweenValue / (distancePerShape))*(distancePerShape);
+        let furthestPoint = Math.floor(1 + inbetweenValue / (distancePerShape)) * (distancePerShape);
         return Math.min(position, furthestPoint);
     }
 
