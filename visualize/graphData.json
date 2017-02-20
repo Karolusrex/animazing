@@ -1,196 +1,412 @@
 {
   "nodes": [
     {
-      "id": "hamburger_0",
+      "id": "chineeseSticks_0",
       "rotation": 0,
-      "shapeName": "hamburger",
+      "shapeName": "chineeseSticks",
       "group": 1
     },
     {
-      "id": "hamburger_1",
+      "id": "chineeseSticks_1",
       "rotation": 1,
-      "shapeName": "hamburger",
+      "shapeName": "chineeseSticks",
       "group": 1
     },
     {
-      "id": "hamburger_2",
+      "id": "chineeseSticks_2",
       "rotation": 2,
-      "shapeName": "hamburger",
+      "shapeName": "chineeseSticks",
       "group": 1
     },
     {
-      "id": "hamburger_3",
+      "id": "chineeseSticks_3",
       "rotation": 3,
-      "shapeName": "hamburger",
+      "shapeName": "chineeseSticks",
       "group": 1
     },
     {
-      "id": "fallenHamburger_0",
+      "id": "parallel_0",
       "rotation": 0,
-      "shapeName": "fallenHamburger",
+      "shapeName": "parallel",
       "group": 2
     },
     {
-      "id": "fallenHamburger_1",
+      "id": "parallel_1",
       "rotation": 1,
-      "shapeName": "fallenHamburger",
+      "shapeName": "parallel",
       "group": 2
     },
     {
-      "id": "fallenHamburger_2",
+      "id": "parallel_2",
       "rotation": 2,
-      "shapeName": "fallenHamburger",
+      "shapeName": "parallel",
       "group": 2
     },
     {
-      "id": "fallenHamburger_3",
+      "id": "parallel_3",
       "rotation": 3,
-      "shapeName": "fallenHamburger",
+      "shapeName": "parallel",
       "group": 2
+    },
+    {
+      "id": "t_0",
+      "rotation": 0,
+      "shapeName": "t",
+      "group": 3
+    },
+    {
+      "id": "t_1",
+      "rotation": 1,
+      "shapeName": "t",
+      "group": 3
+    },
+    {
+      "id": "t_2",
+      "rotation": 2,
+      "shapeName": "t",
+      "group": 3
+    },
+    {
+      "id": "t_3",
+      "rotation": 3,
+      "shapeName": "t",
+      "group": 3
     }
   ],
   "links": [
     {
-      "source": "hamburger_0",
-      "target": "fallenHamburger_0",
+      "source": "chineeseSticks_0",
+      "target": "parallel_0",
       "value": 1,
       "clockwiseRotate": false
     },
     {
-      "source": "fallenHamburger_0",
-      "target": "hamburger_0",
+      "source": "parallel_0",
+      "target": "chineeseSticks_0",
       "value": 1,
       "clockwiseRotate": true
     },
     {
-      "source": "hamburger_1",
-      "target": "fallenHamburger_1",
+      "source": "chineeseSticks_1",
+      "target": "parallel_1",
       "value": 1,
       "clockwiseRotate": false
     },
     {
-      "source": "fallenHamburger_1",
-      "target": "hamburger_1",
+      "source": "parallel_1",
+      "target": "chineeseSticks_1",
       "value": 1,
       "clockwiseRotate": true
     },
     {
-      "source": "hamburger_2",
-      "target": "fallenHamburger_2",
+      "source": "chineeseSticks_2",
+      "target": "parallel_2",
       "value": 1,
       "clockwiseRotate": false
     },
     {
-      "source": "fallenHamburger_2",
-      "target": "hamburger_2",
+      "source": "parallel_2",
+      "target": "chineeseSticks_2",
       "value": 1,
       "clockwiseRotate": true
     },
     {
-      "source": "hamburger_3",
-      "target": "fallenHamburger_3",
+      "source": "chineeseSticks_3",
+      "target": "parallel_3",
       "value": 1,
       "clockwiseRotate": false
     },
     {
-      "source": "fallenHamburger_3",
-      "target": "hamburger_3",
+      "source": "parallel_3",
+      "target": "chineeseSticks_3",
       "value": 1,
       "clockwiseRotate": true
     },
     {
-      "source": "hamburger_0",
-      "target": "fallenHamburger_2",
+      "source": "chineeseSticks_0",
+      "target": "parallel_1",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "parallel_1",
+      "target": "chineeseSticks_0",
       "value": 1,
       "clockwiseRotate": true
     },
     {
-      "source": "fallenHamburger_2",
-      "target": "hamburger_0",
+      "source": "chineeseSticks_1",
+      "target": "parallel_2",
       "value": 1,
       "clockwiseRotate": false
     },
     {
-      "source": "hamburger_1",
-      "target": "fallenHamburger_3",
+      "source": "parallel_2",
+      "target": "chineeseSticks_1",
       "value": 1,
       "clockwiseRotate": true
     },
     {
-      "source": "fallenHamburger_3",
-      "target": "hamburger_1",
+      "source": "chineeseSticks_2",
+      "target": "parallel_3",
       "value": 1,
       "clockwiseRotate": false
     },
     {
-      "source": "hamburger_2",
-      "target": "fallenHamburger_0",
+      "source": "parallel_3",
+      "target": "chineeseSticks_2",
       "value": 1,
       "clockwiseRotate": true
     },
     {
-      "source": "fallenHamburger_0",
-      "target": "hamburger_2",
+      "source": "chineeseSticks_3",
+      "target": "parallel_0",
       "value": 1,
       "clockwiseRotate": false
     },
     {
-      "source": "hamburger_3",
-      "target": "fallenHamburger_1",
+      "source": "parallel_0",
+      "target": "chineeseSticks_3",
       "value": 1,
       "clockwiseRotate": true
     },
     {
-      "source": "fallenHamburger_1",
-      "target": "hamburger_3",
+      "source": "chineeseSticks_0",
+      "target": "t_0",
       "value": 1,
       "clockwiseRotate": false
     },
     {
-      "source": "hamburger_0",
-      "target": "fallenHamburger_3",
-      "value": 1,
-      "clockwiseRotate": false
-    },
-    {
-      "source": "fallenHamburger_3",
-      "target": "hamburger_0",
+      "source": "t_0",
+      "target": "chineeseSticks_0",
       "value": 1,
       "clockwiseRotate": true
     },
     {
-      "source": "hamburger_1",
-      "target": "fallenHamburger_0",
+      "source": "chineeseSticks_1",
+      "target": "t_1",
       "value": 1,
       "clockwiseRotate": false
     },
     {
-      "source": "fallenHamburger_0",
-      "target": "hamburger_1",
+      "source": "t_1",
+      "target": "chineeseSticks_1",
       "value": 1,
       "clockwiseRotate": true
     },
     {
-      "source": "hamburger_2",
-      "target": "fallenHamburger_1",
+      "source": "chineeseSticks_2",
+      "target": "t_2",
       "value": 1,
       "clockwiseRotate": false
     },
     {
-      "source": "fallenHamburger_1",
-      "target": "hamburger_2",
+      "source": "t_2",
+      "target": "chineeseSticks_2",
       "value": 1,
       "clockwiseRotate": true
     },
     {
-      "source": "hamburger_3",
-      "target": "fallenHamburger_2",
+      "source": "chineeseSticks_3",
+      "target": "t_3",
       "value": 1,
       "clockwiseRotate": false
     },
     {
-      "source": "fallenHamburger_2",
-      "target": "hamburger_3",
+      "source": "t_3",
+      "target": "chineeseSticks_3",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "chineeseSticks_0",
+      "target": "t_1",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_1",
+      "target": "chineeseSticks_0",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "chineeseSticks_1",
+      "target": "t_2",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_2",
+      "target": "chineeseSticks_1",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "chineeseSticks_2",
+      "target": "t_3",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_3",
+      "target": "chineeseSticks_2",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "chineeseSticks_3",
+      "target": "t_0",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_0",
+      "target": "chineeseSticks_3",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_0",
+      "target": "t_0",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_0",
+      "target": "parallel_0",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_1",
+      "target": "t_1",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_1",
+      "target": "parallel_1",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_2",
+      "target": "t_2",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_2",
+      "target": "parallel_2",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_3",
+      "target": "t_3",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_3",
+      "target": "parallel_3",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_0",
+      "target": "t_1",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_1",
+      "target": "parallel_0",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_1",
+      "target": "t_2",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_2",
+      "target": "parallel_1",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_2",
+      "target": "t_3",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_3",
+      "target": "parallel_2",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_3",
+      "target": "t_0",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_0",
+      "target": "parallel_3",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_0",
+      "target": "t_3",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_3",
+      "target": "parallel_0",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_1",
+      "target": "t_0",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_0",
+      "target": "parallel_1",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_2",
+      "target": "t_1",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_1",
+      "target": "parallel_2",
+      "value": 1,
+      "clockwiseRotate": true
+    },
+    {
+      "source": "parallel_3",
+      "target": "t_2",
+      "value": 1,
+      "clockwiseRotate": false
+    },
+    {
+      "source": "t_2",
+      "target": "parallel_3",
       "value": 1,
       "clockwiseRotate": true
     }
