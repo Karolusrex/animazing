@@ -74,9 +74,6 @@ export class ShapeSelector extends View {
         icon: RotateLeftIcon
     });
 
-    /*@layout.fullscreen
-     bg = new Surface({properties: {backgroundColor: 'red'}});*/
-
 
     constructor(options = {}) {
         super(options);

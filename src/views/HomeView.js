@@ -33,14 +33,14 @@ insertRule('.bar:hover::after', {
     opacity: 1
 });
 
-@layout.margins([5, 10, 10, 10])
+
+@layout.dockPadding(5, 10, 10, 10)
 export class HomeView extends View {
 
 
-
     @layout.translate(0, 0, -10)
-    @layout.fullscreen
-    background = new Surface({properties: {backgroundColor: '#2F2F40'}});
+    @layout.fullSize()
+    background = new Surface({ properties: { backgroundColor: '#2F2F40' } });
 
     @layout.animate({
         showInitially: false,
@@ -49,8 +49,8 @@ export class HomeView extends View {
         animation: AnimationController.Animation.Fade
     })
     @layout.translate(0, 0, 0)
-    @layout.fullscreen
-    isDeadIndication = new Surface({properties: {backgroundColor: '#722F37'}});
+    @layout.fullSize()
+    isDeadIndication = new Surface({ properties: { backgroundColor: '#722F37' } });
 
     @layout.animate({
         showInitially: false,
@@ -64,11 +64,11 @@ export class HomeView extends View {
     })
     @layout.size(~100, 40)
     @layout.translate(0, 100, 0)
-    @layout.place('top')
-    nextLevelButton = new OutlineTextButton({variation: 'bold', clickEventName: 'nextLevel', content: 'NEXT LEVEL'});
+    @layout.stick.top()
+    nextLevelButton = new OutlineTextButton({ variation: 'bold', clickEventName: 'nextLevel', content: 'NEXT LEVEL' });
 
     @layout.translate(0, 0, 10)
-    @layout.dock('top', ~27)
+    @layout.dock.top(~27)
     get instruction() {
         this.instructions = {
             initial: 'Tap grid in the middle and see what fits inbetween.',
@@ -101,14 +101,10 @@ export class HomeView extends View {
             }
         }
     })
-    @layout.dock("top", 0.4, 10)
+    @layout.dock.top(0.4, 10)
     shapeSlider = this._createShapeSliderFromLevel(0);
 
-    /*@layout.size(undefined, 1 / 3)
-     @layout.align(0.5, 0.75)
-     @layout.origin(0.5, 0.5)
-     @layout.translate(0, 0, 30)*/
-    @layout.dock("fill")
+    @layout.dock.fill()
     shapeSelector = this._createShapeSelectorFromLevel(0);
 
     constructor(options = {}) {

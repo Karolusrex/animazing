@@ -19,8 +19,8 @@ import {layout, options}    from 'arva-js/layout/decorators.js';
 export class LevelGenerator extends View {
 
     @layout.translate(0, 0, -10)
-    @layout.fullscreen
-    background = new Surface({properties: {backgroundColor: 'red'}});
+    @layout.fullSize()
+    background = new Surface({ properties: { backgroundColor: 'rgb(178, 178, 178)' } });
 
 
     constructor(options) {

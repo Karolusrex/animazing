@@ -14,7 +14,7 @@ import {associateShapesInInterval,
 
 
 export class Shape extends View{
-    /*@layout.fullscreen
+    /*@layout.fullSize()
     bg = new Surface({properties: {backgroundColor: 'red'}});*/
 
 

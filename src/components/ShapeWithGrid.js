@@ -20,10 +20,10 @@ import {combineOptions}      from 'arva-js/utils/CombineOptions.js';
 
 export class ShapeWithGrid extends View {
 
-    @layout.fullscreen
+    @layout.fullSize()
     grid = new ShapeGrid();
 
-    @layout.dock('fill')
+    @layout.dock.fill()
     @layout.translate(0, 0, 30)
     overlay = new Surface({
         properties: {
@@ -50,7 +50,7 @@ export class ShapeWithGrid extends View {
     @layout.animate({showInitially: false})
     @layout.size(undefined, 30)
     @layout.translate(0, 0, 30)
-    @layout.place('top')
+    @layout.stick.top()
     placeholder = new Surface({
         content: '?',
         properties: {fontSize: '80px', textAlign: 'center', color: 'rgba(255,255,255,0.6)'}

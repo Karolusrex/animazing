@@ -15,10 +15,10 @@ let gridOptions = {
 export class ShapeGrid extends View {
 
 
-    @layout.fullscreen
+    @layout.fullSize()
     horizontal = new HorizontalGrid(gridOptions);
 
-    @layout.fullscreen
+    @layout.fullSize()
     vertical = new VerticalGrid(gridOptions);
 
     getSize() {

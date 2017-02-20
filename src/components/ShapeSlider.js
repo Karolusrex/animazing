@@ -10,7 +10,7 @@ import {ShapeWithGrid}              from './ShapeWithGrid.js';
 
 
 export class ShapeSlider extends View {
-    @layout.place('bottom')
+    @layout.stick.bottom()
     @layout.size(undefined, 1)
     @layout.translate(0, -10, -10)
     path = new Surface({
@@ -31,7 +31,7 @@ export class ShapeSlider extends View {
         }
     });
     /*@layout.translate(0, 0, -20)
-    @layout.fullscreen
+    @layout.fullSize()
     bg = new Surface({properties: {backgroundColor: 'red'}});*/
 
     setSelection(index, shapeSpec) {
@@ -79,12 +79,12 @@ export class ShapeSlider extends View {
             });
             if (index !== lastShapeIndex) {
                 this.addRenderable(circle, circleName,
-                    layout.dock('left'),
+                    layout.dock.left(),
                     layout.size(...circleSize))
             } else {
                 this.addRenderable(circle, circleName,
                     layout.size(...circleSize),
-                    layout.place('topright'))
+                    layout.stick.topRight())
             }
         }
         this.on('shapeChosen', (index) => {
@@ -142,8 +142,8 @@ export class ShapeSlider extends View {
 }
 
 class ShapeSelection extends View {
-    @layout.dock('bottom', 30)
-    @layout.place('bottom')
+    @layout.dock.bottom(30)
+    @layout.stick.bottom()
     @layout.size(20, 20)
     circle = new Surface({
         properties: {
@@ -154,7 +154,7 @@ class ShapeSelection extends View {
     });
 
 
-    @layout.dock('fill')
+    @layout.dock.fill()
     shapeWithGrid = new ShapeWithGrid(this.options);
 
     showShape() {
