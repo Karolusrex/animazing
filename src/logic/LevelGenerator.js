@@ -63,7 +63,7 @@ export class LevelGenerator extends View {
         let debugView = new LevelGenerator();
         debugView.layout.options.alwaysLayout = true;
         debugView.layouts.push((context) => {
-            debugView._eventOutput.emit('newContext', context)
+            debugView._eventOutput.emit('newContext', context);
         });
         LevelGenerator.generateCollisionGraph(debugView, speed);
         return debugView;
@@ -419,6 +419,11 @@ export class LevelGenerator extends View {
         return links.sort((link, otherLink) => (linkDict[link.target] || []).length - (linkDict[otherLink.target] || []).length);
     }
 
+    /**
+     *
+     * @param [Array<{source: String, target: String, value: String, clockwiseRotate: Boolean}>] links
+     * @returns {{}}
+     */
     static getLinksByStartNodeId(links) {
         let linksByStartNodeId = {};
         for (let { source, target, value, clockwiseRotate } of links) {
@@ -441,24 +446,23 @@ export class LevelGenerator extends View {
      * @returns {Array}
      */
     static createAvailableShapesForLevel(availableShapes, startNode, endNode, linksById, nodesById) {
-        let availableShapesForLevel = _.shuffle(_.uniq(availableShapes.slice(0, -1)));
+        /* Slice the last one because that's going to be the end node */
+        let availableShapesForLevel = _.uniq(availableShapes.slice(0, -1));
         /* Slice to remove last shape (the final one) */
         let edgeNodes = [startNode, endNode];
         if (availableShapesForLevel.length === 1) {
-            /* Add a joker to confuse player */
-            for (let nodeId of Object.keys(nodesById)) {
-                if (edgeNodes.find((edgeNode) => edgeNode.id == nodeId)) {
+            /* If only 1 to choose from, add joker to confuse player */
+            for (let nodeId of _.shuffle(Object.keys(nodesById))) {
+                let node = nodesById[nodeId];
+                /* Don't add the start or end node as a joker */
+                if (edgeNodes.map(({shapeName}) => shapeName).concat(availableShapes).includes(node.shapeName)) {
                     continue;
                 }
-                for (let nodeThatShouldNotHaveLinkWithJoker of edgeNodes) {
-                    if (LevelGenerator.getNodesOfSameRotation(nodeThatShouldNotHaveLinkWithJoker, nodesById).every((potentialCollisionFreeNode) => linksById[nodeId].every((link) => link.target !== potentialCollisionFreeNode.id))) {
-                        availableShapesForLevel.push(nodesById[nodeId].shapeName);
-                        return _.shuffle(availableShapesForLevel);
-                    }
-                }
+                availableShapesForLevel.push(nodesById[nodeId].shapeName);
+                break;
             }
         }
-        return availableShapesForLevel;
+        return _.shuffle(availableShapesForLevel);
     }
 
     static getLinksFromNodeToNodeGroup(availableLinks, node, nodeGroup) {
