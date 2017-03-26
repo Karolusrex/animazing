@@ -34,22 +34,40 @@ export class LevelStorage {
         let processedLevels =
             _.uniqBy(_.shuffle(interestingRawLevels), 'inbetweenSpaces').concat(_.uniqBy(_.shuffle(interestingRawLevels), 'inbetweenSpaces'))
             .sort(({inbetweenSpaces: otherNoSpaces, availableShapes: {length: otherNoAvailableShapes}}, {inbetweenSpaces, availableShapes: {length: noAvailableShapes}}) => ((otherNoSpaces) - (inbetweenSpaces)))
-            .map(({availableShapes, startShape, endShape, inbetweenSpaces, clockwiseRotate, cheatAnswer}) => {
+            .map(({availableShapes, startShape, endShape, inbetweenSpaces, cheatAnswer}) => {
             return {
                 availableShapes: availableShapes.map((shapeName) => ShapeSpecs[shapeName]),
                 startShape: LevelStorage.getShapeFromStored(startShape),
                 endShape: LevelStorage.getShapeFromStored(endShape),
                 inbetweenSpaces,
-                cheatAnswer,
-                clockwiseRotate: clockwiseRotate.map((pair) => pair.map((storedShape) => LevelStorage.getShapeFromStored(storedShape)))
+                cheatAnswer
             };
         });
         return processedLevels;
     }
 
+    /* Check for undefined if current localStorage data is inconsistent. In that case, print a warning*/
     static getShapeFromStored(stored) {
-        let shape =  turnShape(stored.rotation, ShapeSpecs[stored.shapeName])
-        shape._shapeName = stored.shapeName;
-        return shape;
+        let shapeSpec = ShapeSpecs[stored.shapeName];
+        if(shapeSpec){
+            let shape = turnShape(stored.rotation, shapeSpec);
+            if(shape){
+                return shape;
+            } else {
+                console.warn('localStorage data incosistent with hard-coded state. Please regenerate levels');
+            }
+        } else {
+            console.warn('localStorage data incosistent with hard-coded state. Please regenerate levels');
+        }
+    }
+
+    static getCollisionGraph() {
+        let textualGraph = localStorage.getItem('collisionGraph');
+        if(textualGraph){
+            return JSON.parse(textualGraph);
+        } else {
+            console.warn('Invalid collision graph in local storage');
+        }
+        return {};
     }
 }

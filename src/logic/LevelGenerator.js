@@ -13,6 +13,7 @@ import {View}               from 'arva-js/core/View.js';
 import Surface              from 'famous/core/Surface.js';
 import {layout, options}    from 'arva-js/layout/decorators.js';
 
+import {RotationDirectionManager} from '../util/RotationDirectionManager.js';
 
 /* We extend view because of possibility of debugging by seeing the different collision modes possible */
 export class LevelGenerator extends View {
@@ -20,6 +21,25 @@ export class LevelGenerator extends View {
     @layout.translate(0, 0, -10)
     @layout.fullSize()
     background = new Surface({ properties: { backgroundColor: 'rgb(178, 178, 178)' } });
+
+    @layout.stick.center()
+    @layout.size(undefined, 200)
+    statusIndicator = new Surface({});
+
+    static rotationMode = {
+        /**
+         * All rotations possible
+         */
+        all: 'all',
+        /**
+         * Can only rotate half-way
+         */
+        halfOnly: 'halfOnly',
+        /**
+         * No rotation available
+         */
+        noRotation: 'noRotation'
+    };
 
 
     constructor(options) {
@@ -68,6 +88,12 @@ export class LevelGenerator extends View {
             }
             checkedShapes[shapeName] = true;
             for (let otherShapeName in ShapeSpecs) {
+                let unrotatedShape = ShapeSpecs[shapeName];
+                let unrotatedOtherShape = ShapeSpecs[otherShapeName];
+                /* If they are different type of objects, so one doesn't have the same stick count as the other, then skip */
+                if (unrotatedShape.getStickCount() !== unrotatedOtherShape.getStickCount()) {
+                    continue;
+                }
                 if (checkedShapes[otherShapeName]) {
                     continue;
                 }
@@ -148,7 +174,7 @@ export class LevelGenerator extends View {
             if (getNextContextEmitter) {
                 context = await new Promise((resolve) => getNextContextEmitter.once('newContext', resolve));
             }
-            if (!associateShapesInInterval(i, shapePair, context, 1, false, doClickwiseRotation ? [shapePair] : [[]], [100, 100, 0], [200, 200])) {
+            if (!associateShapesInInterval(i, shapePair, context, 1, doClickwiseRotation,false, [100, 100, 0],  [200, 200])) {
                 return true;
             }
         }
@@ -207,8 +233,7 @@ export class LevelGenerator extends View {
                 startShape: LevelGenerator.shapeFromNode(startNode),
                 availableShapes: [],
                 inbetweenSpaces: -1,
-                cheatAnswer: [startNode.id],
-                clockwiseRotate: []
+                cheatAnswer: [startNode.id]
             };
             let newLevels = await LevelGenerator.searchForLevel(
                 startNode,
@@ -229,28 +254,28 @@ export class LevelGenerator extends View {
         /* The levels are going to be nested and nasty, can have undefined things so filter that out */
         foundLevels = _.flattenDeep(foundLevels).filter((level) => !!level);
         console.log(`Found ${foundLevels.length} levels`);
+        console.timeEnd('Finding all levels');
         localStorage.setItem("levels", JSON.stringify(foundLevels));
     }
 
 
-    static async searchForLevel(startNode, currentNode, availableLinks, skipList, levelData, visitedNodes, linksByStartNodeId, nodesById) {
+    static async searchForLevel(startNode, currentNode, availableLinks, skipByShapeName, levelData, visitedNodes, linksByStartNodeId, nodesById, rotationMode, debugView) {
+        /* Uniqify the links because we are about to loop over the shapes, treating different rotation modes as the same */
         let unsortedOutgoingLinks = LevelGenerator.uniquifyLinksByShapeTargetName(linksByStartNodeId[currentNode.id] || []);
         console.log("Searching for level from node " + currentNode.id + ", amount of spaces : " + levelData.inbetweenSpaces);
         /* Sort link and choose the target node that has the least amount of outgoing links */
         let outgoingLinks = LevelGenerator.sortLinksForRareFirst(unsortedOutgoingLinks, linksByStartNodeId);
         let { availableShapes } = levelData;
+        debugView.statusIndicator.setContent([startNode.id].concat(availableShapes).join(' -> '));
         let availableShapesForLevel = LevelGenerator.createAvailableShapesForLevel(availableShapes, startNode, currentNode, linksByStartNodeId, nodesById);
         let levelDataInCaseOfBailOut = levelData.inbetweenSpaces > 0 ? {
-            ...levelData,
-            endShape: LevelGenerator.shapeFromNode(currentNode),
-            availableShapes: availableShapesForLevel,
-            clockwiseRotate: LevelGenerator.aggregateClockwiseRotations(
-                LevelGenerator.mergeLinkDicts(availableLinks, LevelGenerator.getListDictFromNodeList([..._.flatten(availableShapesForLevel.map((shapeName) => LevelGenerator.getNodesOfSameRotation(nodesById[`${shapeName}_0`], nodesById))), ...LevelGenerator.getNodesOfSameRotation(startNode, nodesById)], linksByStartNodeId)),
-                nodesById)
-        } : null;
+                ...levelData,
+                endShape: LevelGenerator.shapeFromNode(currentNode),
+                availableShapes: availableShapesForLevel
+            } : null;
 
 
-        if (levelData.inbetweenSpaces >= 6 || !outgoingLinks.length || skipList[currentNode.shapeName]) {
+        if (levelData.inbetweenSpaces >= 4 || !outgoingLinks.length || skipByShapeName[currentNode.shapeName]) {
             return levelDataInCaseOfBailOut;
         }
 
@@ -288,16 +313,18 @@ export class LevelGenerator extends View {
                 cheatAnswer: levelData.cheatAnswer.concat(newPotentialNode)
             };
             /* Await in order to prevent the browser from not responding to interruptions */
-            await new Promise((resolve) => setTimeout(resolve,50));
+            await new Promise((resolve) => setTimeout(resolve, 35));
             let newLevels = await LevelGenerator.searchForLevel(
                 startNode,                                                              //  Stays the same
                 newPotentialNode,                                                       //  "currentNode"
                 potentialLinkCollection,                                                //  "availableLinks"
-                skipList,                                                               //  Stays the same
+                skipByShapeName,                                                        //  Stays the same
                 newLevelData,                                                           //  "levelData"
                 { ...visitedNodes, [newPotentialNode.id]: true },                       //  "visitedNodeTypes"
                 linksByStartNodeId,                                                     //  Stays the same
-                nodesById                                                               //  Stays the same
+                nodesById,                                                              //  Stays the same
+                rotationMode,                                                           //  Stays the same
+                debugView                                                               //  Stays the same
             );
 
             levelsToReturn = levelsToReturn.concat(

@@ -16,6 +16,19 @@ export class ShapeSpec {
         });
     }
 
+    toString() {
+        let shapeName = this._shapeName || this.getUnrotated()._shapeName;
+        let quarterTurns = this._quarterTurns;
+        return `${shapeName}_${quarterTurns}`;
+    }
+
+    setShapeName(shapeName) {
+        this._shapeName = shapeName;
+    }
+
+    getStickCount() {
+        return this._keys.length;
+    }
 
     /**
      * Loops over the specs in a deterministic order
@@ -51,6 +64,53 @@ export class ShapeSpec {
 const stickDimensions = [100, 10];
 
 export class ShapeSpecCollection {
+/*
+    /!* Two sticked shapes *!/
+    chineeseSticks = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, -Math.PI / 3],
+                translate: [35, -70, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, Math.PI / 3],
+                translate: [-35, -70, 0],
+                size: stickDimensions
+            }
+        }
+    });
+
+    parallel = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, Math.PI],
+                translate: [35, 70, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, Math.PI],
+                translate: [-35, -70, 0],
+                size: stickDimensions
+            }
+        }
+    });
+
+    t = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, 0],
+                translate: [35, 70, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, Math.PI],
+                translate: [-35, -70, 0],
+                size: stickDimensions
+            }
+        }
+    });*/
+/* Three sticked shapes */
     hamburger = new ShapeSpec({
         shape: {
             topBar: {
@@ -281,4 +341,15 @@ export class ShapeSpecCollection {
     });
 }
 
-export const ShapeSpecs = new ShapeSpecCollection();
+
+
+let shapeCollection = new ShapeSpecCollection();
+export const ShapeSpecs = shapeCollection;
+
+
+for(let shapeName in shapeCollection){
+    /* Set the shape names so that every shape knows it owns name */
+    shapeCollection[shapeName].setShapeName(shapeName);
+}
+
+

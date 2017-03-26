@@ -20,8 +20,8 @@ export class LevelGeneratorController extends Controller {
         }
     }
 
-    FindLevels() {
-        return LevelGenerator.findLevels();
+    FindLevels(rotationMode = LevelGenerator.all) {
+        return LevelGenerator.findLevels(rotationMode);
     }
 
 }

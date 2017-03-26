@@ -197,7 +197,7 @@ export class ShapeSelector extends View {
             this.showRenderable('rotateLeftButton', shouldCollapse);
             this.showRenderable('okButton', shouldCollapse);
             this.showRenderable('cancelButton', shouldCollapse);
-        }
+        };
         if(delayButtonModification){
             Timer.setTimeout(buttonModification, this._transition.duration*1.5);
         } else {

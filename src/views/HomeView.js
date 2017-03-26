@@ -9,19 +9,15 @@ import {Snappable}              from '../components/Snappable.js';
 import {ShapeSpecs}              from '../logic/ShapeSpecs.js';
 import {
     associateShapesInInterval,
-    turnShape,
-    specBoundingBoxSize, shapeBoundingBox
-}        from '../util/SpecProcessing.js';
+}                               from '../util/SpecProcessing.js';
 import {Shape}                  from '../components/Shape.js';
 import {ShapeSelector}          from '../components/ShapeSelector.js';
 import {ShapeGrid}              from '../components/ShapeGrid.js';
 import {ShapeSlider}            from '../components/ShapeSlider.js';
 import {Text}                   from 'arva-kit/text/Text.js';
 import {LevelStorage}           from '../logic/LevelStorage.js';
-/*import {levels}                 from '../logic/Levels.js';*/
 import {OutlineTextButton}      from 'arva-kit/buttons/OutlineTextButton.js'
 
-let levels = LevelStorage.getLevels();
 
 insertRule('.bar::after', {
     webkitBoxShadow: '1px 30px 47px 0px rgba(178,97,137,1)',
@@ -33,6 +29,9 @@ insertRule('.bar:hover::after', {
     opacity: 1
 });
 
+//TODO Remove global variable
+let levels               = window.levels = LevelStorage.getLevels();
+let collisionGraph       = LevelStorage.getCollisionGraph();
 
 @layout.dockPadding(5, 10, 10, 10)
 export class HomeView extends View {
@@ -285,7 +284,13 @@ export class HomeView extends View {
                     }
                 }
                 /* If there is a collision, go into dead mode */
-                if (!associateShapesInInterval(inputPosition, this._selectedShapeSequence, context, this.maxRange, this._isDead ? inputPosition > this._diedAtPosition : false, levels[this._currentLevelIndex].clockwiseRotate, [0, context.size[1] * 0.65 + 10 + this.getResolvedSize('instruction')[1], 0], [animatingShapeSize, animatingShapeSize])) {
+                if (!associateShapesInInterval(inputPosition,
+                        this._selectedShapeSequence,
+                        context,
+                        this.maxRange, undefined,
+                        this._isDead ? inputPosition > this._diedAtPosition : false,
+                        [0, context.size[1] * 0.65 + 10 + this.getResolvedSize('instruction')[1], 0],
+                        [animatingShapeSize, animatingShapeSize])) {
                     if (!this._isDead) {
                         this._diedAtPosition = inputPosition;
                         this._makeDeadAnimation();

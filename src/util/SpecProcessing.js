@@ -2,8 +2,9 @@
  * Created by lundfall on 5/31/16.
  */
 
-import {ShapeSpec}      from '../logic/ShapeSpecs.js';
-import {ShapeGrid}      from '../components/ShapeGrid.js';
+import {ShapeSpec}                      from '../logic/ShapeSpecs.js';
+import {ShapeGrid}                      from '../components/ShapeGrid.js';
+import {RotationDirectionManager}       from './RotationDirectionManager';
 
 export let specAttributes = {
     rotate: {dimensions: 3, defaultValue: [0, 0, 0]},
@@ -184,7 +185,6 @@ export function calcSpecCorners(spec, doBackwardsRotation = false) {
 
 //For boxes
 export function specBoundingBoxSize(spec) {
-    let boundingBoxSize = [...spec.size];
     let {rotate = specAttributes.rotate.defaultValue} = spec;
     let corners = calcSpecCorners(spec);
 
@@ -220,15 +220,16 @@ export function specBoundingBoxSize(spec) {
  * @param shapes
  * @param context
  * @param maxRange
+ * @param clockwiseRotate
  * @param displayOpaque if the shapes should be displayed with an opacity
- * @param clockwiseRotateSpecialCases Different combination that overrides standard behaviour of rotation
  * @param extraTranslate Adds an extra translate
+ * @param size
  * @returns {boolean} collisionFree if there was no collision
  */
-export function associateShapesInInterval(input, shapes, context, maxRange, displayOpaque = false, clockwiseRotateSpecialCases, extraTranslate = [0, 0, 0], size) {
+//TODO Cleanup function arguments
+export function associateShapesInInterval(input, shapes, context, maxRange, clockwiseRotate, displayOpaque = false, extraTranslate = [0, 0, 0], size) {
 
     let allSpecs = [];
-    let resultingSpec = {};
     let i = 0;
     shapes[0].forEach((bar) => {
         let specCombo = [];
@@ -245,16 +246,8 @@ export function associateShapesInInterval(input, shapes, context, maxRange, disp
         specCombo.push(shapeCombo[0][bar]);
         specCombo.push(shapeCombo[1][bar]);
         let targetValue = maxRange / (shapes.length - 1);
-        let clockwiseRotate = false;
-        if (clockwiseRotateSpecialCases) {
-            clockwiseRotate = !!clockwiseRotateSpecialCases.find((specialCase) => {
-                let [startShape, endShape, rotationState, renderableName] = specialCase;
-                let shapesForCase = [startShape, endShape];
-                if (!rotationState && !renderableName && shapesForCase[0] !== undefined) {
-                    // return [0, 1].every((index) => shapesForCase[index].isSameUnrotated(shapeCombo[index]));
-                    return [0, 1].every((index) => shapesForCase[index].isSameAs(shapeCombo[index]));
-                }
-            });
+        if(clockwiseRotate === undefined){
+            clockwiseRotate = RotationDirectionManager.shouldShapesClockwiseRotate(...shapeCombo);
         }
         let spec = mergeSpecs(...specCombo,
             inbetween ? input - Math.min(Math.floor(input / (targetValue)), shapes.length - 2) * (targetValue) : targetValue,
@@ -268,7 +261,7 @@ export function associateShapesInInterval(input, shapes, context, maxRange, disp
         i++;
     });
     /* For collision handling */
-    let hasCollision = doBoxesCollide(allSpecs[1], allSpecs[2]) || doBoxesCollide(allSpecs[1], allSpecs[0]) || doBoxesCollide(allSpecs[0], allSpecs[2]);
+    let hasCollision = !allSpecs.every((firstSpec, index) => allSpecs.filter((_, innerIndex) => index !== innerIndex).every((innerSpec) => !doBoxesCollide(firstSpec, innerSpec)));
     return !hasCollision;
 }
 
@@ -322,6 +315,7 @@ export function mergeSpecs(startSpec, endSpec, t, goalT, easing, clockwiseRotate
  * @param rotation
  * @param otherRotation
  * @param maxRotation
+ * @param clockwiseRotate
  */
 export function normalizeRotationToOther(rotation, otherRotation, maxRotation = Math.PI * 2, clockwiseRotate = false) {
     let numberOfTurnsFloat = (rotation - otherRotation) / maxRotation;

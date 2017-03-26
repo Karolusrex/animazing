@@ -30,9 +30,6 @@ export class ShapeSlider extends View {
             backgroundColor: 'rgba(255, 255, 255, 0.9)'
         }
     });
-    /*@layout.translate(0, 0, -20)
-    @layout.fullSize()
-    bg = new Surface({properties: {backgroundColor: 'red'}});*/
 
     setSelection(index, shapeSpec) {
         this[`circle${index}`].showShape(shapeSpec);
