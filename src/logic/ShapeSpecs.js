@@ -22,6 +22,14 @@ export class ShapeSpec {
         return `${shapeName}_${quarterTurns}`;
     }
 
+    /**
+     *
+     * @returns {*|number}
+     */
+    getNoQuarterTurns() {
+        return this._quarterTurns;
+    }
+
     setShapeName(shapeName) {
         this._shapeName = shapeName;
     }
@@ -58,6 +66,10 @@ export class ShapeSpec {
 
     isSameAs(otherShapeSpec) {
         return this.isSameUnrotated(otherShapeSpec) && (this._quarterTurns % 4) === (otherShapeSpec._quarterTurns % 4);
+    }
+
+    setNoQuarterTurns(quarterTurns) {
+        this._quarterTurns = quarterTurns;
     }
 }
 
@@ -110,234 +122,232 @@ export class ShapeSpecCollection {
         }
     });
     /* Three sticked shapes */
-    /*hamburger = new ShapeSpec({
-     shape: {
-     topBar: {
-     rotate: [0, 0, 0],
-     translate: [0, -40, 0],
-     size: stickDimensions
-     },
-     midBar: {
-     rotate: [0, 0, 0],
-     translate: [0, 0, 0],
-     size: stickDimensions
-     },
-     bottomBar: {
-     rotate: [0, 0, 0],
-     translate: [0, 40, 0],
-     size: stickDimensions
-     }
-     }
-     });
+    hamburger = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, 0],
+                translate: [0, -40, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, 0],
+                translate: [0, 0, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, 0],
+                translate: [0, 40, 0],
+                size: stickDimensions
+            }
+        }
+    });
 
 
+    pi = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, 0],
+                translate: [-70, 20, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, 0],
+                translate: [-70, -20, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, Math.PI / 2],
+                translate: [30, 0, 0],
+                size: stickDimensions
+            }
+        }
+    });
+
+    fallenHamburger = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, Math.PI / 2],
+                translate: [-40, 40, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, Math.PI / 2],
+                translate: [0, 40, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, Math.PI / 2],
+                translate: [40, 40, 0],
+                size: stickDimensions
+            }
+        }
+    });
+
+    upArrow = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, Math.PI / 3],
+                translate: [35, -30, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, -Math.PI / 3],
+                translate: [-35, -30, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, 0],
+                translate: [0, 30, 0],
+                size: stickDimensions
+            }
+        }
+    });
 
 
-     pi = new ShapeSpec({
-     shape: {
-     topBar: {
-     rotate: [0, 0, 0],
-     translate: [-70, 20, 0],
-     size: stickDimensions
-     },
-     midBar: {
-     rotate: [0, 0, 0],
-     translate: [-70, -20, 0],
-     size: stickDimensions
-     },
-     bottomBar: {
-     rotate: [0, 0, Math.PI / 2],
-     translate: [30, 0, 0],
-     size: stickDimensions
-     }
-     }
-     });
+    capitalN = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, -Math.PI / 3],
+                translate: [75, -50, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, Math.PI / 3],
+                translate: [0, -50, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, -Math.PI / 3],
+                translate: [-75, -50, 0],
+                size: stickDimensions
+            }
+        }
+    });
 
-     fallenHamburger = new ShapeSpec({
-     shape: {
-     topBar: {
-     rotate: [0, 0, Math.PI / 2],
-     translate: [-40, 40, 0],
-     size: stickDimensions
-     },
-     midBar: {
-     rotate: [0, 0, Math.PI / 2],
-     translate: [0, 40, 0],
-     size: stickDimensions
-     },
-     bottomBar: {
-     rotate: [0, 0, Math.PI / 2],
-     translate: [40, 40, 0],
-     size: stickDimensions
-     }
-     }
-     });
-
-     upArrow = new ShapeSpec({
-     shape: {
-     topBar: {
-     rotate: [0, 0, Math.PI / 3],
-     translate: [35, -30, 0],
-     size: stickDimensions
-     },
-     midBar: {
-     rotate: [0, 0, -Math.PI / 3],
-     translate: [-35, -30, 0],
-     size: stickDimensions
-     },
-     bottomBar: {
-     rotate: [0, 0, 0],
-     translate: [0, 30, 0],
-     size: stickDimensions
-     }
-     }
-     });
+    hat = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, Math.PI / 3],
+                translate: [35, 20, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, -Math.PI / 3],
+                translate: [-35, 20, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, 0],
+                translate: [0, -45, 0],
+                size: stickDimensions
+            }
+        }
+    });
 
 
-     capitalN = new ShapeSpec({
-     shape: {
-     topBar: {
-     rotate: [0, 0, - Math.PI / 3],
-     translate: [75, -50, 0],
-     size: stickDimensions
-     },
-     bottomBar: {
-     rotate: [0, 0, Math.PI / 3],
-     translate: [0, -50, 0],
-     size: stickDimensions
-     },
-     midBar: {
-     rotate: [0, 0, -Math.PI / 3],
-     translate: [-75, -50, 0],
-     size: stickDimensions
-     }
-     }
-     });
+    sauron = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, Math.PI / 5],
+                translate: [-30, 30, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, 0],
+                translate: [0, 0, 0],
+                size: stickDimensions
+            },
 
-     hat = new ShapeSpec({
-     shape: {
-     topBar: {
-     rotate: [0, 0, Math.PI / 3],
-     translate: [35, 20, 0],
-     size: stickDimensions
-     },
-     bottomBar: {
-     rotate: [0, 0, - Math.PI / 3],
-     translate: [-35, 20, 0],
-     size: stickDimensions
-     },
-     midBar: {
-     rotate: [0, 0, 0],
-     translate: [0, -45, 0],
-     size: stickDimensions
-     }
-     }
-     });
+            bottomBar: {
+                rotate: [0, 0, Math.PI / 5],
+                translate: [30, -30, 0],
+                size: stickDimensions
+            }
+        }
+    });
 
+    insect = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, -Math.PI / 3],
+                translate: [35, -70, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, Math.PI / 3],
+                translate: [-35, -70, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, Math.PI / 2],
+                translate: [0, 50, 0],
+                size: stickDimensions
+            }
+        }
+    });
 
-     sauron = new ShapeSpec({
-     shape: {
-     topBar: {
-     rotate: [0, 0, Math.PI / 5],
-     translate: [-30, 30, 0],
-     size: stickDimensions
-     },
-     midBar: {
-     rotate: [0, 0, 0],
-     translate: [0, 0, 0],
-     size: stickDimensions
-     },
+    line = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, -Math.PI / 4],
+                translate: [-60, 60, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, -Math.PI / 4],
+                translate: [60, -60, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, Math.PI / 4],
+                translate: [0, 0, 0],
+                size: stickDimensions
+            }
+        }
+    });
 
-     bottomBar: {
-     rotate: [0, 0, Math.PI / 5],
-     translate: [30, -30, 0],
-     size: stickDimensions
-     }
-     }
-     });
+    mess = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, 0],
+                translate: [-75, -55, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, 0],
+                translate: [65, 65, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, Math.PI / 2],
+                translate: [0, 40, 0],
+                size: stickDimensions
+            }
+        }
+    });
 
-     insect = new ShapeSpec({
-     shape: {
-     topBar: {
-     rotate: [0, 0, -Math.PI / 3],
-     translate: [35, -70, 0],
-     size: stickDimensions
-     },
-     midBar: {
-     rotate: [0, 0, Math.PI / 3],
-     translate: [-35, -70, 0],
-     size: stickDimensions
-     },
-     bottomBar: {
-     rotate: [0, 0, Math.PI / 2],
-     translate: [0, 50, 0],
-     size: stickDimensions
-     }
-     }
-     });
-
-     line = new ShapeSpec({
-     shape: {
-     topBar: {
-     rotate: [0, 0, -Math.PI / 4],
-     translate: [-60, 60, 0],
-     size: stickDimensions
-     },
-     bottomBar: {
-     rotate: [0, 0, -Math.PI / 4],
-     translate: [60, -60, 0],
-     size: stickDimensions
-     },
-     midBar: {
-     rotate: [0, 0, Math.PI / 4],
-     translate: [0, 0, 0],
-     size: stickDimensions
-     }
-     }
-     });
-
-     mess = new ShapeSpec({
-     shape: {
-     topBar: {
-     rotate: [0, 0, 0],
-     translate: [-75, -55, 0],
-     size: stickDimensions
-     },
-     bottomBar: {
-     rotate: [0, 0, 0],
-     translate: [65, 65, 0],
-     size: stickDimensions
-     },
-     midBar: {
-     rotate: [0, 0, Math.PI / 2],
-     translate: [0, 40, 0],
-     size: stickDimensions
-     }
-     }
-     });
-
-     upPointArrow = new ShapeSpec({
-     shape: {
-     topBar: Object.assign({}, this.upArrow.midBar, {translate: [this.upArrow.midBar.translate[0], ...this.upArrow.midBar.translate.slice(1)]}),
-     midBar: {
-     rotate: [0, 0, Math.PI / 2],
-     translate: [0, 55, 0],
-     size: stickDimensions
-     },
-     bottomBar: Object.assign({}, this.upArrow.topBar, {translate: [this.upArrow.topBar.translate[0], ...this.upArrow.topBar.translate.slice(1)]})
-     }
-     });
-     shuffledUpPointArrow = new ShapeSpec({
-     shape: {
-     topBar: Object.assign({}, this.upArrow.midBar, {translate: [this.upArrow.midBar.translate[0], ...this.upArrow.midBar.translate.slice(1)]}),
-     midBar: Object.assign({}, this.upArrow.topBar, {translate: [this.upArrow.topBar.translate[0], ...this.upArrow.topBar.translate.slice(1)]}),
-     bottomBar: {
-     rotate: [0, 0, Math.PI / 2],
-     translate: [0, 55, 0],
-     size: stickDimensions
-     }
-     }
-     });*/
+    upPointArrow = new ShapeSpec({
+        shape: {
+            topBar: Object.assign({}, this.upArrow.midBar, { translate: [this.upArrow.midBar.translate[0], ...this.upArrow.midBar.translate.slice(1)] }),
+            midBar: {
+                rotate: [0, 0, Math.PI / 2],
+                translate: [0, 55, 0],
+                size: stickDimensions
+            },
+            bottomBar: Object.assign({}, this.upArrow.topBar, { translate: [this.upArrow.topBar.translate[0], ...this.upArrow.topBar.translate.slice(1)] })
+        }
+    });
+    shuffledUpPointArrow = new ShapeSpec({
+        shape: {
+            topBar: Object.assign({}, this.upArrow.midBar, { translate: [this.upArrow.midBar.translate[0], ...this.upArrow.midBar.translate.slice(1)] }),
+            midBar: Object.assign({}, this.upArrow.topBar, { translate: [this.upArrow.topBar.translate[0], ...this.upArrow.topBar.translate.slice(1)] }),
+            bottomBar: {
+                rotate: [0, 0, Math.PI / 2],
+                translate: [0, 55, 0],
+                size: stickDimensions
+            }
+        }
+    });
 }
 
 

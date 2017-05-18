@@ -15,6 +15,29 @@ export let specAttributes = {
     opacity: {dimensions: 1, defaultValue: 1}
 };
 
+export const RotationMode = {
+    /**
+     * All rotations possible
+     */
+    all: 'all',
+    /**
+     * Can only rotate half-way
+     */
+    halfOnly: 'halfOnly',
+    /**
+     * No rotation available
+     */
+    noRotation: 'noRotation'
+};
+
+export const RotationStates =
+{
+    [RotationMode.all]: [0, 1, 2, 3],
+    [RotationMode.halfOnly]: [0, 2],
+    [RotationMode.noRotation]: [0]
+};
+
+
 export function doBoxesCollide(box1, box2, debugContext) {
     let boxes = [box1, box2];
     let axes = [];

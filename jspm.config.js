@@ -8,7 +8,7 @@ SystemJS.config({
   browserConfig: {
     "baseURL": "/"
   },
-  "arvaOptions": {
+  arvaOptions: {
     "fileMappings": {
       "github:bizboard/arva-js@develop": "../arva-js",
       "github:bizboard/famous-flex@master": "../famous-flex"
@@ -260,6 +260,9 @@ SystemJS.config({
       "main": "shapeshifter.js",
       "format": "esm"
     }
+  },
+  map: {
+    "bizboard/arva-kit": "bitbucket:bizboard/arva-kit@master"
   }
 });
 
@@ -275,7 +278,6 @@ SystemJS.config({
     "arva-kit": "bitbucket:bizboard/arva-kit@master",
     "assert": "npm:jspm-nodelibs-assert@0.2.0",
     "babel-polyfill": "npm:babel-polyfill@6.20.0",
-    "bizboard/arva-kit": "bitbucket:bizboard/arva-kit@master",
     "buffer": "npm:jspm-nodelibs-buffer@0.2.1",
     "child_process": "npm:jspm-nodelibs-child_process@0.2.0",
     "clean-css": "npm:clean-css@3.4.8",
@@ -297,8 +299,8 @@ SystemJS.config({
     "module": "npm:jspm-nodelibs-module@0.2.0",
     "net": "npm:jspm-nodelibs-net@0.2.0",
     "os": "npm:jspm-nodelibs-os@0.2.0",
-    "path": "npm:jspm-nodelibs-path@0.2.1",
-    "process": "npm:jspm-nodelibs-process@0.2.0",
+    "path": "npm:jspm-nodelibs-path@0.2.0",
+    "process": "github:jspm/nodelibs-process@0.2.0-alpha",
     "stream": "npm:jspm-nodelibs-stream@0.2.0",
     "string_decoder": "npm:jspm-nodelibs-string_decoder@0.2.0",
     "text": "github:systemjs/plugin-text@0.0.8",
@@ -335,7 +337,8 @@ SystemJS.config({
         "ordered-hashmap": "npm:ordered-hashmap@1.0.0",
         "request-animation-frame-mock": "github:erykpiast/request-animation-frame-mock@0.1.8",
         "xml2js": "npm:xml2js@0.4.17",
-        "fastclick": "npm:fastclick@1.0.6"
+        "fastclick": "npm:fastclick@1.0.6",
+        "lodash-decorators": "npm:lodash-decorators@3.0.2"
       }
     },
     "npm:amdefine@1.0.0": {
@@ -774,6 +777,11 @@ SystemJS.config({
       "map": {
         "base64url": "npm:base64url@2.0.0",
         "safe-buffer": "npm:safe-buffer@5.0.1"
+      }
+    },
+    "npm:lodash-decorators@3.0.2": {
+      "map": {
+        "lodash": "npm:lodash@4.15.0"
       }
     }
   }

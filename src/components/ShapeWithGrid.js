@@ -109,6 +109,10 @@ export class ShapeWithGrid extends View {
     }
 
 
+    resetRotation() {
+        this.setRotation(this.getSpec().getNoQuarterTurns(), true);
+    }
+
     setRotation(rotation, instant = false) {
         this._targetRotation = rotation;
         /* rotate the shortest way */

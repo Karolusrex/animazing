@@ -1,12 +1,15 @@
-import Surface              from 'famous/core/Surface.js';
-import Timer                from 'famous/utilities/Timer.js';
-import AnimationController  from 'famous-flex/AnimationController.js';
+import Surface                  from 'famous/core/Surface.js';
+import Timer                    from 'famous/utilities/Timer.js';
+import AnimationController      from 'famous-flex/AnimationController.js';
 
-import {View}               from 'arva-js/core/View.js';
-import {layout, options}    from 'arva-js/layout/decorators.js';
+import {Text}                   from 'arva-kit/text/Text.js';
+import {OutlineTextButton}      from 'arva-kit/buttons/OutlineTextButton.js'
+
+import {View}                   from 'arva-js/core/View.js';
+import {layout, options, event} from 'arva-js/layout/decorators.js';
 import insertRule               from 'insert-rule';
 import {Snappable}              from '../components/Snappable.js';
-import {ShapeSpecs}              from '../logic/ShapeSpecs.js';
+import {ShapeSpecs}             from '../logic/ShapeSpecs.js';
 import {
     associateShapesInInterval,
 }                               from '../util/SpecProcessing.js';
@@ -14,9 +17,9 @@ import {Shape}                  from '../components/Shape.js';
 import {ShapeSelector}          from '../components/ShapeSelector.js';
 import {ShapeGrid}              from '../components/ShapeGrid.js';
 import {ShapeSlider}            from '../components/ShapeSlider.js';
-import {Text}                   from 'arva-kit/text/Text.js';
+
 import {LevelStorage}           from '../logic/LevelStorage.js';
-import {OutlineTextButton}      from 'arva-kit/buttons/OutlineTextButton.js'
+import {RotationMode}           from '../util/SpecProcessing';
 
 
 insertRule('.bar::after', {
@@ -30,8 +33,8 @@ insertRule('.bar:hover::after', {
 });
 
 //TODO Remove global variable
-let levels               = window.levels = LevelStorage.getLevels();
-let collisionGraph       = LevelStorage.getCollisionGraph();
+let levels = window.levels = LevelStorage.getLevels();
+let collisionGraph = LevelStorage.getCollisionGraph();
 
 @layout.dockPadding(5, 10, 10, 10)
 export class HomeView extends View {
@@ -58,7 +61,7 @@ export class HomeView extends View {
                 return ({ ...AnimationController.Animation.Slide.Down(...arguments), opacity: 0 });
             }
         },
-        /* Hide animation gives the app a slow feel */
+        /* Hide animation gives the app a slow feel, so it's made instant*/
         hide: { transition: { duration: 0 } }
     })
     @layout.size(~100, 40)
@@ -89,6 +92,31 @@ export class HomeView extends View {
         });
     }
 
+    @layout.dock.fill()
+    shapeSelector = this._createShapeSelectorFromLevel(0);
+
+    @event.on('shapeChanged', function (index, spec, completeSequence) {
+        if (completeSequence) {
+            this._onSelectionComplete(completeSequence);
+        } else {
+            this.instruction.setContent(this.instructions.initial);
+        }
+    })
+    @event.on('modifyShape', function (index, forbiddenShapes) {
+        /* If we are already running a sequence, then cancel this and go into choosing mode again */
+        if (this._sliding) {
+            this._cancelSlide();
+        }
+        this.shapeSelector.offerSelection(forbiddenShapes);
+        /* We store the variable this._modifyingShapeIndex to take into account that the user can cancel */
+        if (!this._modifyingShapeIndex) {
+            this.shapeSelector.once('shapeSelected', (spec) => {
+                this.shapeSlider.setSelection(this._modifyingShapeIndex, spec);
+                this._modifyingShapeIndex = undefined;
+            });
+        }
+        this._modifyingShapeIndex = index;
+    })
     @layout.animate({
         hide: {
             animation: function () {
@@ -103,9 +131,6 @@ export class HomeView extends View {
     @layout.dock.top(0.4, 10)
     shapeSlider = this._createShapeSliderFromLevel(0);
 
-    @layout.dock.fill()
-    shapeSelector = this._createShapeSelectorFromLevel(0);
-
     constructor(options = {}) {
         super(options);
         this.layout.options.alwaysLayout = true;
@@ -118,8 +143,8 @@ export class HomeView extends View {
         this.on('nextLevel', () => {
             let newLevel = levels[++this._currentLevelIndex];
             window.currentLevel = newLevel;
-            this.shapeSelector.setSelection(newLevel.availableShapes);
             this.replaceRenderable('shapeSlider', this._createShapeSliderFromLevel(this._currentLevelIndex));
+            this.shapeSelector.setSelection(newLevel.availableShapes, newLevel.rotationMode);
             this.showRenderable('shapeSlider');
             this._cancelSlide();
             this.instruction.setContent(firstNewLevel ? this.instructions.newLevel : (newLevel.inbetweenSpaces === 1 ? this.instructions.initial : this.instructions.multiple));
@@ -143,38 +168,11 @@ export class HomeView extends View {
             }), bar);
         }
 
-        let firstPartialSelection = true;
         /* Use the 'renderables' to listen for the animationcontroller since the shapeslider itself changes when the level changes */
-        this.renderables.shapeSlider.on('shapeChanged', (index, spec, completeSequence) => {
-            if (completeSequence) {
-                this._onSelectionComplete(completeSequence);
-            } else {
-                firstPartialSelection = false;
-                this.instruction.setContent(firstPartialSelection ? this.instructions.encouragement : this.instructions.initial);
-            }
-        });
-        this.renderables.shapeSlider.on('modifyShape', (index, forbiddenShapes) => {
-
-            /* If we are already running a sequence, then cancel this and go into choosing mode again */
-            if (this._sliding) {
-                this._cancelSlide();
-            }
-
-            this.shapeSelector.offerSelection(forbiddenShapes);
-            /* We store the variable this._modifyingShapeIndex to take into account that the user can cancel */
-            if (!this._modifyingShapeIndex) {
-                this.shapeSelector.once('shapeSelected', (spec) => {
-                    this.shapeSlider.setSelection(this._modifyingShapeIndex, spec);
-                    this._modifyingShapeIndex = undefined;
-                });
-            }
-            this._modifyingShapeIndex = index;
-        });
 
         this.renderables.shapeSelector.on('offerSelection', (shape) => {
             this.instruction.setContent(this.instructions.choose);
         });
-
 
 
         this.renderables.shapeSelector.on('invalidSelection', (shape) => {
@@ -189,6 +187,7 @@ export class HomeView extends View {
         this._initDraggable();
         this._initAnimationBehaviour();
     }
+
 
     _setBoxShadow(boxShadow) {
         for (let renderableName of this._getBarNames()) {
@@ -245,14 +244,21 @@ export class HomeView extends View {
 
 
     _createShapeSelectorFromLevel(levelIndex) {
+        let level = levels[levelIndex];
         return new ShapeSelector({
             showInitially: false,
-            shapeSpecs: levels[levelIndex].availableShapes
+            shapeSpecs: level.availableShapes,
+            rotationMode: level.rotationMode
         });
     }
 
     _createShapeSliderFromLevel(levelIndex) {
-        return new ShapeSlider({ shapeSpecs: [levels[levelIndex].startShape, ...new Array(levels[levelIndex].inbetweenSpaces), levels[levelIndex].endShape] });
+        let level = levels[levelIndex];
+        return new ShapeSlider({
+            rotationMode: level.rotationMode,
+            shapeSpecs: [level.startShape,
+                ...new Array(level.inbetweenSpaces), level.endShape]
+        });
     }
 
     _initAnimationBehaviour() {

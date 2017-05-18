@@ -4,16 +4,17 @@
 import {ShapeSpecs}     from './ShapeSpecs.js';
 import {
     turnShape,
-    associateShapesInInterval
+    associateShapesInInterval,
+    RotationMode,
+    RotationStates
 }
-    from '../util/SpecProcessing.js';
+                        from '../util/SpecProcessing.js';
 import _                from 'lodash';
 import {LevelStorage}   from './LevelStorage.js';
 import {View}               from 'arva-js/core/View.js';
 import Surface              from 'famous/core/Surface.js';
 import {layout, options}    from 'arva-js/layout/decorators.js';
 
-import {RotationDirectionManager} from '../util/RotationDirectionManager.js';
 
 /* We extend view because of possibility of debugging by seeing the different collision modes possible */
 export class LevelGenerator extends View {
@@ -22,24 +23,14 @@ export class LevelGenerator extends View {
     @layout.fullSize()
     background = new Surface({ properties: { backgroundColor: 'rgb(178, 178, 178)' } });
 
+    @layout.translate(0, -200, 0)
+    @layout.stick.center()
+    @layout.size(undefined, 200)
+    rotationMode = new Surface({content: `Rotation mode: ${this.options.rotationMode}`, properties: {textAlign: 'center'}});
+
     @layout.stick.center()
     @layout.size(undefined, 200)
     statusIndicator = new Surface({});
-
-    static rotationMode = {
-        /**
-         * All rotations possible
-         */
-        all: 'all',
-        /**
-         * Can only rotate half-way
-         */
-        halfOnly: 'halfOnly',
-        /**
-         * No rotation available
-         */
-        noRotation: 'noRotation'
-    };
 
 
     constructor(options) {
@@ -208,8 +199,8 @@ export class LevelGenerator extends View {
      * @returns {LevelGenerator}
      */
     static findLevels(rotationMode) {
-        console.time('Finding all levels');
-        let debugView = new LevelGenerator();
+        console.time('Finding all levels for rotation mode', rotationMode);
+        let debugView = new LevelGenerator({rotationMode});
         this._findLevels(rotationMode, debugView);
         return debugView;
     }
@@ -222,7 +213,7 @@ export class LevelGenerator extends View {
         let linksByStartNodeId = LevelGenerator.getLinksByStartNodeId(collisionGraph.links);
         let foundLevels = [];
         let checkedShapeNames = {};
-        for (let startNode of collisionGraph.nodes) {
+        for (let startNode of _.shuffle(collisionGraph.nodes)) {
             /* We don't have to do a new set of levels for each of the 4 rotation states */
             if (checkedShapeNames[startNode.shapeName]) {
                 continue;
@@ -230,10 +221,11 @@ export class LevelGenerator extends View {
             console.group(startNode.shapeName);
 
             let levelData = {
+                rotationMode,
                 startShape: LevelGenerator.shapeFromNode(startNode),
                 availableShapes: [],
                 inbetweenSpaces: -1,
-                cheatAnswer: [startNode.id]
+                cheatAnswer: []
             };
             let newLevels = await LevelGenerator.searchForLevel(
                 startNode,
@@ -269,6 +261,7 @@ export class LevelGenerator extends View {
         debugView.statusIndicator.setContent([startNode.id].concat(availableShapes).join(' -> '));
         let availableShapesForLevel = LevelGenerator.createAvailableShapesForLevel(availableShapes, startNode, currentNode, linksByStartNodeId, nodesById);
         let levelDataInCaseOfBailOut = levelData.inbetweenSpaces > 0 ? {
+                rotationMode,
                 ...levelData,
                 endShape: LevelGenerator.shapeFromNode(currentNode),
                 availableShapes: availableShapesForLevel
@@ -292,7 +285,11 @@ export class LevelGenerator extends View {
                 console.log("already visited node " + newPotentialNode.id + ", bailing out");
                 continue;
             }
-            let nodesOfSameType = LevelGenerator.getNodesOfSameRotation(newPotentialNode, nodesById);
+            if (!RotationStates[rotationMode].includes(newPotentialNode.rotation)) {
+                console.log(`Rotation state of node doesn't match specified restriction, bailing out`);
+                continue;
+            }
+            let nodesOfSameType = LevelGenerator.getNodesOfSameRotation(newPotentialNode, nodesById, rotationMode);
             let newLinksByNodeId = LevelGenerator.getListDictFromNodeList(nodesOfSameType, linksByStartNodeId);
             let linksToStartNode = LevelGenerator.getLinksFromNodeToNodeGroup(linksByStartNodeId, startNode, nodesOfSameType);
             let potentialLinkCollection = LevelGenerator.mergeLinkDicts(availableLinks, newLinksByNodeId, { [currentNode.id]: [outgoingLink] }, linksToStartNode);
@@ -307,6 +304,7 @@ export class LevelGenerator extends View {
             console.log("New node " + newPotentialNode.id + " survived check, moving on");
 
             let newLevelData = {
+                rotationMode,
                 startShape: levelData.startShape,
                 availableShapes: levelData.availableShapes.concat(newPotentialNode.shapeName),
                 inbetweenSpaces: newAmountOfSpaces,
@@ -367,14 +365,11 @@ export class LevelGenerator extends View {
         let noFoundPaths = 0;
         let newVisitedNodes = { ...visitedNodes, [sourceNodeId]: true };
         let outgoingLinks = (linkDict[sourceNodeId] || []);
-        //console.log(`outgoingLinks.length: ${outgoingLinks.length}`);
         outgoingLinks.every((link) => {
             if (link.target in newVisitedNodes) {
                 return true;
             }
-            //console.log(`From ${sourceNodeId}: ${link.target}`);
             noFoundPaths += LevelGenerator.nodesHaveUniquePath(linkDict, link.target, targetNodeId, noSteps - 1, newVisitedNodes);
-            //console.log(`noFoundPaths: ${noFoundPaths}`);
             return noFoundPaths <= 1;
         });
 
@@ -386,8 +381,8 @@ export class LevelGenerator extends View {
         return _.uniqBy(Object.keys(links).map((sourceNodeId) => links[sourceNodeId]), (link) => link.target.substr(0, link.target.indexOf('_')));
     }
 
-    static getNodesOfSameRotation(node, nodesById) {
-        return [0, 1, 2, 3].map((rotation) => nodesById[`${node.shapeName}_${rotation}`]);
+    static getNodesOfSameRotation(node, nodesById, rotationMode) {
+        return RotationStates[rotationMode].map((rotation) => nodesById[`${node.shapeName}_${rotation}`]);
     }
 
     static getOtherNodesOfSameRotation(node, nodesById) {
@@ -455,6 +450,7 @@ export class LevelGenerator extends View {
             for (let nodeId of _.shuffle(Object.keys(nodesById))) {
                 let node = nodesById[nodeId];
                 /* Don't add the start or end node as a joker */
+                //todo prevent an incompatible joker to show up
                 if (edgeNodes.map(({shapeName}) => shapeName).concat(availableShapes).includes(node.shapeName)) {
                     continue;
                 }

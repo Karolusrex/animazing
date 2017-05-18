@@ -4,10 +4,10 @@
 import Surface                      from 'famous/core/Surface.js';
 
 import {View}                       from 'arva-js/core/View.js';
-import {layout, options}            from 'arva-js/layout/decorators.js';
-import {Settings}                   from '../util/Settings.js';
+import {layout}                     from 'arva-js/layout/decorators.js';
 import {ShapeWithGrid}              from './ShapeWithGrid.js';
-
+import {Settings}                   from '../util/Settings.js';
+import {RotationMode}               from '../util/SpecProcessing.js';
 
 export class ShapeSlider extends View {
     @layout.stick.bottom()
@@ -38,9 +38,9 @@ export class ShapeSlider extends View {
         let chosenSpecSequence = this.getChosenSpecSequence();
         this._requestSelection = false;
         let completeSequence;
-        if(chosenSpecSequence.every((spec) => !!spec)){
+        if (chosenSpecSequence.every((spec) => !!spec)) {
             completeSequence = chosenSpecSequence;
-        };
+        }
         this._eventOutput.emit('shapeChanged', index, shapeSpec, completeSequence);
     }
 
@@ -61,11 +61,11 @@ export class ShapeSlider extends View {
 
     constructor(options) {
         super(options);
-        let sequenceLength = options.shapeSpecs.length;
-        let lastShapeIndex = sequenceLength - 1;
+
+        let lastShapeIndex = options.shapeSpecs.length - 1;
         for (let [index, shapeSpec] of options.shapeSpecs.entries()) {
             let shapeEnabled = index && index !== lastShapeIndex;
-            let circle = new ShapeSelection({shapeSpec, enabled: shapeEnabled});
+            let circle = new ShapeSelection({ shapeSpec, enabled: shapeEnabled });
             let circleName = `circle${index}`;
             let circleWidth = 100;
             let circleSize = [circleWidth, circleWidth];
@@ -84,57 +84,81 @@ export class ShapeSlider extends View {
                     layout.stick.topRight())
             }
         }
-        this.on('shapeChosen', (index) => {
-            let previouslySelectedShape = this._selectedShape;
-            if (previouslySelectedShape) {
-                previouslySelectedShape.makeEmpty();
-            }
-            let selectedShape = this[`circle${index}`];
-            selectedShape.hideShape();
-            let forbiddenShapes = [];
-            for (let neighbourIndex of [index - 1, index + 1]) {
-                if (this[`circle${neighbourIndex}`]) {
-                    let spec = this[`circle${neighbourIndex}`].shapeWithGrid.getSpec();
-                    if (spec) {
-                        forbiddenShapes.push(spec);
-                    }
-                }
-            }
-            this.getChosenSpecSequence();
-            this._eventOutput.emit('modifyShape', index, forbiddenShapes);
-            this._selectedShape = selectedShape;
-            this._requestSelection = true;
 
-        });
+
+        this.on('shapeChosen', this._onShapeChosen);
         this._slidedRatio = 0;
-        this.layout.on('layoutstart', ({size}) => {
-            let maxHeight = size[1] - 30;
-            let circleWidth = Math.min(Math.min(180, maxHeight), (size[0] - (Settings.shapeSpacing * (sequenceLength - 1))) / (sequenceLength));
-            let noCircles = options.shapeSpecs.length;
-            this.path.decorations.size[0] = size[0] - circleWidth;
-            let withinHeight = circleWidth < maxHeight;
-            let circleHeight = circleWidth + 30;
-            // let circleYOffset = withinHeight ? size[1] / 2 - circleWidth / 2 : 0;
-            let circleYOffset = 0;
-            this.path.decorations.translate[1] = circleYOffset + circleWidth - size[1] + 20;
-            this.slide.decorations.translate[0] = this._slidedRatio * (size[0] - circleWidth) + circleWidth/2;
-            this.slide.decorations.translate[1] = circleYOffset + circleWidth - size[1] + 20;
-
-            /*this.path.decorations.translate[1] = [-10 - (withinHeight ? 0 : (size[1] / 2 - circleWidth / 2))];*/
-            for (let i = 0; i < noCircles; i++) {
-                let {decorations} = this[`circle${i}`];
-                decorations.size = [circleWidth, circleHeight];
-                decorations.translate = [0, circleYOffset, 0];
-                /* For all except the last one */
-                if (decorations.dock) {
-                    decorations.dock.size[0] = size[0] / lastShapeIndex - circleWidth / lastShapeIndex;
-                }
-            }
-        });
+        this.layout.on('layoutstart', this._onLayoutStart);
+        this._selectSingleSpaceIfApplicable();
     }
+
+    setRotationMode(rotationMode) {
+        this._rotationMode = rotationMode;
+    }
+
     setSlideRatio(ratio) {
         this._slidedRatio = ratio;
         this.layout.reflowLayout();
+    }
+
+    /**
+     * If there's only one blank space, then it is chosen by default
+     * @private
+     */
+    _selectSingleSpaceIfApplicable() {
+        if (this.options.shapeSpecs.length === 3) {
+            /* Unfortunately, setTimeout is necessary here due to limitation of not being able to listen to
+             * events during construction
+             */
+            this._eventOutput.emit('shapeChosen', 1, []);
+        }
+    }
+
+    _onShapeChosen(index) {
+        let previouslySelectedShape = this._selectedShape;
+        if (previouslySelectedShape) {
+            previouslySelectedShape.makeEmpty();
+        }
+        let selectedShape = this[`circle${index}`];
+        selectedShape.hideShape();
+        let forbiddenShapes = [];
+        for (let neighbourIndex of [index - 1, index + 1]) {
+            if (this[`circle${neighbourIndex}`]) {
+                let spec = this[`circle${neighbourIndex}`].shapeWithGrid.getSpec();
+                if (spec) {
+                    forbiddenShapes.push(spec);
+                }
+            }
+        }
+        this._eventOutput.emit('modifyShape', index, forbiddenShapes);
+        this._selectedShape = selectedShape;
+        this._requestSelection = true;
+    }
+
+    _onLayoutStart({ size }) {
+        let { options } = this;
+        let sequenceLength = options.shapeSpecs.length;
+        let lastShapeIndex = sequenceLength - 1;
+
+        let maxHeight = size[1] - 30;
+        let circleWidth = Math.min(Math.min(180, maxHeight), (size[0] - (Settings.shapeSpacing * (sequenceLength - 1))) / (sequenceLength));
+        let noCircles = options.shapeSpecs.length;
+        this.path.decorations.size[0] = size[0] - circleWidth;
+        let circleHeight = circleWidth + 30;
+        let circleYOffset = 0;
+        this.path.decorations.translate[1] = circleYOffset + circleWidth - size[1] + 20;
+        this.slide.decorations.translate[0] = this._slidedRatio * (size[0] - circleWidth) + circleWidth / 2;
+        this.slide.decorations.translate[1] = circleYOffset + circleWidth - size[1] + 20;
+
+        for (let i = 0; i < noCircles; i++) {
+            let { decorations } = this[`circle${i}`];
+            decorations.size = [circleWidth, circleHeight];
+            decorations.translate = [0, circleYOffset, 0];
+            /* For all except the last one */
+            if (decorations.dock) {
+                decorations.dock.size[0] = size[0] / lastShapeIndex - circleWidth / lastShapeIndex;
+            }
+        }
     }
 }
 

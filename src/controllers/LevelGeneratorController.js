@@ -2,6 +2,7 @@ import LayoutNode                   from 'famous-flex/LayoutNode.js';
 
 import {Controller}                 from 'arva-js/core/Controller.js';
 import {LevelGenerator}             from '../logic/LevelGenerator.js';
+import {RotationMode} from '../util/SpecProcessing';
 
 export class LevelGeneratorController extends Controller {
 
@@ -20,7 +21,7 @@ export class LevelGeneratorController extends Controller {
         }
     }
 
-    FindLevels(rotationMode = LevelGenerator.all) {
+    FindLevels(rotationMode = RotationMode.all) {
         return LevelGenerator.findLevels(rotationMode);
     }
 
