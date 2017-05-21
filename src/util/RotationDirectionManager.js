@@ -4,10 +4,13 @@
 import {LevelStorage}   from '../logic/LevelStorage.js';
 
 let collisionGraph = LevelStorage.getCollisionGraph();
-let clockwiseRotateMap = collisionGraph.links.reduce((clockwiseRotateMap, { source, target, clockwiseRotate }) => {
-    clockwiseRotateMap[source + target] = clockwiseRotate;
-    return clockwiseRotateMap;
-}, {});
+let clockwiseRotateMap;
+if(collisionGraph.links){
+    clockwiseRotateMap = collisionGraph.links.reduce((clockwiseRotateMap, { source, target, clockwiseRotate }) => {
+        clockwiseRotateMap[source + target] = clockwiseRotate;
+        return clockwiseRotateMap;
+    }, {});
+}
 
 
 export let RotationDirectionManager = {

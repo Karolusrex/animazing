@@ -122,6 +122,13 @@ export class ShapeWithGrid extends View {
         this.layout.options.alwaysLayout = true;
     }
 
+    flip(instant = false) {
+        this._targetRotation+= Math.PI;
+        /* rotate the shortest way */
+        this._rotationTransitionable.set(this._targetRotation, {curve: Easing.outCubic, duration: instant ? 0 : 300});
+        this.layout.options.alwaysLayout = true;
+    }
+
     /** Gets the final rotation, not considering any ongoing animation
      *
      * @returns {*}

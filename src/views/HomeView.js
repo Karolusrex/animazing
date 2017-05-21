@@ -22,15 +22,6 @@ import {LevelStorage}           from '../logic/LevelStorage.js';
 import {RotationMode}           from '../util/SpecProcessing';
 
 
-insertRule('.bar::after', {
-    webkitBoxShadow: '1px 30px 47px 0px rgba(178,97,137,1)',
-    opacity: 0,
-    transition: 'opacity 0.3s ease-in-out'
-});
-
-insertRule('.bar:hover::after', {
-    opacity: 1
-});
 
 //TODO Remove global variable
 let levels = window.levels = LevelStorage.getLevels();
@@ -133,6 +124,17 @@ export class HomeView extends View {
 
     constructor(options = {}) {
         super(options);
+
+        insertRule('.bar::after', {
+            webkitBoxShadow: '1px 30px 47px 0px rgba(178,97,137,1)',
+            opacity: 0,
+            transition: 'opacity 0.3s ease-in-out'
+        });
+
+        insertRule('.bar:hover::after', {
+            opacity: 1
+        });
+
         this.layout.options.alwaysLayout = true;
         let firstNewLevel = true;
         this._currentLevelIndex = 0;
@@ -143,8 +145,8 @@ export class HomeView extends View {
         this.on('nextLevel', () => {
             let newLevel = levels[++this._currentLevelIndex];
             window.currentLevel = newLevel;
-            this.replaceRenderable('shapeSlider', this._createShapeSliderFromLevel(this._currentLevelIndex));
             this.shapeSelector.setSelection(newLevel.availableShapes, newLevel.rotationMode);
+            this.replaceRenderable('shapeSlider', this._createShapeSliderFromLevel(this._currentLevelIndex));
             this.showRenderable('shapeSlider');
             this._cancelSlide();
             this.instruction.setContent(firstNewLevel ? this.instructions.newLevel : (newLevel.inbetweenSpaces === 1 ? this.instructions.initial : this.instructions.multiple));

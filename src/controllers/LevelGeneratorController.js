@@ -6,7 +6,7 @@ import {RotationMode} from '../util/SpecProcessing';
 
 export class LevelGeneratorController extends Controller {
 
-    CheckCollisions(visualFeedback = false) {
+    CheckCollisions(visualFeedback = false, speed = 0.01) {
         if (visualFeedback) {
             /* Patch to make it work */
             LayoutNode.prototype.getSpec = function() {
@@ -15,14 +15,14 @@ export class LevelGeneratorController extends Controller {
                 // this._spec.removed = !this._invalidated;
                 return this._spec;
             };
-            return LevelGenerator.generateCollisionGraphVisualFeedback();
+            return LevelGenerator.generateCollisionGraphVisualFeedback(+speed);
         } else {
             return LevelGenerator.generateCollisionGraph();
         }
     }
 
-    FindLevels(rotationMode = RotationMode.all) {
-        return LevelGenerator.findLevels(rotationMode);
+    FindLevels() {
+        return LevelGenerator.initLevelFinding();
     }
 
 }

@@ -21,16 +21,9 @@ import {combineOptions}             from 'arva-js/utils/CombineOptions.js';
 import arrowImage                   from './next.png';
 import {RotateRightIcon}            from './icons/RotateRightIcon.js';
 import {RotateLeftIcon}             from './icons/RotateLeftIcon.js';
+import {RotateIcon}                 from './icons/RotateIcon.js';
 import {RotationMode}               from '../util/SpecProcessing.js';
 
-/*let buttonAnimationOptions = {
- showInitially: false,
- /!* Hack to reduce the flickering effect when buttons fade in *!/
- transition: {
- duration: 350,
- curve: (x) => x < 0.25 ? 0 : Easing.inCubic(x)
- }
- };*/
 
 export class ShapeSelector extends View {
 
@@ -73,6 +66,20 @@ export class ShapeSelector extends View {
     });
 
     @layout.animate({ showInitially: false })
+    @layout.origin(1, 0.2)
+    @layout.align(0.56, 0)
+    @layout.size(50, 50)
+    flipButton = new ImageButton({
+        imageOnly: true,
+        alwaysEnabled: true,
+        easyPress: true,
+        makeRipple: false,
+        clickEventName: 'rotate',
+        clickEventData: ['flip'],
+        icon: RotateIcon
+    });
+
+    @layout.animate({ showInitially: false })
     @layout.origin(0, 0.2)
     @layout.align(0.5, 0)
     @layout.size(40, 40)
@@ -92,9 +99,11 @@ export class ShapeSelector extends View {
             rotationMode: RotationMode.all
         }, options));
 
+        options = this.options;
+
         this.layout.on('layoutstart', ({ size: [width, height] }) => {
             this.rotateRightButton.decorations.translate = this.cancelButton.decorations.translate = [-height / 2, 0, 0];
-            this.rotateLeftButton.decorations.translate = this.okButton.decorations.translate = [height / 2, 0, 0];
+            this.flipButton.decorations.translate = this.rotateLeftButton.decorations.translate = this.okButton.decorations.translate = [height / 2, 0, 0];
         });
         this._transition = {
             duration: 500,
@@ -121,10 +130,11 @@ export class ShapeSelector extends View {
             let currentRotation = selectedShape.getDeterminedRotation();
             if (direction === 'right') {
                 selectedShape.setRotation(currentRotation + Math.PI / 2);
-            } else {
+            } else if (direction === 'left') {
                 selectedShape.setRotation(currentRotation - Math.PI / 2);
+            } else if (direction === 'flip') {
+                selectedShape.flip();
             }
-
         });
 
         this.setSelection(options.shapeSpecs, this.options.rotationMode);
@@ -166,6 +176,10 @@ export class ShapeSelector extends View {
      * Shows the different renderables that can be chosen between, disabling certain ones possibly
      */
     offerSelection(exceptThese = this._previousExceptions) {
+        if (this.options.shapeSpecs.length === 1) {
+            this._selectShape(0, this.shape0);
+        }
+
         if (this._selectedShape) {
             return;
         }
@@ -195,7 +209,7 @@ export class ShapeSelector extends View {
         for (let [i, shapeSpec] of shapeSpecs.entries()) {
             let shapeRenderable = new ShapeWithGrid({
                 colorScheme: 'transparent',
-                autoSpin: rotationMode === RotationMode.all,
+                autoSpin: rotationMode !== RotationMode.noRotation,
                 shapeSpec,
                 startRotation: i * Math.PI / 2
             });
@@ -203,9 +217,7 @@ export class ShapeSelector extends View {
             shapeRenderable.on('click', this._onShapeClicked.bind(this, i, shapeRenderable));
         }
 
-        if (shapeSpecs.length === 1) {
-            this._onShapeClicked(0, this.shape0);
-        }
+
     }
 
     _clearSelection() {
@@ -219,10 +231,13 @@ export class ShapeSelector extends View {
         this._sliding.set(+shouldCollapse, this._transition);
         let { options } = this;
         let buttonModification = () => {
-            if (options.rotationMode !== RotationMode.noRotation && shouldCollapse) {
+            if (options.rotationMode === RotationMode.all) {
                 this.showRenderable('rotateRightButton', shouldCollapse);
                 this.showRenderable('rotateLeftButton', shouldCollapse);
+            } else if (options.rotationMode === RotationMode.halfOnly) {
+                this.showRenderable('flipButton', shouldCollapse);
             }
+
             this.showRenderable('okButton', shouldCollapse);
             if (options.shapeSpecs.length > 1) {
                 this.showRenderable('cancelButton', shouldCollapse);
@@ -254,6 +269,7 @@ export class ShapeSelector extends View {
         this.hideRenderable('okButton');
         this.hideRenderable('cancelButton');
         this.hideRenderable('rotateRightButton');
+        this.hideRenderable('flipButton');
         this.hideRenderable('rotateLeftButton');
         for (let i = 0; i < this.options.shapeSpecs.length; i++) {
             this[`shape${i}`].setAutoSpin(false);
@@ -275,16 +291,21 @@ export class ShapeSelector extends View {
             return;
         }
         if (!this._isCollapsed) {
-            this._selectedShape = shapeRenderable;
-            this._collapse(true, true);
-            for (let i = 0; i < this.options.shapeSpecs.length; i++) {
-                this[`shape${i}`].setAutoSpin(false);
-            }
-            Timer.setTimeout(() => {
-                let currentRotation = shapeRenderable.getRotation();
-                shapeRenderable.setRotation(Math.round(currentRotation / (Math.PI / 2)) * Math.PI / 2);
-                this._eventOutput.emit('rotatingShape', shapeRenderable.getSpec());
-            }, this._transition.duration);
+            this._selectShape(index, shapeRenderable);
         }
+    }
+
+    _selectShape(index, shapeRenderable) {
+        this._selectedShape = shapeRenderable;
+        this._collapse(true, true);
+        for (let i = 0; i < this.options.shapeSpecs.length; i++) {
+            this[`shape${i}`].setAutoSpin(false);
+        }
+        Timer.setTimeout(() => {
+            let currentRotation = shapeRenderable.getRotation();
+            let rotationPrecision = this.options.rotationMode === RotationMode.all ? Math.PI / 2 : Math.PI;
+            shapeRenderable.setRotation(Math.round(currentRotation / rotationPrecision) * rotationPrecision);
+            this._eventOutput.emit('rotatingShape', shapeRenderable.getSpec());
+        }, this._transition.duration);
     }
 }

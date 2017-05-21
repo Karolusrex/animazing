@@ -7,12 +7,12 @@ import {ShapeGrid}                      from '../components/ShapeGrid.js';
 import {RotationDirectionManager}       from './RotationDirectionManager';
 
 export let specAttributes = {
-    rotate: {dimensions: 3, defaultValue: [0, 0, 0]},
-    align: {dimensions: 2, defaultValue: [0.5, 0]},
-    origin: {dimensions: 2, defaultValue: [0.5, 0.5]},
-    size: {dimensions: 2, defaultValue: [100, 10]},
-    translate: {dimensions: 3, defaultValue: [0, 0, 0]},
-    opacity: {dimensions: 1, defaultValue: 1}
+    rotate: { dimensions: 3, defaultValue: [0, 0, 0] },
+    align: { dimensions: 2, defaultValue: [0.5, 0] },
+    origin: { dimensions: 2, defaultValue: [0.5, 0.5] },
+    size: { dimensions: 2, defaultValue: [100, 10] },
+    translate: { dimensions: 3, defaultValue: [0, 0, 0] },
+    opacity: { dimensions: 1, defaultValue: 1 }
 };
 
 export const RotationMode = {
@@ -31,11 +31,11 @@ export const RotationMode = {
 };
 
 export const RotationStates =
-{
-    [RotationMode.all]: [0, 1, 2, 3],
-    [RotationMode.halfOnly]: [0, 2],
-    [RotationMode.noRotation]: [0]
-};
+    {
+        [RotationMode.all]: [0, 1, 2, 3],
+        [RotationMode.halfOnly]: [0, 2],
+        [RotationMode.noRotation]: [0]
+    };
 
 
 export function doBoxesCollide(box1, box2, debugContext) {
@@ -47,7 +47,7 @@ export function doBoxesCollide(box1, box2, debugContext) {
     for (let box of boxes) {
         let cornerCoordinates = calcSpecCorners(box, true);
         /* Adjust corners to take the different origin into account. We're basically doing an inverse rotation matrix (I think) */
-        let {rotate = specAttributes.rotate.defaultValue, size, origin = specAttributes.origin.defaultValue} = box;
+        let { rotate = specAttributes.rotate.defaultValue, size, origin = specAttributes.origin.defaultValue } = box;
         for (let [cornerName, corner] of Object.entries(cornerCoordinates)) {
             corner[0] = corner[0] - Math.cos(rotate[2]) * size[0] * origin[0] + Math.sin(rotate[2]) * size[1] * origin[1];
             corner[1] = corner[1] - Math.cos(rotate[2]) * size[1] * origin[1] - Math.sin(rotate[2]) * size[0] * origin[0];
@@ -57,7 +57,7 @@ export function doBoxesCollide(box1, box2, debugContext) {
         let generateAxisDimension = (cornerCoordinates, axisDirection, dimension) => {
 
             return axisDirection === 0 ? cornerCoordinates[1][0][dimension] - cornerCoordinates[0][0][dimension] :
-            cornerCoordinates[1][1][dimension] - cornerCoordinates[1][0][dimension]
+                cornerCoordinates[1][1][dimension] - cornerCoordinates[1][0][dimension]
         };
 
 
@@ -93,7 +93,7 @@ export function doBoxesCollide(box1, box2, debugContext) {
             for (let cornerPair of corners) {
                 for (let corner of cornerPair) {
 
-                    let {translate = specAttributes.translate.defaultValue} = boxes[boxNo];
+                    let { translate = specAttributes.translate.defaultValue } = boxes[boxNo];
                     let adjustedCorner = [corner[0] + translate[0], corner[1] + translate[1]];
 
                     /*debugContext.set(`debug${debugCounter++}`,{
@@ -165,30 +165,30 @@ export function turnShape(quarterCycles, shape) {
         } else {
             turnedShape[objectName] = Object.assign({},
                 object, {
-                    /*rotate: [object.rotate[0] || 0, object.rotate[1] || 0, (Math.PI-object.rotate[2]) % Math.PI ],*/
+
                     translate: [-object.translate[0], -object.translate[1], object.translate[2]]
                 }
             )
         }
     });
-    return new ShapeSpec({shape: turnedShape, isRotationOf: shape, quarterCycles});
+    return new ShapeSpec({ shape: turnedShape, isRotationOf: shape, quarterCycles });
 }
 //For actual ShapeSpecs
 export function shapeBoundingBox(shape) {
     let minPos = [Infinity, Infinity], maxPos = [0, 0];
     shape.forEach((name, spec) => {
         let specBoundingBox = specBoundingBoxSize(spec);
-        let {origin = specAttributes.origin.defaultValue, translate = specAttributes.translate.defaultValue} = spec;
+        let { origin = specAttributes.origin.defaultValue, translate = specAttributes.translate.defaultValue } = spec;
         let absolutePosition = [translate[0] - specBoundingBox[0] * origin[0], translate[1] - specBoundingBox[1] * origin[1]];
         minPos = [Math.min(absolutePosition[0], minPos[0]), Math.min(absolutePosition[1], minPos[1])];
         maxPos = [Math.max(absolutePosition[0] + specBoundingBox[0], maxPos[0]), Math.max(absolutePosition[1] + specBoundingBox[1], maxPos[1])];
     });
-    return {size: [maxPos[0] - minPos[0], maxPos[1] - minPos[1]], topLeftCorner: [minPos[0], minPos[1]]};
+    return { size: [maxPos[0] - minPos[0], maxPos[1] - minPos[1]], topLeftCorner: [minPos[0], minPos[1]] };
 }
 
 export function calcSpecCorners(spec, doBackwardsRotation = false) {
-    let {size} = spec;
-    let {rotate = specAttributes.rotate.defaultValue, origin = specAttributes.origin.defaultValue} = spec;
+    let { size } = spec;
+    let { rotate = specAttributes.rotate.defaultValue, origin = specAttributes.origin.defaultValue } = spec;
     /* It seems like famous is treating the rotation as going backwards...TODO: Verify this*/
     let zRotation = doBackwardsRotation ? -rotate[2] : rotate[2];
     //rotate[2] *=-1;
@@ -208,31 +208,31 @@ export function calcSpecCorners(spec, doBackwardsRotation = false) {
 
 //For boxes
 export function specBoundingBoxSize(spec) {
-    let {rotate = specAttributes.rotate.defaultValue} = spec;
+    let { rotate = specAttributes.rotate.defaultValue } = spec;
     let corners = calcSpecCorners(spec);
 
     let normalizedRotation = rotate[2] > 0 ? (rotate[2] % (Math.PI * 2)) : (rotate[2] - Math.PI * 2 * (Math.floor(rotate[2] / (Math.PI * 2))));
 
     let width = normalizedRotation < Math.PI / 2 ?
-    corners['bottomRight'][0] - corners['topLeft'][0] : (
-        normalizedRotation < Math.PI ?
-        corners['bottomLeft'][0] - corners['topRight'][0] : (
-            normalizedRotation < 3 * Math.PI / 2 ?
-            -corners['bottomRight'][0] + corners['topLeft'][0] : (
-                -corners['bottomLeft'][0] + corners['topRight'][0]
+        corners['bottomRight'][0] - corners['topLeft'][0] : (
+            normalizedRotation < Math.PI ?
+                corners['bottomLeft'][0] - corners['topRight'][0] : (
+                normalizedRotation < 3 * Math.PI / 2 ?
+                    -corners['bottomRight'][0] + corners['topLeft'][0] : (
+                    -corners['bottomLeft'][0] + corners['topRight'][0]
+                )
             )
-        )
-    );
+        );
     let height = normalizedRotation < Math.PI / 2 ?
-    corners['bottomLeft'][1] - corners['topRight'][1] : (
-        normalizedRotation < Math.PI ?
-        corners['topLeft'][1] - corners['bottomRight'][1] : (
-            normalizedRotation < 3 * Math.PI / 2 ?
-            -corners['bottomLeft'][1] + corners['topRight'][1] : (
-                corners['topLeft'][1] + corners['bottomRight'][1]
+        corners['bottomLeft'][1] - corners['topRight'][1] : (
+            normalizedRotation < Math.PI ?
+                corners['topLeft'][1] - corners['bottomRight'][1] : (
+                normalizedRotation < 3 * Math.PI / 2 ?
+                    -corners['bottomLeft'][1] + corners['topRight'][1] : (
+                    corners['topLeft'][1] + corners['bottomRight'][1]
+                )
             )
-        )
-    );
+        );
 
     return [width, height];
 }
@@ -269,17 +269,20 @@ export function associateShapesInInterval(input, shapes, context, maxRange, cloc
         specCombo.push(shapeCombo[0][bar]);
         specCombo.push(shapeCombo[1][bar]);
         let targetValue = maxRange / (shapes.length - 1);
-        if(clockwiseRotate === undefined){
+        if (clockwiseRotate === undefined) {
             clockwiseRotate = RotationDirectionManager.shouldShapesClockwiseRotate(...shapeCombo);
         }
         let spec = mergeSpecs(...specCombo,
             inbetween ? input - Math.min(Math.floor(input / (targetValue)), shapes.length - 2) * (targetValue) : targetValue,
-            targetValue, (t) => t, clockwiseRotate, size[0]/ShapeGrid.getSize()[0]);
+            targetValue, (t) => t, clockwiseRotate, size[0] / ShapeGrid.getSize()[0]);
         allSpecs.push(spec);
         if (displayOpaque) {
             spec.opacity = 0.5;
         }
-        let specWithTranslation = {...spec,translate: extraTranslate.map((translation, index)=> translation+spec.translate[index])};
+        let specWithTranslation = {
+            ...spec,
+            translate: extraTranslate.map((translation, index) => translation + spec.translate[index])
+        };
         context.set(bar, specWithTranslation);
         i++;
     });
@@ -303,7 +306,7 @@ let _normalizeWeights = (weights, goalT, easing) => {
 export function mergeSpecs(startSpec, endSpec, t, goalT, easing, clockwiseRotate, sizeDistortion) {
     let [normalizedT] = _normalizeWeights([t], goalT, easing);
     let spec = {};
-    for (let [attribute, {dimensions, defaultValue}] of Object.entries(specAttributes)) {
+    for (let [attribute, { dimensions, defaultValue }] of Object.entries(specAttributes)) {
         spec[attribute] = [];
 
         for (let i = 0; i < dimensions; i++) {
@@ -371,7 +374,7 @@ function biggerOrPotentiallyEqual(biggerValue, smallerValue, doEqual) {
 export function mergeMultipleSpecs(startState, endSpecs, weights, goalT, easing) {
     let normalizedWeights = _normalizeWeights(weights, goalT, easing);
     let spec = {};
-    for (let [attribute, {dimensions, defaultValue}] of Object.entries(specAttributes)) {
+    for (let [attribute, { dimensions, defaultValue }] of Object.entries(specAttributes)) {
         spec[attribute] = [];
 
         for (let i = 0; i < dimensions; i++) {

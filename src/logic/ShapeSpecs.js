@@ -80,12 +80,12 @@ export class ShapeSpecCollection {
     t = new ShapeSpec({
         shape: {
             topBar: {
-                rotate: [0, 0, 0],
-                translate: [0, 70, 0],
+                rotate: [0, 0, Math.PI / 2],
+                translate: [70, 0, 0],
                 size: stickDimensions
             },
             midBar: {
-                rotate: [0, 0, Math.PI / 2],
+                rotate: [0, 0, Math.PI],
                 translate: [0, 0, 0],
                 size: stickDimensions
             }
@@ -111,16 +111,33 @@ export class ShapeSpecCollection {
         shape: {
             topBar: {
                 rotate: [0, 0, Math.PI],
-                translate: [35, 70, 0],
+                translate: [35, 50, 0],
                 size: stickDimensions
             },
             midBar: {
                 rotate: [0, 0, Math.PI],
-                translate: [-35, -70, 0],
+                translate: [-35, -50, 0],
                 size: stickDimensions
             }
         }
     });
+
+    shuffledParallel = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, Math.PI / 4],
+                translate: [35, -35, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, Math.PI / 4],
+                translate: [-35, 35, 0],
+                size: stickDimensions
+            }
+        }
+    });
+
+
     /* Three sticked shapes */
     hamburger = new ShapeSpec({
         shape: {
@@ -162,7 +179,7 @@ export class ShapeSpecCollection {
             }
         }
     });
-
+/*
     fallenHamburger = new ShapeSpec({
         shape: {
             topBar: {
@@ -181,7 +198,7 @@ export class ShapeSpecCollection {
                 size: stickDimensions
             }
         }
-    });
+    });*/
 
     upArrow = new ShapeSpec({
         shape: {
