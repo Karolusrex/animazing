@@ -66,7 +66,7 @@ export class HomeView extends View {
         this.instructions = {
             initial: 'Tap grid in the middle and see what fits inbetween.',
             multiple: 'Tap one of the highlighted grids to continue.',
-            selected: 'Rotate the shape as you want by tapping the arrows.',
+            selected: 'Press OK to execute.',
             choose: 'Choose the shape to appear in the sequence.',
             encouragement: 'Well done! Continue like this until you are satisfied with your sequence',
             swipe: 'Now swipe to the right to see the result of what you made.',
@@ -203,26 +203,38 @@ export class HomeView extends View {
         this.instruction.setContent(this.instructions.swipe);
         this._selectedShapeSequence = sequence;
         let sequenceLength = sequence.length;
-        this.renderables.snappable = new Snappable({
+        let snapPoints = [...Array(sequenceLength).keys()].map((index) => [this.maxRange / (sequenceLength - 1) * (index), 0]);
+        let snappable = this.renderables.snappable = new Snappable({
             projection: 'x',
             /*surfaceOptions: {properties: {backgroundColor: 'red'}},*/
-            snapPoints: [...Array(sequenceLength).keys()].map((index) => [this.maxRange / (sequenceLength - 1) * (index), 0]),
+            snapPoints,
             xRange: [0, this.maxRange],
             /*yRange: [-this.maxRange - 8, this.maxRange + 8],*/
-            scale: 1, restrictFunction: this._restrictSlider,
+            scale: 1,
             snapOnDrop: false
         });
+
         this._slideEndedOnPosition = [0, 0];
+        this._playSequence(snappable, snapPoints.slice(1));
         this.renderables.snappable.on('end', () => {
             this._slideEndedOnPosition = this.renderables.snappable.getPosition();
         });
+    }
 
+    async _playSequence(snappable, snapPoints) {
+        await new Promise((resolve) => setTimeout(resolve, 200));
+        for(let point of snapPoints){
+            let wasDead = this._isDead;
+            await snappable.setPosition(point);
+            if(this._isDead && !wasDead){
+                await new Promise((resolve) => setTimeout(resolve, 400));
+            }
+        }
     }
 
     _initDraggable() {
 
         this.maxRange = 280;
-
 
         let guideLineProperties = {
             border: '1px',
@@ -272,10 +284,10 @@ export class HomeView extends View {
 
                 this._drawGuides(context);
                 let draggableSpec = {
-                    size: [context.size[0] + this.maxRange * 2, context.size[1]],
+                    size: [context.size[0] + this.maxRange * 2, context.size[1] * 2],
                     align: [0.5, 0.5],
                     origin: [0.5, 0.5],
-                    translate: [0, 0, 0]
+                    translate: [0, 0, 30]
                 };
 
                 context.set('snappable', draggableSpec);

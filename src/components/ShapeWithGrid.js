@@ -158,6 +158,7 @@ export class ShapeWithGrid extends View {
         this.overlay.setProperties({
             backgroundColor: enabled ? 'inherit' : Settings.transparentBackgroundColor
         });
+        this.shape.setGlowEnabled(enabled);
     }
 
 

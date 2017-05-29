@@ -138,6 +138,7 @@ export class ShapeSpecCollection {
     });
 
 
+
     /* Three sticked shapes */
     hamburger = new ShapeSpec({
         shape: {
@@ -158,6 +159,7 @@ export class ShapeSpecCollection {
             }
         }
     });
+
 
 
     pi = new ShapeSpec({

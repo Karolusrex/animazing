@@ -27,7 +27,7 @@ export class LevelGenerator extends View {
     @layout.translate(0, -200, 0)
     @layout.stick.center()
     @layout.size(undefined, 200)
-    rotationMode = new Surface({
+    titleText = new Surface({
         properties: { textAlign: 'center' }
     });
 
@@ -54,7 +54,7 @@ export class LevelGenerator extends View {
     }
 
     setRotationMode(rotationMode) {
-        this.rotationMode.setContent(`Rotation mode: ${rotationMode}`);
+        this.titleText.setContent(`Rotation mode: ${rotationMode}`);
     }
 
     static async generateCollisionGraphVisualFeedback(speed = 0.01) {
@@ -219,6 +219,8 @@ export class LevelGenerator extends View {
             console.groupEnd(`rotationMode.${rotationMode}`);
         }
 
+        debugView.titleText.setContent(`Total amount of levels: ${foundLevels.length}`);
+
         console.log('Total amount of levels:', foundLevels.length);
         localStorage.setItem('levels', JSON.stringify(foundLevels));
     }
@@ -236,11 +238,10 @@ export class LevelGenerator extends View {
         let foundLevels = [];
         let checkedShapeNames = {};
         // TODO allow shuffling again with the following code line. It's removed now for reproducability
-        // for (let startNode of _.shuffle(nodesRestrictedByAllowedRotations)) {
-        for (let startNode of nodesRestrictedByAllowedRotations) {
+        for (let startNode of _.shuffle(nodesRestrictedByAllowedRotations)) {
+        // for (let startNode of nodesRestrictedByAllowedRotations) {
             /* We don't have to do a new set of levels for each of the 4 rotation states */
-            //TODO remove debug restriction
-            if (checkedShapeNames[startNode.shapeName]/* || ShapeSpecs[startNode.shapeName].getStickCount() === 3*/) {
+            if (checkedShapeNames[startNode.shapeName]) {
                 continue;
             }
             console.group(startNode.shapeName);

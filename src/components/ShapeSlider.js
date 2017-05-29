@@ -121,6 +121,7 @@ export class ShapeSlider extends View {
         }
         let selectedShape = this[`circle${index}`];
         selectedShape.hideShape();
+        this._slidedRatio = 0;
         let forbiddenShapes = [];
         for (let neighbourIndex of [index - 1, index + 1]) {
             if (this[`circle${neighbourIndex}`]) {
@@ -174,7 +175,7 @@ class ShapeSelection extends View {
         }
     });
 
-
+    @layout.translate(0, 0, 200)
     @layout.dock.fill()
     shapeWithGrid = new ShapeWithGrid(this.options);
 

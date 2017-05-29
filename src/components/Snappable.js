@@ -11,12 +11,11 @@ import Transitionable           from 'famous/transitions/Transitionable';
 import Easing                   from 'famous/transitions/Easing';
 
 
-
 export class Snappable extends View {
     constructor(options) {
         super(options);
         this._draggable = new Draggable(options);
-        if(options.disabled){
+        if (options.disabled) {
             this.disable();
         } else {
             this.enable();
@@ -31,7 +30,7 @@ export class Snappable extends View {
         this.renderables.draggable = controlRenderNode;
         dragSurface.pipe(this._draggable);
 
-        if(options.snapPoints){
+        if (options.snapPoints) {
             this._doSnap = true;
             this._snapPoints = options.snapPoints;
             this._restrictFunction = options.restrictFunction;
@@ -42,14 +41,14 @@ export class Snappable extends View {
             this._minDistance = 0;
             this._closestSnapPoint = this._snapPoints[0];
             this._snapThreshold = options.snapThreshold || 12;
-            this._draggable.setPosition(this._snapPoints[0].concat(0), {duration: 450, curve: Easing.outBack});
+            this._draggable.setPosition(this._snapPoints[0].concat(0)/*, {duration: 450, curve: Easing.outBack}*/);
             this._draggable.on('end', (dragEvent) => {
                 this._eventOutput.emit('end', dragEvent);
             });
             this._draggable.on('update', (dragEvent) => {
                 this._eventOutput.emit('update', dragEvent);
             });
-            if(options.snapOnDrop){
+            if (options.snapOnDrop) {
                 this._draggable.on('end', (dragEvent) => {
                     this._draggableFollowSnap = true;
                     this.snapNext = true;
@@ -60,7 +59,7 @@ export class Snappable extends View {
 
 
         this.layouts.push((context) => {
-            if(this._doSnap){
+            if (this._doSnap) {
                 this.doSnapping();
             }
 
@@ -74,24 +73,38 @@ export class Snappable extends View {
         });
     }
 
-    setDraggableRange(xRange, yRange){
-        this._draggable.setOptions({xRange, yRange});
+    setDraggableRange(xRange, yRange) {
+        this._draggable.setOptions({ xRange, yRange });
     }
 
-    getPosition(){
-        if(this._doSnap){
+    getPosition() {
+        if (this._doSnap) {
             return this._snapPositionState.get();
         } else {
             return this.getUnSnappedPosition();
         }
     }
 
-    getUnSnappedPosition(){
+    setPosition([x, y]) {
+        this._doSnap = false;
+        this.disable();
+        return new Promise((resolve) =>
+            this._draggable.setPosition([x, y], { duration: 600, curve: Easing.inOutCubic }, () => {
+                this.enable();
+                this._doSnap = true;
+                //Not sure why this should be set, but apparently needed
+                this._snappingIn = false;
+                this._snapPositionState.set([x,y]);
+                resolve();
+            }));
+    }
+
+    getUnSnappedPosition() {
         return this._draggable.getPosition();
     }
 
 
-    enableSnapping(enabled){
+    enableSnapping(enabled) {
         this._doSnap = enabled;
     }
 
@@ -105,7 +118,7 @@ export class Snappable extends View {
         this._draggable.activate();
     }
 
-    setSnapPoints(snapPoints){
+    setSnapPoints(snapPoints) {
         this._snapPoints = snapPoints;
     }
 
@@ -138,11 +151,11 @@ export class Snappable extends View {
 
         if (!this._snappingIn && !this._snappingOut) {
             this._snapPositionState.set(this.restrictedPosition);
-        } else if(this._draggableFollowSnap){
+        } else if (this._draggableFollowSnap) {
             this._draggable.setPosition(this._snapPositionState.get());
         }
         let newPosition = this.getPosition();
-        if(lastDraggablePosition[0] !== newPosition[0] || lastDraggablePosition[1] !== newPosition[1]){
+        if (lastDraggablePosition[0] !== newPosition[0] || lastDraggablePosition[1] !== newPosition[1]) {
             this._eventOutput.emit('newPosition', newPosition);
         }
 
@@ -151,10 +164,11 @@ export class Snappable extends View {
     _distance(p1, p2) {
         return Math.sqrt(Math.pow(p1[0] - p2[0], 2) + Math.pow(p1[1] - p2[1], 2));
     }
+
     _calcToNearestPoint() {
 
         let position = this.snapNext ? this._draggable.getPosition() : this.restrictedPosition;
-        this._minDistance  = Infinity;
+        this._minDistance = Infinity;
         for (let snapPoint of this._snapPoints) {
             let distance = this._distance(position, snapPoint);
             if (distance < this._minDistance) {
@@ -170,7 +184,7 @@ export class Snappable extends View {
         this._snappingOut = false;
         this.snapNext = false;
         let transition = {
-            duration: this._alreadySnapped ? 0 : 29 * Math.sqrt(this._minDistance+36),
+            duration: this._alreadySnapped ? 0 : 29 * Math.sqrt(this._minDistance + 36),
             curve: Easing.inQuad
         };
         this._snapPositionState.set(this._closestSnapPoint, transition, () => {
