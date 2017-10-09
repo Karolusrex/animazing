@@ -11,26 +11,23 @@ import {Snappable}              from '../components/Snappable.js';
 import {associateShapesInInterval,
     turnShape,
     specBoundingBoxSize, specAttributes, shapeBoundingBox}     from '../util/SpecProcessing.js';
+import {ShapeSpec} from '../logic/ShapeSpecs';
 
 let boxShadow = '1px 3px 37px 0px rgba(168,91,132,1)';
 export class Shape extends View{
-    /*@layout.fullSize()
-    bg = new Surface({properties: {backgroundColor: 'red'}});*/
-
 
     constructor(options){
         super(options);
         options.renderableType = options.renderableType || Surface;
 
-        options.colorScheme = options.colorScheme || ['#2ecc71','#8e44ad','#d35400', '#27ae60','#e67e22','#9b59b6'];
+        options.colorScheme = options.colorScheme || ['#2ecc71', '#8e44ad', '#d35400', '#e67e22', '#27ae60', '#9b59b6'];
         this._boundingBox = shapeBoundingBox(options.spec);
 
-        let i=0;
         options.spec.forEach((renderableName) => {
             this.addRenderable(new options.renderableType({
                 properties: {
                     boxShadow,
-                    backgroundColor: Array.isArray(options.colorScheme) ? options.colorScheme[i++] : options.colorScheme
+                    backgroundColor: this.getColorForStick(renderableName)
                 }}),renderableName);
         });
 
@@ -55,6 +52,11 @@ export class Shape extends View{
             });
 
         });
+    }
+
+    getColorForStick(renderableName){
+        let {colorScheme} = this.options;
+        return Array.isArray(colorScheme) ? colorScheme[ShapeSpec.getBarNames().indexOf(renderableName)] : colorScheme
     }
 
     /**
@@ -88,7 +90,7 @@ export class Shape extends View{
         let {options} = this;
         let i = 0;
         options.spec.forEach((renderableName) => {
-            this[renderableName].setProperties({boxShadow: isEnabled ? boxShadow : 'none', backgroundColor: isEnabled ? options.colorScheme[i++] : 'rgba(255, 255, 255, 0.2)'});
+            this[renderableName].setProperties({boxShadow: isEnabled ? boxShadow : 'none', backgroundColor: isEnabled ? this.getColorForStick(renderableName) : 'rgba(255, 255, 255, 0.2)'});
         });
     }
 

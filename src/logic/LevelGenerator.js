@@ -38,20 +38,17 @@ export class LevelGenerator extends View {
 
     constructor(options) {
         super(options);
-        for (let [i, bar] of this._getBarNames().entries()) {
+        for (let [i, bar] of ShapeSpec.getBarNames().entries()) {
             this.addRenderable(new Surface({
                 content: '',
                 classes: ['bar'],
                 properties: {
-                    backgroundColor: ['#2ecc71', '#8e44ad', '#d35400', '#27ae60', '#e67e22', '#9b59b6'][i],
+                    backgroundColor: ['#2ecc71', '#8e44ad', '#d35400', '#e67e22', '#27ae60', '#9b59b6'][i],
                 }
             }), bar);
         }
     }
 
-    _getBarNames() {
-        return ['topBar', 'midBar', 'bottomBar'].sort();
-    }
 
     setRotationMode(rotationMode) {
         this.titleText.setContent(`Rotation mode: ${rotationMode}`);

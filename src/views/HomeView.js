@@ -159,16 +159,7 @@ export class HomeView extends View {
         this._standardBoxShadow = '1px 3px 37px 0px rgba(168,91,132,1)';
         this._glowingBoxShadow = '1px 3px 97px 5px rgba(168,91,132,1)';
 
-        for (let [i, bar] of this._getBarNames().entries()) {
-            this.addRenderable(new Surface({
-                content: '',
-                classes: ['bar'],
-                properties: {
-                    backgroundColor: ['#2ecc71', '#8e44ad', '#d35400', '#27ae60', '#e67e22', '#9b59b6'][i],
-                    boxShadow: this._standardBoxShadow
-                }
-            }), bar);
-        }
+        this._initSticks();
 
         /* Use the 'renderables' to listen for the animationcontroller since the shapeslider itself changes when the level changes */
 
@@ -192,7 +183,7 @@ export class HomeView extends View {
 
 
     _setBoxShadow(boxShadow) {
-        for (let renderableName of this._getBarNames()) {
+        for (let renderableName of ShapeSpec.getBarNames()) {
             this[renderableName].setProperties({ boxShadow });
         }
     }
@@ -387,8 +378,18 @@ export class HomeView extends View {
     }
 
 
-    _getBarNames() {
-        return ['topBar', 'midBar', 'bottomBar'].sort();
-    }
 
+
+    _initSticks() {
+        for (let [i, bar] of ShapeSpec.getBarNames().entries()) {
+            this.addRenderable(new Surface({
+                content: '',
+                classes: ['bar'],
+                properties: {
+                    backgroundColor: ['#2ecc71', '#8e44ad', '#d35400', '#e67e22', '#27ae60', '#9b59b6'][i],
+                    boxShadow: this._standardBoxShadow
+                }
+            }), bar);
+        }
+    }
 }

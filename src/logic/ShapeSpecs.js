@@ -16,6 +16,9 @@ export class ShapeSpec {
         });
     }
 
+    static getBarNames() {
+        return ['topBar', 'midBar', 'bottomBar', 'extraBar'].sort();
+    }
     toString() {
         let shapeName = this._shapeName || this.getUnrotated()._shapeName;
         let quarterTurns = this._quarterTurns;
@@ -43,11 +46,14 @@ export class ShapeSpec {
      * @param callback Called with (specName, spec)
      */
     forEach(cb) {
-        for (let key of this._keys) {
+        for (let key of this._keys.sort()) {
             cb(key, this._specs[key]);
         }
     }
 
+    hasStickName(stickName) {
+        return this._keys.includes(stickName);
+    }
     getUnrotated() {
         return this._unrotatedShape;
     }
