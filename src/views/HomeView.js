@@ -9,7 +9,7 @@ import {View}                   from 'arva-js/core/View.js';
 import {layout, options, event} from 'arva-js/layout/decorators.js';
 import insertRule               from 'insert-rule';
 import {Snappable}              from '../components/Snappable.js';
-import {ShapeSpecs}             from '../logic/ShapeSpecs.js';
+import {ShapeSpecs, ShapeSpec}  from '../logic/ShapeSpecs.js';
 import {
     associateShapesInInterval,
 }                               from '../util/SpecProcessing.js';
@@ -19,7 +19,10 @@ import {ShapeGrid}              from '../components/ShapeGrid.js';
 import {ShapeSlider}            from '../components/ShapeSlider.js';
 
 import {LevelStorage}           from '../logic/LevelStorage.js';
-import {RotationMode}           from '../util/SpecProcessing';
+import {RotationMode}           from '../util/SpecProcessing.js';
+import {Background}             from '../components/Background.js';
+
+
 
 
 
@@ -278,7 +281,7 @@ export class HomeView extends View {
                     size: [context.size[0] + this.maxRange * 2, context.size[1] * 2],
                     align: [0.5, 0.5],
                     origin: [0.5, 0.5],
-                    translate: [0, 0, 30]
+                    translate: [0, 0, 70]
                 };
 
                 context.set('snappable', draggableSpec);

@@ -22,6 +22,7 @@ export class LevelStorage {
 
     static storeLevel(level) {
         if (!syncedLevels) {
+
             syncedLevels = JSON.parse(localStorage.getItem("levels"));
         }
         syncedLevels.push(level);
@@ -48,13 +49,14 @@ export class LevelStorage {
         let interestingRawLevels = rawLevels
             .filter(({ inbetweenSpaces, availableShapes: { length: noAvailableShapes } }) => inbetweenSpaces >= 4 ? (inbetweenSpaces - noAvailableShapes) : true);
         let sortAndPick = {
-            sort: [{
+            sort: [
+                {
                 property: 'inbetweenSpaces',
                 direction: 'ascending'
             }, {
                 property: ['availableShapes', 'length'],
                 direction: 'ascending'
-            },],
+            }],
             pickUnique: {
                 matchesPerValue: 2,
                 grouping: [((level) => level.availableShapes.length), ((level) => level.inbetweenSpaces)]
@@ -62,9 +64,13 @@ export class LevelStorage {
         };
         let selectionGroups = _.flattenDeep([
             RotationMode.noRotation, RotationMode.halfOnly, RotationMode.all
-        ].map((rotationMode) => [2, 3].map((stickCount) => ({
+        ].map((rotationMode) => [2, 3, 4].map((stickCount) => ({
             ...sortAndPick,
-            filter: { stickCount, rotationMode, inbetweenSpaces: (spaces) => rotationMode === RotationMode.all ? true : spaces < 3}
+            filter: {
+                stickCount,
+                rotationMode,
+                inbetweenSpaces: (spaces) => rotationMode === RotationMode.all ? spaces <= 4 : spaces < 3},
+                
         }))));
         let processedLevels =
             this.advancedSelection(rawLevels, ...selectionGroups)

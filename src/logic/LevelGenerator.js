@@ -1,14 +1,15 @@
 /**
  * Created by lundfall on 03/09/16.
  */
-import {ShapeSpecs}     from './ShapeSpecs.js';
+import {ShapeSpecs,
+ShapeSpec}              from './ShapeSpecs.js';
 import {
     turnShape,
     associateShapesInInterval,
     RotationMode,
     RotationStates
 }
-    from '../util/SpecProcessing.js';
+                        from '../util/SpecProcessing.js';
 import _                from 'lodash';
 import {LevelStorage}   from './LevelStorage.js';
 import {View}               from 'arva-js/core/View.js';
@@ -278,7 +279,7 @@ export class LevelGenerator extends View {
         /* Store a hash in order to debug the level creation more easily */
         levelData.id = hash(JSON.stringify([...arguments].slice(0, 8)));
         /* Uniqify the links because we are about to loop over the shapes, treating different rotation modes as the same */
-        let unsortedOutgoingLinks = LevelGenerator.uniquifyLinksByShapeTargetName(linksByStartNodeId[currentNode.id] || []);
+        let unsortedOutgoingLinks = LevelGenerator.uniquifyLinksByShapeTargetName(visitedNodes, linksByStartNodeId[currentNode.id] || []);
         console.log("Searching for level from node " + currentNode.id + ", amount of spaces : " + levelData.inbetweenSpaces);
         /* Sort link and choose the target node that has the least amount of outgoing links */
         let outgoingLinks = LevelGenerator.sortLinksForRareFirst(unsortedOutgoingLinks, linksByStartNodeId);
@@ -297,7 +298,7 @@ export class LevelGenerator extends View {
             return levelDataInCaseOfBailOut;
         }
 
-        let levelsToReturn = [levelDataInCaseOfBailOut];
+        let levelsToReturn = [];
         let noNewLevels = true;
         for (let outgoingLink of outgoingLinks) {
             /* Add the links to the links in our subset */
@@ -346,18 +347,19 @@ export class LevelGenerator extends View {
                 rotationMode,                                                           //  Stays the same
                 debugView                                                               //  Stays the same
             );
-
+            //TODO Consider whether we should modify this could to what it was before= no intermediary levels stored.
+            //Or perhaps set a flag for intermediary levels
             levelsToReturn = levelsToReturn.concat(
                 Array.isArray(newLevels) ?
                     _.flattenDeep(newLevels).filter((level) => !!level && level.length !== 0) : newLevels
             );
         }
-        /*if (noNewLevels) {
-         if (levelDataInCaseOfBailOut) {
-         LevelStorage.storeLevel(levelDataInCaseOfBailOut);
+        if (noNewLevels) {
+             if (levelDataInCaseOfBailOut) {
+                LevelStorage.storeLevel(levelDataInCaseOfBailOut);
+            }
+            return levelDataInCaseOfBailOut;
          }
-         return levelDataInCaseOfBailOut;
-         }*/
         return levelsToReturn;
     }
 
@@ -399,8 +401,17 @@ export class LevelGenerator extends View {
     }
 
 
-    static uniquifyLinksByShapeTargetName(links) {
-        return _.uniqBy(Object.keys(links).map((sourceNodeId) => links[sourceNodeId]), (link) => link.target.substr(0, link.target.indexOf('_')));
+    /**
+     *
+     * @param visitedNodes
+     * @param links
+     * @returns {Array|*}
+     */
+    static uniquifyLinksByShapeTargetName(visitedNodes, links) {
+        return _.uniqBy(links
+                /* Filter by already visited node */
+                .filter((link) => !visitedNodes[link.target])
+            , (link) => link.target.substr(0, link.target.indexOf('_')));
     }
 
     static getNodesOfSameRotation(node, nodesById, rotationMode) {
