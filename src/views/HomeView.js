@@ -20,7 +20,6 @@ import {ShapeSlider}            from '../components/ShapeSlider.js';
 
 import {LevelStorage}           from '../logic/LevelStorage.js';
 import {RotationMode}           from '../util/SpecProcessing.js';
-import {Background}             from '../components/Background.js';
 
 
 

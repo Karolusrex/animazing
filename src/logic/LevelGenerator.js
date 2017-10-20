@@ -2,16 +2,17 @@
  * Created by lundfall on 03/09/16.
  */
 import {ShapeSpecs,
-ShapeSpec}              from './ShapeSpecs.js';
+ShapeSpec}                  from './ShapeSpecs.js';
 import {
     turnShape,
     associateShapesInInterval,
     RotationMode,
     RotationStates
 }
-                        from '../util/SpecProcessing.js';
-import _                from 'lodash';
-import {LevelStorage}   from './LevelStorage.js';
+                            from '../util/SpecProcessing.js';
+import _                    from 'lodash';
+import {LevelStorage}       from './LevelStorage.js';
+
 import {View}               from 'arva-js/core/View.js';
 import Surface              from 'famous/core/Surface.js';
 import {layout, options}    from 'arva-js/layout/decorators.js';

@@ -1,4 +1,4 @@
-/.idea/
+/.idea/*
 /jspm_packages/
 /node_modules/
 www/bundle.*
