@@ -11,6 +11,10 @@ import {App as ArvaApp}             from 'arva-js/core/App.js';
 import './famous.css';
 import './fonts.css';
 
+//TODO Remove from the final product
+import 'arva-js/utils/DebuggerTools.js';
+
+
 /* Here we import all controllers we want to use in the app */
 import {HomeController}             from './controllers/HomeController.js';
 import {LevelGeneratorController}   from './controllers/LevelGeneratorController.js';

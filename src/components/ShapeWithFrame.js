@@ -1,36 +1,47 @@
 /**
  * Created by lundfall on 6/14/16.
  */
-import Surface              from 'famous/core/Surface.js';
-import Transitionable       from 'famous/transitions/Transitionable';
-import Easing               from 'famous/transitions/Easing.js';
+import Surface from 'famous/core/Surface.js';
+import Transitionable from 'famous/transitions/Transitionable';
+import Easing from 'famous/transitions/Easing.js';
 
-import {View}               from 'arva-js/core/View.js';
-import {layout, options}    from 'arva-js/layout/decorators.js';
+import {View} from 'arva-js/core/View.js';
+import {layout} from 'arva-js/layout/decorators.js';
 
-import {Shape}              from './Shape.js';
-import {ShapeGrid}          from './ShapeGrid.js';
+import {Shape} from './Shape.js';
+import {ShapeGrid} from './ShapeGrid.js';
 import {
     normalizeRotationToOther
 }
     from '../util/SpecProcessing.js';
-import {Settings}           from '../util/Settings.js';
-import AnimationController  from 'famous-flex/AnimationController.js';
-import {combineOptions}      from 'arva-js/utils/CombineOptions.js';
+import {Settings} from '../util/Settings.js';
+import AnimationController from 'famous-flex/AnimationController.js';
+import {combineOptions} from 'arva-js/utils/CombineOptions.js';
 
-export class ShapeWithGrid extends View {
+let boxShadow = 'rgba(0, 0, 0, 0.44) -1px 0px 18px', borderRadius = '20px';
+export class ShapeWithFrame extends View {
 
+
+    @layout.animate({showInitially: false})
     @layout.fullSize()
-    grid = new ShapeGrid();
-
-    @layout.dock.fill()
-    @layout.translate(0, 0, 30)
-    overlay = new Surface({
+    @layout.translate(0, 0, -30)
+    defaultFrame = new Surface({
         properties: {
-            backgroundColor: this.options.enabled ? 'inherit' : Settings.transparentBackgroundColor
+            borderRadius,
+            boxShadow: `inset ${boxShadow}`
         }
     });
 
+    @layout.animate({showInitially: false})
+    @layout.fullSize()
+    @layout.translate(0, 0, -20)
+    activatedFrame = new Surface({
+        properties: {
+            borderRadius,
+            boxShadow,
+            backgroundColor: 'white'
+        }
+    });
 
     @layout.animate({
         transition: {duration: 0}, animation: function () {
@@ -58,8 +69,11 @@ export class ShapeWithGrid extends View {
 
     constructor(options) {
         super(combineOptions(
-            {enabled: true}
+            {
+                activated: false
+            }
             , options));
+        this.showRenderable(this.options.activated ? `activatedFrame` : `defaultFrame`);
         this._enabled = this.options.enabled;
         this.setAutoSpin(options.autoSpin);
         this._rotationTransitionable = new Transitionable(0);
@@ -76,15 +90,33 @@ export class ShapeWithGrid extends View {
                 }
             }
         });
-
+        let initialSpeed = 0.005;
 
         this.layouts.push((context) => {
 
             if (this._autoSpin) {
-                let newDiff = getTime();
+                let newDiff = getTime(), timeDiffFromLastFrame = (newDiff - this._lastDiff);
                 if (this._lastDiff) {
-                    this.shape.decorations.rotate = [0, 0, this._currentRotation += this._spinSpeed * (newDiff - this._lastDiff)];
-                    this._rotationTransitionable.set(this._currentRotation);
+                    let newSpeed = Math.min(0.02,
+                        (1 - (this._currentRotation % (Math.PI / 2)) / Math.PI) * initialSpeed
+                    );
+                    let upcomingRotationDelta = newSpeed * timeDiffFromLastFrame;
+                    if ((this._currentRotation + upcomingRotationDelta ) % (Math.PI / 2) < this._currentRotation % (Math.PI / 4)) {
+                        if (!this._lockedAt) {
+                            this._lockedAt = Date.now();
+                            this._spinSpeed = 0;
+                            this._currentRotation = Math.ceil(this._currentRotation / (Math.PI / 4)) * (Math.PI / 4);
+                        }
+                    }
+                    if (this._spinSpeed) {
+                        this._spinSpeed = newSpeed;
+                        this.shape.decorations.rotate = [0, 0, this._currentRotation += upcomingRotationDelta];
+                        this._rotationTransitionable.set(this._currentRotation);
+                    } else if (Date.now() - this._lockedAt > 100) {
+                        this._lockedAt = null;
+                        this._spinSpeed = initialSpeed;
+                        this._currentRotation += this._spinSpeed;
+                    }
                 }
                 this._lastDiff = newDiff;
             } else {
@@ -96,6 +128,23 @@ export class ShapeWithGrid extends View {
         })
     }
 
+    select() {
+        if(this.options.activated){
+            console.log('Cannot select shape because it is permanently activated!');
+            return;
+        }
+        this.showRenderable(`activatedFrame`);
+
+    }
+
+    unselect() {
+        if(this.options.activated){
+            console.log('Cannot unselect shape because it is permanently activated!');
+            return;
+        }
+        this.hideRenderable(`activatedFrame`);
+    }
+
     isEnabled() {
         return this._enabled;
     }
@@ -105,7 +154,7 @@ export class ShapeWithGrid extends View {
     }
 
     determineShapeSize(contextSize, dimension) {
-        return this.shape.getSize ? this.shape.getSize()[dimension] / (this.grid.getSize()[dimension] / contextSize) : [undefined, undefined];
+        return this.shape.getSize ? this.shape.getSize()[dimension] / (250 / contextSize) : [undefined, undefined];
     }
 
 
@@ -123,7 +172,7 @@ export class ShapeWithGrid extends View {
     }
 
     flip(instant = false) {
-        this._targetRotation+= Math.PI;
+        this._targetRotation += Math.PI;
         /* rotate the shortest way */
         this._rotationTransitionable.set(this._targetRotation, {curve: Easing.outCubic, duration: instant ? 0 : 300});
         this.layout.options.alwaysLayout = true;
@@ -153,11 +202,14 @@ export class ShapeWithGrid extends View {
         this._setEnabled(false);
     }
 
+
     _setEnabled(enabled) {
         this._enabled = enabled;
-        this.overlay.setProperties({
+        //todo
+        console.log('TODO: Change the background color or something here when setting enabled');
+        /*this.overlay.setProperties({
             backgroundColor: enabled ? 'inherit' : Settings.transparentBackgroundColor
-        });
+        });*/
         this.shape.setGlowEnabled(enabled);
     }
 
@@ -203,7 +255,11 @@ export class ShapeWithGrid extends View {
         this.layout.reflowLayout();
     }
 
+    getFrame() {
+        return this.options.activated ? this.activatedFrame : this.defaultFrame;
+    }
 }
+
 function getTime() {
     return (window.performance && window.performance.now) ? window.performance.now() : Date.now();
 }

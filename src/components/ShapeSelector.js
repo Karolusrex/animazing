@@ -14,7 +14,7 @@ import {ImageButton}                from 'arva-kit/buttons/ImageButton.js'
 
 import {turnShape}                  from '../util/SpecProcessing.js';
 import {Settings}                   from '../util/Settings.js';
-import {ShapeWithGrid}              from './ShapeWithGrid.js';
+import {DraggableShape}     from './DraggableShapeWithGrid.js';
 import AnimationController          from 'famous-flex/AnimationController.js';
 import {combineOptions}             from 'arva-js/utils/CombineOptions.js';
 
@@ -24,32 +24,13 @@ import {RotateLeftIcon}             from './icons/RotateLeftIcon.js';
 import {RotateIcon}                 from './icons/RotateIcon.js';
 import {RotationMode}               from '../util/SpecProcessing.js';
 
+let margin = 30;
 
 export class ShapeSelector extends View {
 
-    @layout.animate({ showInitially: false })
-    @layout.origin(0, 1)
-    @layout.align(0.5, 1)
-    @layout.size(100, 40)
-    okButton = new OutlineTextButton({
-        variation: 'bold',
-        easyPress: true,
-        makeRipple: false,
-        clickEventName: 'accept',
-        content: 'OK'
-    });
-
-    @layout.animate({ showInitially: false })
-    @layout.origin(1, 1)
-    @layout.align(0.5, 1)
-    @layout.size(100, 40)
-    cancelButton = new OutlineTextButton({
-        variation: 'bold',
-        easyPress: true,
-        makeRipple: false,
-        clickEventName: 'cancel',
-        content: 'CANCEL'
-    });
+    @layout.translate(0, 0, -10)
+    @layout.dock.right(0.5)
+    background = new Surface({properties: {backgroundColor: 'white'}});
 
     @layout.animate({ showInitially: false })
     @layout.origin(1, 0.2)
@@ -102,8 +83,7 @@ export class ShapeSelector extends View {
         options = this.options;
 
         this.layout.on('layoutstart', ({ size: [width, height] }) => {
-            this.rotateRightButton.decorations.translate = this.cancelButton.decorations.translate = [-height / 2, 0, 0];
-            this.flipButton.decorations.translate = this.rotateLeftButton.decorations.translate = this.okButton.decorations.translate = [height / 2, 0, 0];
+            this._onNewSize(width, height);
         });
         this._transition = {
             duration: 500,
@@ -114,7 +94,6 @@ export class ShapeSelector extends View {
         this.on('accept', () => {
             let rotation = this._selectedShape.getDeterminedRotation();
             let { shapeSpec } = this._selectedShape.options;
-            this.hideAll();
             Timer.setTimeout(() => {
                 /* The turn shape calculates the rotation backwards from what famous does, so it's inverted here */
                 this._eventOutput.emit('shapeSelected', turnShape(Math.round((4 - (rotation % (Math.PI * 2)) / (Math.PI / 2))) % 4, shapeSpec));
@@ -141,35 +120,7 @@ export class ShapeSelector extends View {
 
         options.margins = options.margins || [10, 10, 10, 10];
         this._displaySpacing = Settings.shapeSpacing;
-        this.layouts.push((context) => {
-            this.layout.options.alwaysLayout = this._fading.isActive();
-            let noRenderables = options.shapeSpecs.length;
-            let contextSize = context.size;
-            let gridLength = Math.min(contextSize[1] - options.margins[0] - options.margins[2], (contextSize[0] - options.margins[1] - options.margins[3] - this._displaySpacing * (noRenderables - 1)) / noRenderables);
-            let betweenSpace = Math.max(gridLength + this._displaySpacing, (contextSize[0] - options.margins[3] - options.margins[1]) / (noRenderables - 1) - gridLength / (noRenderables - 1));
-            let xOffset = options.margins[3];
-            for (let i = 0; i < noRenderables; i++) {
-                let shapeName = `shape${i}`;
-                let isChosen = this.renderables[shapeName] === this._selectedShape;
-                let size = [gridLength, gridLength];
-                if (isChosen) {
-                    for (let i of [0, 1]) {
-                        size[i] = size[i] - (size[i] - (contextSize[1] - options.margins[0] - options.margins[2])) * this._sliding.get();
-                    }
-                }
-                let opacity = isChosen ? 1 : this._fading.get();
-                if (opacity) {
-                    context.set(shapeName, {
-                        size,
-                        origin: [0, 0],
-                        rotate: [0, 0, 0],
-                        opacity,
-                        translate: [xOffset - (xOffset - context.size[0] / 2 + size[0] / 2) * this._sliding.get(), /*this._arrowSpace * this._sliding.get() + */options.margins[0], 0]
-                    });
-                }
-                xOffset += betweenSpace;
-            }
-        });
+
     }
 
     /**
@@ -205,19 +156,56 @@ export class ShapeSelector extends View {
         }
 
         this.options.shapeSpecs = shapeSpecs;
+        let numberOfShapes = shapeSpecs.length;
 
         for (let [i, shapeSpec] of shapeSpecs.entries()) {
-            let shapeRenderable = new ShapeWithGrid({
+            let shapeRenderable = new DraggableShape({
                 colorScheme: 'transparent',
                 autoSpin: rotationMode !== RotationMode.noRotation,
                 shapeSpec,
                 startRotation: i * Math.PI / 2
             });
-            this.addRenderable(shapeRenderable, `shape${i}`);
+
+            this.addRenderable(shapeRenderable, `shape${i}`
+                /* Size is set properly later in the pre-layout function */
+                , layout.size(100, 100), layout.translate(0, 0, 10), layout.animate());
             shapeRenderable.on('click', this._onShapeClicked.bind(this, i, shapeRenderable));
+            shapeRenderable.on('isDragged', () => this._currentlyDraggedShape = shapeRenderable);
+            shapeRenderable.on('finishedDragging', () => this._onShapeFinishedDrag(shapeRenderable));
         }
+    }
+
+    expand() {
+        this._collapse(false);
+    }
+
+    collapse() {
+        this._collapse(true);
+    }
+
+    notifyShouldNotSnap(){
+        this._currentlyDraggedShape.snapToPositionWhenDropped([0, 0]);
+    }
 
 
+    notifyShapeWillSnap(shapeWillSnapAtPosition) {
+        this._shapeWillSnapAtPosition = shapeWillSnapAtPosition;
+        let calculateRelativePositionForDimension = (dimension) =>
+            shapeWillSnapAtPosition[dimension] - this._currentlyDraggedShape.decorations.translate[dimension];
+        this._currentlyDraggedShape.snapToPositionWhenDropped([
+            calculateRelativePositionForDimension(0),
+            calculateRelativePositionForDimension(1)
+        ]);
+    }
+
+    _onNewSize(width, height) {
+        let shapeHeight = this.options.shapeWidth || 0;
+        for(let [shapeIndex] of this.options.shapeSpecs.entries()){
+            this[`shape${shapeIndex}`].decorations.size = [shapeHeight, shapeHeight];
+            this[`shape${shapeIndex}`].decorations.translate[0] = width * .75 - shapeHeight / 2;
+            this[`shape${shapeIndex}`].decorations.translate[1] = margin / 2 +
+                Math.max(0, (shapeIndex) * (margin + shapeHeight));
+        }
     }
 
     _clearSelection() {
@@ -231,17 +219,7 @@ export class ShapeSelector extends View {
         this._sliding.set(+shouldCollapse, this._transition);
         let { options } = this;
         let buttonModification = () => {
-            if (options.rotationMode === RotationMode.all) {
-                this.showRenderable('rotateRightButton', shouldCollapse);
-                this.showRenderable('rotateLeftButton', shouldCollapse);
-            } else if (options.rotationMode === RotationMode.halfOnly) {
-                this.showRenderable('flipButton', shouldCollapse);
-            }
 
-            this.showRenderable('okButton', shouldCollapse);
-            if (options.shapeSpecs.length > 1) {
-                this.showRenderable('cancelButton', shouldCollapse);
-            }
         };
         if (delayButtonModification) {
             Timer.setTimeout(buttonModification, this._transition.duration * 1.5);
@@ -262,27 +240,23 @@ export class ShapeSelector extends View {
         this._isCollapsed = shouldCollapse;
     }
 
-    hideAll() {
-        this._selectedShape = null;
-        this.layout.reflowLayout();
-        this._fading.set(0, this._transition);
-        this.hideRenderable('okButton');
-        this.hideRenderable('cancelButton');
-        this.hideRenderable('rotateRightButton');
-        this.hideRenderable('flipButton');
-        this.hideRenderable('rotateLeftButton');
-        for (let i = 0; i < this.options.shapeSpecs.length; i++) {
-            this[`shape${i}`].setAutoSpin(false);
+    _onShapeFinishedDrag(shapeRenderable) {
+        if(!shapeRenderable.willSnapToOtherPosition()){
+            return;
         }
-    }
-
-
-    expand() {
-        this._collapse(false);
-    }
-
-    collapse() {
-        this._collapse(true);
+        shapeRenderable.once('didSnapToPosition', () => {
+            shapeRenderable.setAutoSpin(false);
+        });
+        for(let [index] of this.options.shapeSpecs.entries()){
+            let otherShapeRenderableName = `shape${index}`;
+            let otherShapeRenderable = this[otherShapeRenderableName];
+            if(otherShapeRenderable === shapeRenderable){
+                continue;
+            }
+            this.hideRenderable(otherShapeRenderableName);
+        }
+        this.showRenderable('rotateRightButton');
+        this.showRenderable('rotateLeftButton');
     }
 
     _onShapeClicked(index, shapeRenderable) {
@@ -308,4 +282,6 @@ export class ShapeSelector extends View {
             this._eventOutput.emit('rotatingShape', shapeRenderable.getSpec());
         }, this._transition.duration);
     }
+
+
 }

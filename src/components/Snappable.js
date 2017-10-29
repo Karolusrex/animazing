@@ -22,13 +22,21 @@ export class Snappable extends View {
         }
 
 
-        let dragSurface = new Surface(options.surfaceOptions || {});
+        let dragSurface = this.dragSurface = new Surface(options.surfaceOptions || {});
 
         let controlRenderNode = new RenderNode();
         controlRenderNode.add(this._draggable).add(dragSurface);
 
         this.renderables.draggable = controlRenderNode;
         dragSurface.pipe(this._draggable);
+
+
+        this._draggable.on('end', (dragEvent) => {
+            this._eventOutput.emit('end', dragEvent);
+        });
+        this._draggable.on('update', (dragEvent) => {
+            this._eventOutput.emit('update', dragEvent);
+        });
 
         if (options.snapPoints) {
             this._doSnap = true;
@@ -42,12 +50,7 @@ export class Snappable extends View {
             this._closestSnapPoint = this._snapPoints[0];
             this._snapThreshold = options.snapThreshold || 12;
             this._draggable.setPosition(this._snapPoints[0].concat(0)/*, {duration: 450, curve: Easing.outBack}*/);
-            this._draggable.on('end', (dragEvent) => {
-                this._eventOutput.emit('end', dragEvent);
-            });
-            this._draggable.on('update', (dragEvent) => {
-                this._eventOutput.emit('update', dragEvent);
-            });
+
             if (options.snapOnDrop) {
                 this._draggable.on('end', (dragEvent) => {
                     this._draggableFollowSnap = true;
@@ -85,16 +88,19 @@ export class Snappable extends View {
         }
     }
 
-    setPosition([x, y]) {
+    setPosition([x, y], options = { duration: 600, curve: Easing.inOutCubic }) {
+        if(!this.options.snapPoints){
+            return this._draggable.setPosition([x, y], options);
+        }
         this._doSnap = false;
         this.disable();
         return new Promise((resolve) =>
-            this._draggable.setPosition([x, y], { duration: 600, curve: Easing.inOutCubic }, () => {
+            this._draggable.setPosition([x, y], options, () => {
                 this.enable();
                 this._doSnap = true;
                 //Not sure why this should be set, but apparently needed
                 this._snappingIn = false;
-                this._snapPositionState.set([x,y]);
+                this._snapPositionState && this._snapPositionState.set([x,y]);
                 resolve();
             }));
     }

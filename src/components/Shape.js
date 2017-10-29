@@ -13,7 +13,9 @@ import {associateShapesInInterval,
     specBoundingBoxSize, specAttributes, shapeBoundingBox}     from '../util/SpecProcessing.js';
 import {ShapeSpec} from '../logic/ShapeSpecs';
 
-let boxShadow = '1px 3px 37px 0px rgba(168,91,132,1)';
+//TODO Disabled the box shadow for now
+let boxShadow = '';
+// let boxShadow = '1px 3px 37px 0px rgba(168,91,132,1)';
 export class Shape extends View{
 
     constructor(options){
