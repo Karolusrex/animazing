@@ -18,7 +18,7 @@ import 'arva-js/utils/DebuggerTools.js';
 /* Here we import all controllers we want to use in the app */
 import {HomeController}             from './controllers/HomeController.js';
 import {LevelGeneratorController}   from './controllers/LevelGeneratorController.js';
-
+import {setColors}                  from 'arva-kit/defaults/DefaultColors.js'
 
 export class App extends ArvaApp {
 
@@ -29,12 +29,14 @@ export class App extends ArvaApp {
     static controllers = [HomeController, LevelGeneratorController];
 
 
-
     /**
      *  Called before the App is constructed and before the basic components (Router, Famous Context, Controllers,
      *  DataSource) have loaded.
      */
     static initialize(){
+        setColors({
+            PrimaryUIColor: '#d35400'
+        });
         /* Change initial route, view animation or something needed before we start */
         this.start();
     }

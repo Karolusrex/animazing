@@ -6,7 +6,7 @@ import {Text} from 'arva-kit/text/Text.js';
 import {OutlineTextButton} from 'arva-kit/buttons/OutlineTextButton.js'
 
 import {View} from 'arva-js/core/View.js';
-import {layout, event} from 'arva-js/layout/decorators.js';
+import {layout, event, flow} from 'arva-js/layout/decorators.js';
 import insertRule from 'insert-rule';
 import {Snappable} from '../components/Snappable.js';
 import {ShapeSpecs, ShapeSpec} from '../logic/ShapeSpecs.js';
@@ -29,13 +29,19 @@ let collisionGraph = LevelStorage.getCollisionGraph();
 
 let currentLevelIndex = 9;
 
+@layout.scrollable({enabled: false, layoutOptions: {margins: [0, 0, window.innerHeight, 0]}})
 @layout.dockPadding(5, 10, 10, 10)
-export class HomeView extends View {
+export class ShapeSetupView extends View {
 
 
     @layout.translate(0, 0, -10)
     @layout.fullSize()
     background = new Surface({properties: {backgroundColor: '#2F2F40'}});
+
+    @layout.animate()
+    @layout.translate(0, 0, -10)
+    @layout.dock.right(0.5)
+    whiteBackground = new Surface({properties: {backgroundColor: 'white'}});
 
     @layout.animate({
         showInitially: false,
@@ -64,14 +70,18 @@ export class HomeView extends View {
 
 
     @event.on('finishedDragging', function () {
-      this.shapeSlider.unselectShape();
+        this.shapeSlider.unselectShape();
     })
     @event.on('isDragged', function (position) {
-        let absolutePositionOfHoveringItem = this.shapeSlider.onShapeDragFromOtherSide(position, [this._globalShapeWidth, this._globalShapeWidth]);
-        if(!absolutePositionOfHoveringItem){
+        let resultFromDragging = this.shapeSlider.onShapeDragFromOtherSide(position, [this._globalShapeWidth, this._globalShapeWidth]);
+        if (!Array.isArray(resultFromDragging)) {
+            return;
+        }
+        let [absolutePositionOfHoveringItem, index] = resultFromDragging;
+        if (!absolutePositionOfHoveringItem) {
             this.shapeSelector.notifyShouldNotSnap();
         } else {
-            this.shapeSelector.notifyShapeWillSnap(absolutePositionOfHoveringItem);
+            this.shapeSelector.notifyShapeWillSnap(absolutePositionOfHoveringItem, index);
         }
     })
     @layout.translate(0, 0, 100)
@@ -105,7 +115,7 @@ export class HomeView extends View {
             }
         }, show: {
             animation: function () {
-                return ({...AnimationController.Animation.Slide.Right(...arguments), opacity: 0})
+                return ({...AnimationController.Animation.Fade(...arguments), opacity: 0})
             }
         }
     })
@@ -151,28 +161,24 @@ export class HomeView extends View {
         this._standardBoxShadow = '1px 3px 37px 0px rgba(168,91,132,1)';
         this._glowingBoxShadow = '1px 3px 97px 5px rgba(168,91,132,1)';
 
-        this._initSticks();
-
         this._continuouslyCalculateShapeWidth();
 
         /* Use the 'renderables' to listen for the animationcontroller since the shapeslider itself changes when the level changes */
 
-        /*this.renderables.shapeSelector.on('offerSelection', (shape) => {
-            this.instruction.setContent(this.instructions.choose);
-        });
-
-
-        this.renderables.shapeSelector.on('invalidSelection', (shape) => {
-            this.instruction.setContent(this.instructions.attemptSameSubsequent);
-        });
-
-        this.renderables.shapeSelector.on('rotatingShape', (shape) => {
-            this.instruction.setContent(this.instructions.selected);
-        });*/
-
 
         this._initDraggable();
         this._initAnimationBehaviour();
+    }
+
+    enterLockedMode() {
+        this.getScrollView().options.enabled = true;
+        this.hideRenderable('whiteBackground');
+        this.shapeSelector.lockShapes();
+    }
+
+    exitLockedMode() {
+        this.showRenderable('whiteBackground');
+        this.shapeSelector.unlockShapes();
     }
 
 
@@ -369,19 +375,6 @@ export class HomeView extends View {
     }
 
 
-    _initSticks() {
-        for (let [i, bar] of ShapeSpec.getBarNames().entries()) {
-            this.addRenderable(new Surface({
-                content: '',
-                classes: ['bar'],
-                properties: {
-                    backgroundColor: ['#2ecc71', '#8e44ad', '#d35400', '#e67e22', '#27ae60', '#9b59b6'][i],
-                    boxShadow: this._standardBoxShadow
-                }
-            }), bar);
-        }
-    }
-
     _continuouslyCalculateShapeWidth() {
         this.layout.on('layoutstart', ({size}) => {
             let numberOfShapes = levels[currentLevelIndex].inbetweenSpaces + 2;
@@ -392,5 +385,17 @@ export class HomeView extends View {
                         , (size[1] - (Settings.shapeSpacing * (numberOfShapes - 1))) /
                         numberOfShapes);
         });
+    }
+
+    getSize() {
+        return [undefined, undefined];
+    }
+
+    getSelectedShapeSequence() {
+        let currentLevel = levels[currentLevelIndex];
+        let shapeSequence = [...this.shapeSelector.getSelectedShapeSequence()];
+        shapeSequence[0] = currentLevel.startShape;
+        shapeSequence[currentLevel.inbetweenSpaces] = currentLevel.endShape;
+        return shapeSequence;
     }
 }

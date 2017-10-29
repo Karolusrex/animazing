@@ -10,6 +10,8 @@ export class DraggableShape extends ShapeWithFrame {
 
     _snapBackTransitionable = new Transitionable(0);
     _destination = [0, 0];
+    /* Whether the shape is "home", which means that it's at its starting position (0, 0) */
+    isHome = true;
 
     @event.on('update', function(dragEvent) {
         this._eventOutput.emit('isDragged', this.activatedFrame.getLastAbsoluteTranslate());
@@ -70,9 +72,19 @@ export class DraggableShape extends ShapeWithFrame {
         this._snapBackTransitionable.set(0);
         this._snapBackTransitionable.set(1, {curve: Easing.outCubic, duration: 300}, () =>  this._eventOutput.emit('didSnapToPosition'));
         this.snappable.setPosition(this._destination);
+        this.isHome = !this.willSnapToOtherPosition();
         this._startingPoint = this.decorations.extraTranslate;
         this.snappable.decorations.translate = [-this._destination[0], -this._destination[1], 50];
         this._eventOutput.emit('dragEnded', this.activatedFrame.getLastAbsoluteTranslate());
+    }
+
+    lockShape() {
+        this.snappable.disable();
+        this.hideRenderable(`activatedFrame`);
+    }
+
+    unlockShape() {
+        this.snappable.enable();
     }
 
 }

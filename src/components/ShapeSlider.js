@@ -6,6 +6,7 @@ import Timer            from 'famous/utilities/Timer.js';
 
 import {View}           from 'arva-js/core/View.js';
 import {layout}         from 'arva-js/layout/decorators.js';
+
 import {ShapeWithFrame} from './ShapeWithFrame.js';
 import {RotationMode}   from '../util/SpecProcessing.js';
 import {DraggableShape} from './DraggableShapeWithGrid';
@@ -22,17 +23,11 @@ export class ShapeSlider extends View {
             let circleName = `circle${index}`;
             let circleWidth = 100;
             let circleSize = [circleWidth, circleWidth];
-            circle.on('click', () => {
-                if (circle.shapeWithGrid.isEnabled()) {
-                    this._eventOutput.emit('shapeChosen', index);
-                }
-            });
 
             this.addRenderable(circle, circleName,
                 layout.dock.top(circleSize[1]),
                 layout.stick.center(),
                 layout.size(...circleSize))
-
 
         }
 
@@ -95,7 +90,7 @@ export class ShapeSlider extends View {
         let shapeObject = this[`circle${hoveredItemIndex}`];
         this._currentlyHighlightedShape = shapeObject;
         this._currentlyHighlightedShape.select();
-        return this._absoluteShapePositions[hoveredItemIndex];
+        return [this._absoluteShapePositions[hoveredItemIndex], hoveredItemIndex];
     }
 
     setRotationMode(rotationMode) {

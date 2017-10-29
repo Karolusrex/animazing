@@ -1,11 +1,11 @@
 import {Controller}                 from 'arva-js/core/Controller.js';
-import {HomeView}                   from '../views/HomeView.js';
+import {GamePlayView}               from '../views/GamePlayView';
 
 export class HomeController extends Controller {
 
     Index(){
         if(!this.homeView) {
-            this.homeView = new HomeView();
+            this.homeView = new GamePlayView();
         }
         return this.homeView;
     }
