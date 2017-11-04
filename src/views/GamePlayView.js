@@ -71,7 +71,7 @@ export class GamePlayView extends View {
                     context,
                     200, undefined,
                     this._isDead ? inputPosition > this._diedAtPosition : false,
-                    [0, context.size[1] * 0.65 + 10, 0],
+                    [0, context.size[1] * 0.65 + 10, 1000],
                     [animatingShapeSize, animatingShapeSize]);
             }
         });

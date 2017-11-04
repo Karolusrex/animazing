@@ -74,15 +74,11 @@ export class ShapeSetupView extends View {
     })
     @event.on('isDragged', function (position) {
         let resultFromDragging = this.shapeSlider.onShapeDragFromOtherSide(position, [this._globalShapeWidth, this._globalShapeWidth]);
-        if (!Array.isArray(resultFromDragging)) {
-            return;
+        if (!resultFromDragging) {
+            return this.shapeSelector.notifyShouldNotSnap();
         }
         let [absolutePositionOfHoveringItem, index] = resultFromDragging;
-        if (!absolutePositionOfHoveringItem) {
-            this.shapeSelector.notifyShouldNotSnap();
-        } else {
-            this.shapeSelector.notifyShapeWillSnap(absolutePositionOfHoveringItem, index);
-        }
+        this.shapeSelector.notifyShapeWillSnap(absolutePositionOfHoveringItem, index);
     })
     @layout.translate(0, 0, 100)
     @layout.fullSize()
@@ -120,7 +116,7 @@ export class ShapeSetupView extends View {
         }
     })
     @layout.dock.left(0.5, 10)
-    shapeSlider = this._createShapeSliderFromLevel(0);
+    shapeSlider = this._createShapeSliderFromLevel(currentLevelIndex);
 
     constructor(options = {}) {
         super(options);
@@ -395,7 +391,7 @@ export class ShapeSetupView extends View {
         let currentLevel = levels[currentLevelIndex];
         let shapeSequence = [...this.shapeSelector.getSelectedShapeSequence()];
         shapeSequence[0] = currentLevel.startShape;
-        shapeSequence[currentLevel.inbetweenSpaces] = currentLevel.endShape;
+        shapeSequence.push(currentLevel.endShape);
         return shapeSequence;
     }
 }
