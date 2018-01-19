@@ -251,7 +251,7 @@ export class ShapeSelector extends View {
         }
 
         this._finalSelection[shapeRenderable.activeExternalIndex] = shapeRenderable;
-        if (this._finalSelection.every((selection, index) => !!selection || !index)
+        if ([...this._finalSelection].every((selection, index) => !!selection || !index)
             && this._finalSelection.length === this.options.noInbetweenSpaces + 1) {
             this._eventOutput.emit('selectionComplete');
         }

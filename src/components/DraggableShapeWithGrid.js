@@ -22,7 +22,10 @@ export class DraggableShape extends ShapeWithFrame {
         /* Temporarily increase the size of the draggable area in order to prevent the drag from losing focus */
         this.snappable.decorations.size = [9999, 9999];
     })
-    @event.on('end', function() {
+    @event.on('end', function(dragEvent) {
+        /* For consistency, pretend that this item was dragged just now
+        *  (sometimes end event fires without the update event) */
+        this._eventOutput.emit('isDragged', this.activatedFrame.getLastAbsoluteTranslate(), this);
         this.snappable.decorations.translate[2] = 50;
         this.snappable.decorations.size = [undefined, undefined];
         this._snapToPosition();
