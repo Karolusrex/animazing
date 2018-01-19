@@ -137,7 +137,7 @@ export class ShapeSetupView extends View {
 
     exitLockedMode() {
         let scrollView = this.getScrollView();
-        scrollView.setVelocity(10);
+        scrollView.goToFirstPage();
         this.getScrollView().options.enabled = false;
         this.showRenderable('whiteBackground');
         this.shapeSelector.unlockShapes();
