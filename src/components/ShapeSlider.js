@@ -86,7 +86,7 @@ export class ShapeSlider extends View {
             /* Ignore the first one and the last one */
             index > 0 && index !== this._absoluteShapePositions.length - 1 &&
             /* Ignore the ones already occupied */
-            !(currentSelection[index]) &&
+            (!currentSelection[index] || currentSelection[index] !== this._currentlyHighlightedShape) &&
             potentialItem[1] < foreignAbsoluteCenter[1] && potentialItem[1] + shapeWidth > foreignAbsoluteCenter[1]
         );
         /* Not hovering over any item */
