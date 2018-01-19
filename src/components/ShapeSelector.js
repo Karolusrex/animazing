@@ -198,9 +198,16 @@ export class ShapeSelector extends View {
     }
 
     getSelectedShapeSequence() {
-        return this._finalSelection.filter((shape) => !!shape).map(({options: {shapeSpec}, getDeterminedRotation}) =>
-            turnShape(Math.round((4 - (getDeterminedRotation() % (Math.PI * 2)) / (Math.PI / 2))) % 4, shapeSpec)
-        );
+        /* Need to clone with spread operator because otherwise filter will automatically remove hole (as supposed to undefined entries) */
+        return [...this._finalSelection].filter((shape, index) => !!shape || !index)
+            .map((shape) => {
+                    if (!shape) {
+                        return;
+                    }
+                    let {options: {shapeSpec}, getDeterminedRotation} = shape;
+                    return turnShape(Math.round((4 - (getDeterminedRotation() % (Math.PI * 2)) / (Math.PI / 2))) % 4, shapeSpec)
+                }
+            );
     }
 
     _onNewSize(width, height) {
