@@ -96,7 +96,10 @@ export class ShapeSlider extends View {
             return this.unselectShape();
         }
         let shapeObject = this[`shape${hoveredItemIndex}`];
-        this._currentlyHighlightedShape = shapeObject;
+        if(this._currentlyHighlightedShape !== shapeObject){
+            this.unselectShape();
+            this._currentlyHighlightedShape = shapeObject;
+        }
         shapeObject.select();
         return [this._absoluteShapePositions[hoveredItemIndex], hoveredItemIndex];
     }
