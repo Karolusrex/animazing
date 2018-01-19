@@ -169,7 +169,7 @@ export class ShapeSelector extends View {
             let shapeRenderableName = `shape${index}`;
             let shape = this[shapeRenderableName];
             this.showRenderable(shapeRenderableName);
-            if(this._problematicShape === shape){
+            if (this._problematicShape === shape) {
                 shape.markAsProblematic();
             }
             shape.unlockShape();
@@ -187,8 +187,8 @@ export class ShapeSelector extends View {
             calculateRelativePositionForDimension(1)
         ]);
         let previousIndex = this._finalSelection.findIndex((shape) => shape === draggedShape);
-        if(previousIndex !== -1 && this._finalSelection[index] !== draggedShape){
-            if(draggedShape.isRemovedFromIndex === undefined){
+        if (previousIndex !== -1 && this._finalSelection[index] !== draggedShape) {
+            if (draggedShape.isRemovedFromIndex === undefined) {
                 draggedShape.isRemovedFromIndex = previousIndex;
             }
         } else {
@@ -228,13 +228,13 @@ export class ShapeSelector extends View {
         }
     }
 
-    getSelection(){
+    getSelection() {
         return this._finalSelection;
     }
 
 
     _onShapeFinishedDrag(shapeRenderable) {
-        if(this._problematicShape){
+        if (this._problematicShape) {
             this._problematicShape.markAsUnproblematic();
             this._problematicShape = null;
         }
@@ -245,14 +245,14 @@ export class ShapeSelector extends View {
             return;
         }
 
-        if(shapeRenderable.isRemovedFromIndex){
+        if (shapeRenderable.isRemovedFromIndex) {
             delete this._finalSelection[shapeRenderable.isRemovedFromIndex];
             delete shapeRenderable.isRemovedFromIndex;
         }
 
         this._finalSelection[shapeRenderable.activeExternalIndex] = shapeRenderable;
-        if(this._finalSelection.every((selection, index) => !!selection || !index)
-            && this._finalSelection.length === this.options.noInbetweenSpaces + 1){
+        if (this._finalSelection.every((selection, index) => !!selection || !index)
+            && this._finalSelection.length === this.options.noInbetweenSpaces + 1) {
             this._eventOutput.emit('selectionComplete');
         }
         shapeRenderable.once('didSnapToPosition', () => {
@@ -327,7 +327,7 @@ export class ShapeSelector extends View {
             this.hideRenderable(otherShapeRenderableName);
         }
         this._setNewButtonPositions();
-        if(currentShapes.length > 1){
+        if (currentShapes.length > 1) {
             this.showRenderable('checkButton');
         }
         this.showRenderable('rotateRightButton');
