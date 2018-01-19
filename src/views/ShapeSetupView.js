@@ -41,6 +41,8 @@ export class ShapeSetupView extends View {
     @layout.animate()
     @layout.translate(0, 0, -10)
     @layout.dock.right(0.5)
+    @layout.size(undefined, (_, height) => height * 2)
+    @layout.stick.center()
     whiteBackground = new Surface({properties: {backgroundColor: 'white'}});
 
 
@@ -120,7 +122,8 @@ export class ShapeSetupView extends View {
 
     enterLockedMode() {
         let numberOfSpaces = this.getNumberOfSpaces();
-        this._totalScrollHeight = this._lastSeenSize[1] * ((numberOfSpaces + 1)/(numberOfSpaces));
+        // 3: 4/3 4: 6/4
+        this._totalScrollHeight = this._lastSeenSize[1] * (((numberOfSpaces - 1) * 2)/numberOfSpaces);
         this.getScrollView().options.layoutOptions.margins[2] = this._totalScrollHeight;
         this.getScrollView().options.enabled = true;
         this.hideRenderable('whiteBackground');

@@ -198,7 +198,7 @@ export class ShapeSelector extends View {
     }
 
     getSelectedShapeSequence() {
-        return this._finalSelection.map(({options: {shapeSpec}, getDeterminedRotation}) =>
+        return this._finalSelection.filter((shape) => !!shape).map(({options: {shapeSpec}, getDeterminedRotation}) =>
             turnShape(Math.round((4 - (getDeterminedRotation() % (Math.PI * 2)) / (Math.PI / 2))) % 4, shapeSpec)
         );
     }
@@ -328,7 +328,7 @@ export class ShapeSelector extends View {
     }
 
     notifyCollidedForIndex(forWhichShapeIndex) {
-        this._problematicShape = this[`shape${forWhichShapeIndex - 1}`];
+        this._problematicShape = this._finalSelection[forWhichShapeIndex];
     }
 
 }
