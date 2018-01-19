@@ -247,13 +247,14 @@ export function specBoundingBoxSize(spec) {
  * @param displayOpaque if the shapes should be displayed with an opacity
  * @param extraTranslate Adds an extra translate
  * @param size
- * @returns {boolean} collisionFree if there was no collision
+ * @returns {Array} didCollide if there was a collision
  */
 //TODO Cleanup function arguments
 export function associateShapesInInterval(input, shapes, context, maxRange, clockwiseRotate, displayOpaque = false, extraTranslate = [0, 0, 0], size) {
 
     let allSpecs = [];
     let i = 0;
+    let indexOfNextShape = 1;
     shapes[0].forEach((bar) => {
         let specCombo = [];
         let j;
@@ -266,6 +267,7 @@ export function associateShapesInInterval(input, shapes, context, maxRange, cloc
         }
         if (!inbetween) j--;
         let shapeCombo = [shapes[j], shapes[j + 1]];
+        indexOfNextShape = j + 1;
         specCombo.push(shapeCombo[0][bar]);
         specCombo.push(shapeCombo[1][bar]);
         let targetValue = maxRange / (shapes.length - 1);
@@ -288,7 +290,7 @@ export function associateShapesInInterval(input, shapes, context, maxRange, cloc
     });
     /* For collision handling */
     let hasCollision = !allSpecs.every((firstSpec, index) => allSpecs.filter((_, innerIndex) => index !== innerIndex).every((innerSpec) => !doBoxesCollide(firstSpec, innerSpec)));
-    return !hasCollision;
+    return [hasCollision, indexOfNextShape];
 }
 
 let _ensureNewArray = (potentialArray) => Array.isArray(potentialArray) ? [...potentialArray] : [potentialArray];

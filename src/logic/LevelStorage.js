@@ -46,8 +46,6 @@ export class LevelStorage {
         }
         if (!rawLevels) return [];
         console.log(`Number of levels in storage: ${rawLevels.length}`);
-        let interestingRawLevels = rawLevels
-            .filter(({ inbetweenSpaces, availableShapes: { length: noAvailableShapes } }) => inbetweenSpaces >= 4 ? (inbetweenSpaces - noAvailableShapes) : true);
         let sortAndPick = {
             sort: [
                 {
@@ -63,7 +61,7 @@ export class LevelStorage {
             }
         };
         let selectionGroups = _.flattenDeep([
-            RotationMode.noRotation, RotationMode.halfOnly, RotationMode.all
+            RotationMode.noRotation, RotationMode.all
         ].map((rotationMode) => [2, 3, 4].map((stickCount) => ({
             ...sortAndPick,
             filter: {
@@ -76,9 +74,8 @@ export class LevelStorage {
             this.advancedSelection(rawLevels, ...selectionGroups)
                 .map(({ rotationMode, id, availableShapes, startShape, endShape, inbetweenSpaces, cheatAnswer }, index) => {
                     availableShapes = availableShapes.map((shapeName) => ShapeSpecs[shapeName]);
-
-
                     return {
+                        index,
                         id,
                         rotationMode,
                         availableShapes,

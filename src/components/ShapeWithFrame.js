@@ -18,7 +18,7 @@ import {Settings} from '../util/Settings.js';
 import AnimationController from 'famous-flex/AnimationController.js';
 import {combineOptions} from 'arva-js/utils/CombineOptions.js';
 
-let boxShadow = 'rgba(0, 0, 0, 0.44) -1px 0px 18px', borderRadius = '20px';
+let boxShadow = 'rgba(0, 0, 0, 0.16) -1px 0px 64px', borderRadius = '20px';
 export class ShapeWithFrame extends View {
 
 
@@ -66,6 +66,10 @@ export class ShapeWithFrame extends View {
         content: '?',
         properties: {fontSize: '80px', textAlign: 'center', color: 'rgba(255,255,255,0.6)'}
     });
+
+    getBoxShadowString() {
+        return boxShadow;
+    }
 
     constructor(options) {
         super(combineOptions(
@@ -169,6 +173,7 @@ export class ShapeWithFrame extends View {
         this._rotationTransitionable.set(adjustedCurrentRotation);
         this._rotationTransitionable.set(rotation, {curve: Easing.outCubic, duration: instant ? 0 : 300});
         this.layout.options.alwaysLayout = true;
+
     }
 
     flip(instant = false) {
@@ -257,6 +262,14 @@ export class ShapeWithFrame extends View {
 
     getFrame() {
         return this.options.activated ? this.activatedFrame : this.defaultFrame;
+    }
+
+    lockShape() {
+        this.decorateRenderable('shape', layout.opacity(0.5));
+    }
+
+    unlockShape() {
+        this.decorateRenderable('shape', layout.opacity(1));
     }
 }
 

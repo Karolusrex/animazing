@@ -1,30 +1,31 @@
 /**
  * Created by lundfall on 5/31/16.
  */
-import Surface              from 'famous/core/Surface.js';
-import ImageSurface         from 'famous/Surfaces/ImageSurface.js';
-import Transitionable       from 'famous/transitions/Transitionable';
-import Timer                from 'famous/utilities/Timer.js';
-import Easing               from 'famous/transitions/Easing';
+import Surface from 'famous/core/Surface.js';
+import ImageSurface from 'famous/Surfaces/ImageSurface.js';
+import Transitionable from 'famous/transitions/Transitionable';
+import Timer from 'famous/utilities/Timer.js';
+import Easing from 'famous/transitions/Easing';
 
-import {View}               from 'arva-js/core/View.js';
-import {combineOptions}     from 'arva-js/utils/CombineOptions.js';
-import {layout, event}      from 'arva-js/layout/decorators.js';
-import {OutlineTextButton}  from 'arva-kit/buttons/OutlineTextButton.js'
-import {ImageButton}        from 'arva-kit/buttons/ImageButton.js'
-import {replaceColors}      from 'arva-kit/icons/views/ReplaceColors.js';
-import {Colors}             from 'arva-kit/defaults/DefaultColors.js'
-import {CirclecheckIcon}    from 'arva-kit/icons/angular/thin/CirclecheckIcon.js'
+import {View} from 'arva-js/core/View.js';
+import {combineOptions} from 'arva-js/utils/CombineOptions.js';
+import {layout, event} from 'arva-js/layout/decorators.js';
+import {OutlineTextButton} from 'arva-kit/buttons/OutlineTextButton.js'
+import {ImageButton} from 'arva-kit/buttons/ImageButton.js'
+import {replaceColors} from 'arva-kit/icons/views/ReplaceColors.js';
+import {Colors} from 'arva-kit/defaults/DefaultColors.js'
 
-import {turnShape}          from '../util/SpecProcessing.js';
-import {Settings}           from '../util/Settings.js';
-import {DraggableShape}     from './DraggableShapeWithGrid.js';
-import AnimationController  from 'famous-flex/AnimationController.js';
+import {turnShape} from '../util/SpecProcessing.js';
+import {Settings} from '../util/Settings.js';
+import {DraggableShape} from './DraggableShapeWithGrid.js';
+import AnimationController from 'famous-flex/AnimationController.js';
 
-import arrowImage           from './next.png';
-import rightTurn            from './icons/rightTurn.png';
-import leftTurn             from './icons/leftTurn.png';
-import {RotationMode}       from '../util/SpecProcessing.js';
+import arrowImage from './next.png';
+import {RotationMode} from '../util/SpecProcessing.js';
+import {RotateLeftIcon} from './icons/RotateLeftIcon';
+import {CheckIcon} from './icons/CheckIcon';
+import {RotateRightIcon} from './icons/RotateRightIcon';
+
 
 let margin = 30;
 
@@ -44,7 +45,7 @@ export class ShapeSelector extends View {
         makeRipple: false,
         clickEventName: 'rotate',
         clickEventData: ['right'],
-        image: rightTurn
+        icon: RotateRightIcon
     });
 
 
@@ -59,7 +60,7 @@ export class ShapeSelector extends View {
         easyPress: true,
         makeRipple: false,
         clickEventName: 'shapeFinalized',
-        icon: CirclecheckIcon,
+        icon: CheckIcon,
         properties: {color: 'black'}
     });
 
@@ -73,7 +74,7 @@ export class ShapeSelector extends View {
         makeRipple: false,
         clickEventName: 'rotate',
         clickEventData: ['left'],
-        image: leftTurn
+        icon: RotateLeftIcon
     });
 
 
@@ -93,18 +94,6 @@ export class ShapeSelector extends View {
         };
         this._fading = new Transitionable(options.showInitally ? 1 : 0);
         this._sliding = new Transitionable(options.showInitially ? 0 : 1);
-        this.on('accept', () => {
-            let rotation = this._selectedShape.getDeterminedRotation();
-            let {shapeSpec} = this._selectedShape.options;
-            Timer.setTimeout(() => {
-                /* The turn shape calculates the rotation backwards from what famous does, so it's inverted here */
-                this._eventOutput.emit('shapeSelected', turnShape(Math.round((4 - (rotation % (Math.PI * 2)) / (Math.PI / 2))) % 4, shapeSpec));
-            }, this._transition.duration);
-        });
-        this.on('cancel', () => {
-            this._selectedShape = null;
-            this.offerSelection();
-        });
 
         this.on('rotate', (direction) => {
             let selectedShape = this._selectedShape;
@@ -118,40 +107,12 @@ export class ShapeSelector extends View {
             }
         });
 
-        this.setSelection(options.shapeSpecs, this.options.rotationMode);
-
+        this.setSelection(options.shapeSpecs, this.options.rotationMode, this.options.noInbetweenSpaces);
         options.margins = options.margins || [10, 10, 10, 10];
-        this._displaySpacing = Settings.shapeSpacing;
-
     }
 
-    /**
-     * Shows the different renderables that can be chosen between, disabling certain ones possibly
-     */
-    offerSelection(exceptThese = this._previousExceptions) {
-        if (this.options.shapeSpecs.length === 1) {
-            this._selectShape(0, this.shape0);
-        }
-
-        if (this._selectedShape) {
-            return;
-        }
-
-        for (let i = 0; i < this.options.shapeSpecs.length; i++) {
-            let exception;
-            let shapeWithGrid = this[`shape${i}`];
-            if (exception = exceptThese.find((possibleException) => shapeWithGrid.getSpec().isSameUnrotated(possibleException))) {
-                shapeWithGrid.disable();
-            } else {
-                shapeWithGrid.enable();
-            }
-        }
-        this._previousExceptions = exceptThese;
-        this.expand();
-        this._eventOutput.emit('offerSelection');
-    }
-
-    setSelection(shapeSpecs, rotationMode) {
+    setSelection(shapeSpecs, rotationMode, noInbetweenSpaces) {
+        this.options.noInbetweenSpaces = noInbetweenSpaces;
         this.options.rotationMode = rotationMode;
         this._finalSelection = [];
 
@@ -174,22 +135,14 @@ export class ShapeSelector extends View {
             this.addRenderable(shapeRenderable, `shape${i}`
                 /* Size is set properly later in the pre-layout function */
                 , layout.size(100, 100), layout.translate(0, 0, 10), layout.animate());
-            shapeRenderable.on('click', this._onShapeClicked.bind(this, i, shapeRenderable));
             shapeRenderable.on('isDragged', () => this._onShapeDrag(shapeRenderable));
             shapeRenderable.on('finishedDragging', () => this._onShapeFinishedDrag(shapeRenderable));
         }
     }
 
-    expand() {
-        this._collapse(false);
-    }
 
-    collapse() {
-        this._collapse(true);
-    }
-
-    notifyShouldNotSnap() {
-        this._currentlyDraggedShape.snapToPositionWhenDropped([0, 0]);
+    notifyShouldNotSnap(draggedShape) {
+        draggedShape.snapToPositionWhenDropped([0, 0]);
     }
 
 
@@ -199,10 +152,11 @@ export class ShapeSelector extends View {
 
     lockShapes() {
         this._hideButtons();
+        this._problematicShape = null;
         for (let [index] of this.options.shapeSpecs.entries()) {
             let shapeRenderableName = `shape${index}`;
             let shape = this[shapeRenderableName];
-            if(shape.isHome){
+            if (shape.isHome) {
                 this.hideRenderable(shapeRenderableName)
             } else {
                 shape.lockShape();
@@ -215,24 +169,30 @@ export class ShapeSelector extends View {
             let shapeRenderableName = `shape${index}`;
             let shape = this[shapeRenderableName];
             this.showRenderable(shapeRenderableName);
+            if(this._problematicShape === shape){
+                shape.markAsProblematic();
+            }
             shape.unlockShape();
         }
 
     }
 
-    notifyShapeWillSnap(shapeWillSnapAtPosition, index) {
+    notifyShapeWillSnap(draggedShape, shapeWillSnapAtPosition, index) {
         this._shapeWillSnapAtPosition = shapeWillSnapAtPosition;
+        /* Convert to an absolute position */
         let calculateRelativePositionForDimension = (dimension) =>
-            shapeWillSnapAtPosition[dimension] - this._currentlyDraggedShape.decorations.translate[dimension];
-        this._currentlyDraggedShape.snapToPositionWhenDropped([
+            shapeWillSnapAtPosition[dimension] - draggedShape.decorations.translate[dimension];
+        draggedShape.snapToPositionWhenDropped([
             calculateRelativePositionForDimension(0),
             calculateRelativePositionForDimension(1)
         ]);
-        this._currentlyDraggedShape.activeExternalIndex = index;
+        draggedShape.activeExternalIndex = index;
     }
 
     getSelectedShapeSequence() {
-        return this._finalSelection;
+        return this._finalSelection.map(({options: {shapeSpec}, getDeterminedRotation}) =>
+            turnShape(Math.round((4 - (getDeterminedRotation() % (Math.PI * 2)) / (Math.PI / 2))) % 4, shapeSpec)
+        );
     }
 
     _onNewSize(width, height) {
@@ -248,42 +208,30 @@ export class ShapeSelector extends View {
 
 
     _clearSelection() {
-        //TODO Remove all shape0, shape1, etc.
+        for (let [index] of this.options.shapeSpecs.entries()) {
+            this.removeRenderable(`shape${index}`);
+        }
     }
 
-    _collapse(shouldCollapse, delayButtonModification = false) {
-        this.layout.reflowLayout();
-        this._fading.set(+!shouldCollapse, this._transition);
-        this._sliding.set(+shouldCollapse, this._transition);
-        let {options} = this;
-        let buttonModification = () => {
-
-        };
-        if (delayButtonModification) {
-            Timer.setTimeout(buttonModification, this._transition.duration * 1.5);
-        } else {
-            buttonModification();
-        }
-        if (!shouldCollapse) {
-            for (let i = 0; i < this.options.shapeSpecs.length; i++) {
-                let shapeWithGrid = this[`shape${i}`];
-                if (this.options.rotationMode !== RotationMode.noRotation && shapeWithGrid.isEnabled()) {
-                    shapeWithGrid.setAutoSpin(true);
-                } else {
-                    shapeWithGrid.setAutoSpin(false);
-                    shapeWithGrid.resetRotation();
-                }
-            }
-        }
-        this._isCollapsed = shouldCollapse;
+    getSelection(){
+        return this._finalSelection;
     }
+
 
     _onShapeFinishedDrag(shapeRenderable) {
-        if (!shapeRenderable.willSnapToOtherPosition()) {
+        if(this._problematicShape){
+            this._problematicShape.markAsUnproblematic();
+            this._problematicShape = null;
+        }
+        if (!shapeRenderable.isSnappingToOtherPosition()) {
             delete this._finalSelection[shapeRenderable.activeExternalIndex];
             return;
         }
-        this._finalSelection[shapeRenderable.activeExternalIndex] = shapeRenderable.options.shapeSpec;
+        this._finalSelection[shapeRenderable.activeExternalIndex] = shapeRenderable;
+        if(this._finalSelection.every((selection, index) => !!selection || !index)
+            && this._finalSelection.length === this.options.noInbetweenSpaces + 1){
+            this._eventOutput.emit('selectionComplete');
+        }
         shapeRenderable.once('didSnapToPosition', () => {
             shapeRenderable.setAutoSpin(false);
             this._selectedShape = shapeRenderable;
@@ -291,65 +239,34 @@ export class ShapeSelector extends View {
             let rotationPrecision = this.options.rotationMode === RotationMode.all ? Math.PI / 2 : Math.PI;
             shapeRenderable.setRotation(Math.round(currentRotation / rotationPrecision) * rotationPrecision);
         });
-        for (let [index] of this.options.shapeSpecs.entries()) {
-            let otherShapeRenderableName = `shape${index}`;
-            let otherShapeRenderable = this[otherShapeRenderableName];
-            if (otherShapeRenderable === shapeRenderable) {
-                continue;
-            }
-            this.hideRenderable(otherShapeRenderableName);
+        if (this._canRotateShapes()) {
+            this._showRotationControls(shapeRenderable);
         }
-        this._setNewButtonPositions();
-        this.showRenderable('checkButton');
-        this.showRenderable('rotateRightButton');
-        this.showRenderable('rotateLeftButton');
     }
 
 
     _setNewButtonPositions() {
-        let halfOfScreen = this._lastKnownSize[0] / 2;
+        let halfOfScreen = this._lastKnownSize[0] / 2 + 22;
         let shapeWillSnapAtPosition = this._shapeWillSnapAtPosition, {shapeWidth} = this.options;
-        this.rotateLeftButton.decorations.translate = [halfOfScreen, shapeWillSnapAtPosition[1], 10];
-        this.rotateRightButton.decorations.translate = [halfOfScreen + 50, shapeWillSnapAtPosition[1], 10];
-        this.checkButton.decorations.translate = [halfOfScreen + 25, shapeWillSnapAtPosition[1] + 30, 10];
+        let yPosition = shapeWillSnapAtPosition[1] + shapeWidth / 2 - 22;
+        this.rotateLeftButton.decorations.translate = [halfOfScreen, yPosition, 10];
+        this.rotateRightButton.decorations.translate = [halfOfScreen + 50, yPosition, 10];
+        this.checkButton.decorations.translate = [halfOfScreen + 100, yPosition, 10];
         /* Reflow in order to put the translates in place */
         this.reflowRecursively();
     }
 
-    _onShapeClicked(index, shapeRenderable) {
-        if (!shapeRenderable.isEnabled()) {
-            this._eventOutput.emit('invalidSelection', shapeRenderable.getSpec());
-            return;
-        }
-        if (!this._isCollapsed) {
-            this._selectShape(index, shapeRenderable);
-        }
-    }
-
-
-    _selectShape(index, shapeRenderable) {
-        this._selectedShape = shapeRenderable;
-        this._collapse(true, true);
-        for (let i = 0; i < this.options.shapeSpecs.length; i++) {
-            this[`shape${i}`].setAutoSpin(false);
-        }
-        Timer.setTimeout(() => {
-            let currentRotation = shapeRenderable.getRotation();
-            let rotationPrecision = this.options.rotationMode === RotationMode.all ? Math.PI / 2 : Math.PI;
-            shapeRenderable.setRotation(Math.ceil(currentRotation / rotationPrecision) * rotationPrecision);
-            this._eventOutput.emit('rotatingShape', shapeRenderable.getSpec());
-        }, this._transition.duration);
-    }
-
     _onShapeDrag(shapeRenderable) {
-        if(!shapeRenderable.isHome){
+        if (!shapeRenderable.isHome && this._canRotateShapes()) {
             shapeRenderable.setAutoSpin(true);
         }
-        if (!this._selectedShape) {
-            this._currentlyDraggedShape = shapeRenderable
-            return;
+        if (this._selectedShape) {
+            this._exitShapeConfigurationMode();
         }
-        this._exitShapeConfigurationMode();
+    }
+
+    _canRotateShapes() {
+        return this.options.rotationMode !== RotationMode.noRotation;
     }
 
     _exitShapeConfigurationMode() {
@@ -372,5 +289,30 @@ export class ShapeSelector extends View {
         this.hideRenderable('rotateLeftButton');
     }
 
+
+    _showRotationControls(shapeRenderable) {
+        let currentShapes = this.options.shapeSpecs;
+        for (let [index] of currentShapes.entries()) {
+            let otherShapeRenderableName = `shape${index}`;
+            let otherShapeRenderable = this[otherShapeRenderableName];
+
+            if (otherShapeRenderable === shapeRenderable ||
+                /* Don't hide renderables that are already in place */
+                otherShapeRenderable.isSnappingToOtherPosition()) {
+                continue;
+            }
+            this.hideRenderable(otherShapeRenderableName);
+        }
+        this._setNewButtonPositions();
+        if(currentShapes.length > 1){
+            this.showRenderable('checkButton');
+        }
+        this.showRenderable('rotateRightButton');
+        this.showRenderable('rotateLeftButton');
+    }
+
+    notifyCollidedForIndex(forWhichShapeIndex) {
+        this._problematicShape = this[`shape${forWhichShapeIndex - 1}`];
+    }
 
 }

@@ -5,6 +5,7 @@ import Easing           from 'famous/transitions/Easing.js';
 import {ShapeWithFrame} from './ShapeWithFrame';
 import {Snappable}      from './Snappable';
 import Surface          from 'famous/core/Surface.js';
+import {Colors}         from 'arva-kit/defaults/DefaultColors.js';
 
 export class DraggableShape extends ShapeWithFrame {
 
@@ -14,7 +15,7 @@ export class DraggableShape extends ShapeWithFrame {
     isHome = true;
 
     @event.on('update', function(dragEvent) {
-        this._eventOutput.emit('isDragged', this.activatedFrame.getLastAbsoluteTranslate());
+        this._eventOutput.emit('isDragged', this.activatedFrame.getLastAbsoluteTranslate(), this);
         this.decorations.extraTranslate = [dragEvent.position[0], dragEvent.position[1], 10];
         /* Increase the z index in order to make sure that the translate is constantly staying high */
         this.snappable.decorations.translate = [-dragEvent.position[0], -dragEvent.position[1], 1000];
@@ -27,6 +28,7 @@ export class DraggableShape extends ShapeWithFrame {
         this._snapToPosition();
         this._eventOutput.emit('finishedDragging');
     })
+    @layout.animate()
     @layout.translate(0, 0, 50)
     @layout.size(undefined, undefined)
     @layout.stick.center()
@@ -64,27 +66,43 @@ export class DraggableShape extends ShapeWithFrame {
         this._destination = [x, y];
     }
 
-    willSnapToOtherPosition() {
+    isSnappingToOtherPosition() {
         return this._destination[0] !== 0 || this._destination[1] !== 0;
     }
 
     _snapToPosition() {
         this._snapBackTransitionable.set(0);
-        this._snapBackTransitionable.set(1, {curve: Easing.outCubic, duration: 300}, () =>  this._eventOutput.emit('didSnapToPosition'));
+        this._snapBackTransitionable.set(1,
+            {curve: Easing.outCubic, duration: 300},
+            () =>  this._eventOutput.emit('didSnapToPosition')
+        );
         this.snappable.setPosition(this._destination);
-        this.isHome = !this.willSnapToOtherPosition();
+        this.isHome = !this.isSnappingToOtherPosition();
         this._startingPoint = this.decorations.extraTranslate;
         this.snappable.decorations.translate = [-this._destination[0], -this._destination[1], 50];
         this._eventOutput.emit('dragEnded', this.activatedFrame.getLastAbsoluteTranslate());
     }
 
     lockShape() {
-        this.snappable.disable();
+        super.lockShape();
+        this.hideRenderable(`snappable`);
         this.hideRenderable(`activatedFrame`);
     }
 
     unlockShape() {
+        super.unlockShape();
+        this.showRenderable(`snappable`);
+        this.showRenderable(`activatedFrame`);
         this.snappable.enable();
+    }
+
+
+    markAsProblematic() {
+        this.activatedFrame.setProperties({boxShadow: this.getBoxShadowString().replace(/rgba\(.+\)/, Colors.PrimaryUIColor)});
+    }
+
+    markAsUnproblematic() {
+        this.activatedFrame.setProperties({boxShadow: this.getBoxShadowString()});
     }
 
 }

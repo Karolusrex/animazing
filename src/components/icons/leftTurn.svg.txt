@@ -1,11 +1,14 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-<!-- Generator: Adobe Illustrator 16.0.0, SVG Export Plug-In . SVG Version: 6.00 Build 0)  -->
-<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
-<svg version="1.1" id="Capa_1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px"
-	 width="100%" height="100%" viewBox="0 0 24.758 24.758" style="enable-background:new 0 0 612 612;" xml:space="preserve">
-<g>
-	<path d="M340.502,560.924v25.5C491.258,581.68,612,457.98,612,306.076c0-154.913-125.588-280.5-280.5-280.5
-		c-141.933,0-259.258,105.442-277.924,242.25H0l63.75,76.5l63.75-76.5H79.356C97.792,145.146,203.668,51.076,331.5,51.076
-		c140.837,0,255,114.164,255,255C586.5,443.904,477.156,556.18,340.502,560.924z"/>
-</g>
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="100%" height="100%" viewBox="0 0 24 24" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 47.1 (45422) - http://www.bohemiancoding.com/sketch -->
+    <title>icon / undo / thin / rounded</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Symbols" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="icon-/-undo-/-thin-/-rounded">
+            <g id="Grid"></g>
+            <polyline id="Line" stroke="#141414" stroke-linecap="round" stroke-linejoin="round" points="18.5 7.5 18.5 2.5 23.5 2.5"></polyline>
+            <path d="M12,0.5 C5.64872538,0.5 0.5,5.64872538 0.5,12 C0.5,18.3512746 5.64872538,23.5 12,23.5 L12,23.5 C18.3512746,23.5 23.5,18.3512746 23.5,12 C23.5,8.40377109 21.8492831,5.19308777 19.2642166,3.08431738" id="Oval-2" stroke="#141414" stroke-linecap="round" stroke-linejoin="round"></path>
+        </g>
+    </g>
 </svg>

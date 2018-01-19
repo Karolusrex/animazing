@@ -1,14 +1,12 @@
 import Surface from 'famous/core/Surface.js';
 import Timer from 'famous/utilities/Timer.js';
 import AnimationController from 'famous-flex/AnimationController.js';
-
 import {Text} from 'arva-kit/text/Text.js';
 import {OutlineTextButton} from 'arva-kit/buttons/OutlineTextButton.js'
 
 import {View} from 'arva-js/core/View.js';
 import {layout, event, flow} from 'arva-js/layout/decorators.js';
 import insertRule from 'insert-rule';
-import {Snappable} from '../components/Snappable.js';
 import {ShapeSpecs, ShapeSpec} from '../logic/ShapeSpecs.js';
 import {
     associateShapesInInterval,
@@ -27,31 +25,24 @@ import {Settings} from '../util/Settings.js';
 let levels = window.levels = LevelStorage.getLevels();
 let collisionGraph = LevelStorage.getCollisionGraph();
 
-let currentLevelIndex = 9;
+let currentLevelIndex = 8;
 
-@layout.scrollable({enabled: false, layoutOptions: {margins: [0, 0, window.innerHeight, 0]}})
-@layout.dockPadding(5, 10, 10, 10)
+/* Margin will be set later per level.
+ * The margin here is needed so that scrolling can be done when zoomed in.
+ * Scrolling is only enabled when sliding the shapes */
+@layout.scrollable({enabled: false, layoutOptions: {margins: [0, 0, 0, 0]}})
 export class ShapeSetupView extends View {
 
-
     @layout.translate(0, 0, -10)
-    @layout.fullSize()
-    background = new Surface({properties: {backgroundColor: '#2F2F40'}});
+    @layout.stick.center()
+    @layout.size(undefined, (_, height) => height * 2)
+    background = new Surface({properties: {backgroundColor: 'rgb(245, 245, 245)'}});
 
     @layout.animate()
     @layout.translate(0, 0, -10)
     @layout.dock.right(0.5)
     whiteBackground = new Surface({properties: {backgroundColor: 'white'}});
 
-    @layout.animate({
-        showInitially: false,
-        show: {transition: {duration: 10}},
-        hide: {transition: {duration: 500}},
-        animation: AnimationController.Animation.Fade
-    })
-    @layout.translate(0, 0, 0)
-    @layout.fullSize()
-    isDeadIndication = new Surface({properties: {backgroundColor: '#722F37'}});
 
     @layout.animate({
         showInitially: false,
@@ -72,13 +63,14 @@ export class ShapeSetupView extends View {
     @event.on('finishedDragging', function () {
         this.shapeSlider.unselectShape();
     })
-    @event.on('isDragged', function (position) {
-        let resultFromDragging = this.shapeSlider.onShapeDragFromOtherSide(position, [this._globalShapeWidth, this._globalShapeWidth]);
+    @event.on('isDragged', function (position, shape) {
+        let {shapeSelector} = this;
+        let resultFromDragging = this.shapeSlider.onShapeDragFromOtherSide(position, [this._globalShapeWidth, this._globalShapeWidth], shapeSelector.getSelectedShapeSequence());
         if (!resultFromDragging) {
-            return this.shapeSelector.notifyShouldNotSnap();
+            return shapeSelector.notifyShouldNotSnap(shape);
         }
         let [absolutePositionOfHoveringItem, index] = resultFromDragging;
-        this.shapeSelector.notifyShapeWillSnap(absolutePositionOfHoveringItem, index);
+        shapeSelector.notifyShapeWillSnap(shape, absolutePositionOfHoveringItem, index);
     })
     @layout.translate(0, 0, 100)
     @layout.fullSize()
@@ -88,21 +80,6 @@ export class ShapeSetupView extends View {
         if (completeSequence) {
             this._onSelectionComplete(completeSequence);
         }
-    })
-    @event.on('modifyShape', function (index, forbiddenShapes) {
-        /* If we are already running a sequence, then cancel this and go into choosing mode again */
-        if (this._sliding) {
-            this._cancelSlide();
-        }
-        this.shapeSelector.offerSelection(forbiddenShapes);
-        /* We store the variable this._modifyingShapeIndex to take into account that the user can cancel */
-        if (!this._modifyingShapeIndex) {
-            this.shapeSelector.once('shapeSelected', (spec) => {
-                this.shapeSlider.setSelection(this._modifyingShapeIndex, spec);
-                this._modifyingShapeIndex = undefined;
-            });
-        }
-        this._modifyingShapeIndex = index;
     })
     @layout.animate({
         hide: {
@@ -120,38 +97,16 @@ export class ShapeSetupView extends View {
 
     constructor(options = {}) {
         super(options);
-
-        insertRule('.bar::after', {
-            webkitBoxShadow: '1px 30px 47px 0px rgba(178,97,137,1)',
-            opacity: 0,
-            transition: 'opacity 0.3s ease-in-out'
-        });
-
-        insertRule('.bar:hover::after', {
-            opacity: 1
-        });
-
-        this.layout.options.alwaysLayout = true;
-        let firstNewLevel = true;
         window.currentLevel = levels[currentLevelIndex];
         document.body.onkeyup = (e) => {
             if (e.keyCode === 0 || e.keyCode === 32) {
                 e.preventDefault();
-                this._eventOutput.emit('nextLevel');
+                this.gotoNextLevel();
             }
         };
         //TODO Implement this cheat somewhere
         this.on('nextLevel', () => {
-            let newLevel = levels[++currentLevelIndex];
-            window.currentLevel = newLevel;
-            this.shapeSelector.setSelection(newLevel.availableShapes, newLevel.rotationMode);
-            this.replaceRenderable('shapeSlider', this._createShapeSliderFromLevel(currentLevelIndex));
-            this.showRenderable('shapeSlider');
-            this._cancelSlide();
-            firstNewLevel = false;
-            this.hideRenderable('nextLevelButton');
-            /* Change the box shadow back to less glow */
-            this._setBoxShadow(this._standardBoxShadow);
+            this.gotoNextLevel();
         });
 
         this._standardBoxShadow = '1px 3px 37px 0px rgba(168,91,132,1)';
@@ -161,27 +116,29 @@ export class ShapeSetupView extends View {
 
         /* Use the 'renderables' to listen for the animationcontroller since the shapeslider itself changes when the level changes */
 
-
-        this._initDraggable();
-        this._initAnimationBehaviour();
     }
 
     enterLockedMode() {
+        let numberOfSpaces = this.getNumberOfSpaces();
+        this._totalScrollHeight = this._lastSeenSize[1] * ((numberOfSpaces + 1)/(numberOfSpaces));
+        this.getScrollView().options.layoutOptions.margins[2] = this._totalScrollHeight;
         this.getScrollView().options.enabled = true;
         this.hideRenderable('whiteBackground');
         this.shapeSelector.lockShapes();
+        this.shapeSlider.lockShapes();
+    }
+
+    getTotalScrollHeight(){
+        return this._totalScrollHeight;
     }
 
     exitLockedMode() {
+        let scrollView = this.getScrollView();
+        scrollView.setVelocity(10);
+        this.getScrollView().options.enabled = false;
         this.showRenderable('whiteBackground');
         this.shapeSelector.unlockShapes();
-    }
-
-
-    _setBoxShadow(boxShadow) {
-        for (let renderableName of ShapeSpec.getBarNames()) {
-            this[renderableName].setProperties({boxShadow});
-        }
+        this.shapeSlider.unlockShapes();
     }
 
     _onSelectionComplete(sequence) {
@@ -190,55 +147,6 @@ export class ShapeSetupView extends View {
         this._selectedShapeSequence = sequence;
         let sequenceLength = sequence.length;
         let snapPoints = [...Array(sequenceLength).keys()].map((index) => [this.maxRange / (sequenceLength - 1) * (index), 0]);
-        let snappable = this.renderables.snappable = new Snappable({
-            projection: 'x',
-            /*surfaceOptions: {properties: {backgroundColor: 'red'}},*/
-            snapPoints,
-            xRange: [0, this.maxRange],
-            /*yRange: [-this.maxRange - 8, this.maxRange + 8],*/
-            scale: 1,
-            snapOnDrop: false
-        });
-
-        this._slideEndedOnPosition = [0, 0];
-        this._playSequence(snappable, snapPoints.slice(1));
-        this.renderables.snappable.on('end', () => {
-            this._slideEndedOnPosition = this.renderables.snappable.getPosition();
-        });
-    }
-
-    async _playSequence(snappable, snapPoints) {
-        await new Promise((resolve) => setTimeout(resolve, 200));
-        for (let point of snapPoints) {
-            let wasDead = this._isDead;
-            await snappable.setPosition(point);
-            if (this._isDead && !wasDead) {
-                await new Promise((resolve) => setTimeout(resolve, 400));
-            }
-        }
-    }
-
-    _initDraggable() {
-
-        this.maxRange = 280;
-
-        let guideLineProperties = {
-            border: '1px',
-            borderStyle: 'dashed',
-            borderColor: 'chartreuse',
-            backgroundColor: "rgb(15, 15, 236)"
-        };
-
-        this.renderables.limitedDragIndicator = new Surface({
-            properties: {
-                backgroundColor: "black",
-                borderRadius: '100%'
-            }
-        });
-        this.renderables.dragGuide = new Surface({properties: {backgroundColor: "green", borderRadius: '100%'}});
-        this.renderables.verticalGuideLine = new Surface({properties: guideLineProperties});
-        this.renderables.horizontalGuideLine = new Surface({properties: guideLineProperties});
-
 
     }
 
@@ -248,7 +156,8 @@ export class ShapeSetupView extends View {
         return new ShapeSelector({
             showInitially: false,
             shapeSpecs: level.availableShapes,
-            rotationMode: level.rotationMode
+            rotationMode: level.rotationMode,
+            noInbetweenSpaces: level.inbetweenSpaces
         });
     }
 
@@ -259,71 +168,6 @@ export class ShapeSetupView extends View {
             shapeSpecs: [level.startShape,
                 ...new Array(level.inbetweenSpaces), level.endShape]
         });
-    }
-
-    _initAnimationBehaviour() {
-        this.layouts.push((context) => {
-
-            if (this.renderables.snappable) {
-                let inputPosition = this.renderables.snappable.getPosition()[0];
-
-
-                this._drawGuides(context);
-                let draggableSpec = {
-                    size: [context.size[0] + this.maxRange * 2, context.size[1] * 2],
-                    align: [0.5, 0.5],
-                    origin: [0.5, 0.5],
-                    translate: [0, 0, 70]
-                };
-
-                context.set('snappable', draggableSpec);
-
-                let animatingShapeSize = Math.min(context.size[1] / 2, 300);
-                this.shapeSlider.setSlideRatio(inputPosition / this.maxRange);
-                if (this._isDead) {
-                    if (inputPosition >= this._diedAtPosition) {
-                        if (!this._isAtDeadPosition) {
-                            this._makeDeadAnimation();
-                        }
-                    } else {
-                        this._isAtDeadPosition = false;
-                    }
-                }
-                /* If there is a collision, go into dead mode */
-                if (!associateShapesInInterval(inputPosition,
-                        this._selectedShapeSequence,
-                        context,
-                        this.maxRange, undefined,
-                        this._isDead ? inputPosition > this._diedAtPosition : false,
-                        [0, context.size[1] * 0.65 + 10, 0],
-                        [animatingShapeSize, animatingShapeSize])) {
-                    if (!this._isDead) {
-                        this._diedAtPosition = inputPosition;
-                        this._makeDeadAnimation();
-                    }
-
-                    this._isDead = true;
-                } else if (!this._isDead && inputPosition === this.maxRange && !this._levelComplete) {
-                    this._levelComplete = true;
-                    this._setBoxShadow(this._glowingBoxShadow);
-                    let isLastLevel = currentLevelIndex === levels.length - 1;
-                    let isFirstLevel = currentLevelIndex === 0;
-                    this.hideRenderable('shapeSlider');
-                    if (!isLastLevel) {
-                        Timer.setTimeout(this.showRenderable.bind(this, 'nextLevelButton'), 500);
-                    }
-                }
-            }
-        });
-    }
-
-    _makeDeadAnimation() {
-        this._isAtDeadPosition = true;
-        if (window.navigator && navigator.vibrate) {
-            navigator.vibrate(100);
-        }
-        this.showRenderable('isDeadIndication');
-        this.hideRenderable('isDeadIndication');
     }
 
     _cancelSlide() {
@@ -350,31 +194,13 @@ export class ShapeSetupView extends View {
     }
 
 
-    _drawGuides(context) {
-
-        /*context.set('verticalGuideLine', {
-         size: [1, 100],
-         align: [0.5, 0.5],
-         origin: [0.5, 0.5],
-         translate: [0, 70, 0],
-         opacity: 0.8
-         });
-         context.set('horizontalGuideLine', {
-         size: [100, 1],
-         align: [0.5, 0.5],
-         origin: [0.5, 0.5],
-         translate: [0, 10, 0],
-         opacity: 0.8
-         });*/
-
-
-    }
 
 
     _continuouslyCalculateShapeWidth() {
         this.layout.on('layoutstart', ({size}) => {
             let numberOfShapes = levels[currentLevelIndex].inbetweenSpaces + 2;
             let maxWidth = size[0] / 2 - 40;
+            this._lastSeenSize = size;
             this._globalShapeWidth = this.shapeSlider.options.shapeWidth =
                 this.shapeSelector.options.shapeWidth =
                     Math.min(Math.min(180, maxWidth)
@@ -383,8 +209,16 @@ export class ShapeSetupView extends View {
         });
     }
 
-    getSize() {
-        return [undefined, undefined];
+    getShapeWidth() {
+        return this._globalShapeWidth;
+    }
+
+    getNumberOfSpaces() {
+        return levels[currentLevelIndex].inbetweenSpaces + 2;
+    }
+
+    getInitialMarginSize() {
+        return this._lastSeenSize[1] / (levels[currentLevelIndex].inbetweenSpaces + 2) - this._globalShapeWidth;
     }
 
     getSelectedShapeSequence() {
@@ -393,5 +227,26 @@ export class ShapeSetupView extends View {
         shapeSequence[0] = currentLevel.startShape;
         shapeSequence.push(currentLevel.endShape);
         return shapeSequence;
+    }
+
+    getSize() {
+        return [undefined, undefined];
+    }
+
+    gotoNextLevel() {
+        let newLevel = levels[++currentLevelIndex];
+        window.currentLevel = newLevel;
+        this.shapeSelector.setSelection(newLevel.availableShapes, newLevel.rotationMode, newLevel.inbetweenSpaces);
+        this.replaceRenderable('shapeSlider', this._createShapeSliderFromLevel(currentLevelIndex));
+        this.showRenderable('shapeSlider');
+        this._cancelSlide();
+        this.hideRenderable('nextLevelButton');
+    }
+
+    notifyCollidedForIndex(forWhichShapeIndex) {
+        let currentLevel = levels[currentLevelIndex];
+        /* The very last shape obviously can't be the problem, so we do math.min. If you fail on the very last transition,
+         * the one but the last will be marked as problematic */
+        this.shapeSelector.notifyCollidedForIndex(Math.min(forWhichShapeIndex, currentLevel.inbetweenSpaces + 1));
     }
 }

@@ -14,9 +14,8 @@
   "arva": {
     "links": {
       "arva-js": "../arva-js",
-      "famous": "../famous",
-      "famous-flex": "../famous-flex",
-      "arva-kit": "../arva-kit"
+      "arva-kit": "../arva-kit",
+      "famous": "../famous"
     }
   },
   "jspm": {

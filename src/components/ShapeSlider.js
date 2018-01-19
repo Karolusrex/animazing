@@ -1,14 +1,14 @@
 /**
  * Created by lundfall on 09/07/16.
  */
-import Surface          from 'famous/core/Surface.js';
-import Timer            from 'famous/utilities/Timer.js';
+import Surface from 'famous/core/Surface.js';
+import Timer from 'famous/utilities/Timer.js';
 
-import {View}           from 'arva-js/core/View.js';
-import {layout}         from 'arva-js/layout/decorators.js';
+import {View} from 'arva-js/core/View.js';
+import {layout} from 'arva-js/layout/decorators.js';
 
 import {ShapeWithFrame} from './ShapeWithFrame.js';
-import {RotationMode}   from '../util/SpecProcessing.js';
+import {RotationMode} from '../util/SpecProcessing.js';
 import {DraggableShape} from './DraggableShapeWithGrid';
 
 export class ShapeSlider extends View {
@@ -20,7 +20,7 @@ export class ShapeSlider extends View {
         for (let [index, shapeSpec] of options.shapeSpecs.entries()) {
             let shapeEnabled = index && index !== lastShapeIndex;
             let circle = new ShapeWithFrame({shapeSpec, enabled: shapeEnabled});
-            let circleName = `circle${index}`;
+            let circleName = `shape${index}`;
             let circleWidth = 100;
             let circleSize = [circleWidth, circleWidth];
 
@@ -31,16 +31,14 @@ export class ShapeSlider extends View {
 
         }
 
-        this.on('shapeChosen', this._onShapeChosen);
         this.onNewSize(this._onNewSize);
     }
 
     setSelection(index, shapeSpec) {
-        this[`circle${index}`].showShape(shapeSpec);
+        this[`shape${index}`].showShape(shapeSpec);
         this._selectedShape = undefined;
 
         let chosenSpecSequence = this.getChosenSpecSequence();
-        this._requestSelection = false;
         let completeSequence;
         if (chosenSpecSequence.every((spec) => !!spec)) {
             completeSequence = chosenSpecSequence;
@@ -50,7 +48,7 @@ export class ShapeSlider extends View {
     }
 
     getChosenSpecSequence() {
-        return [...Array(this.options.shapeSpecs.length).keys()].map((index) => this[`circle${index}`].shapeWithGrid.getSpec());
+        return [...new Array(this.options.shapeSpecs.length).keys()].map((index) => this[`shape${index}`].shapeWithGrid.getSpec());
     }
 
     offerSelection(shapeSpec) {
@@ -62,7 +60,13 @@ export class ShapeSlider extends View {
         });
     }
 
-    onShapeDragFromOtherSide(foreignAbsolutePosition, foreignSize) {
+    /**
+     * Called when a shape is dragged from the shape selector
+     * @param foreignAbsolutePosition
+     * @param foreignSize
+     * @returns {*}
+     */
+    onShapeDragFromOtherSide(foreignAbsolutePosition, foreignSize, currentSelection) {
         let {options} = this;
         let {shapeWidth} = options;
         if (!this._absoluteShapePositions) {
@@ -81,15 +85,17 @@ export class ShapeSlider extends View {
         let hoveredItemIndex = this._absoluteShapePositions.findIndex((potentialItem, index) =>
             /* Ignore the first one and the last one */
             index > 0 && index !== this._absoluteShapePositions.length - 1 &&
+            /* Ignore the ones already occupied */
+            !(currentSelection[index]) &&
             potentialItem[1] < foreignAbsoluteCenter[1] && potentialItem[1] + shapeWidth > foreignAbsoluteCenter[1]
         );
         /* Not hovering over any item */
-        if(hoveredItemIndex === -1){
+        if (hoveredItemIndex === -1) {
             return this.unselectShape();
         }
-        let shapeObject = this[`circle${hoveredItemIndex}`];
+        let shapeObject = this[`shape${hoveredItemIndex}`];
         this._currentlyHighlightedShape = shapeObject;
-        this._currentlyHighlightedShape.select();
+        shapeObject.select();
         return [this._absoluteShapePositions[hoveredItemIndex], hoveredItemIndex];
     }
 
@@ -107,47 +113,40 @@ export class ShapeSlider extends View {
         this._currentlyHighlightedShape && this._currentlyHighlightedShape.unselect();
     }
 
-    _onShapeChosen(index) {
-        let previouslySelectedShape = this._selectedShape;
-        if (previouslySelectedShape) {
-            previouslySelectedShape.makeEmpty();
-        }
-        let selectedShape = this[`circle${index}`];
-        selectedShape.hideShape();
-        this._slidedRatio = 0;
-        let forbiddenShapes = [];
-        for (let neighbourIndex of [index - 1, index + 1]) {
-            if (this[`circle${neighbourIndex}`]) {
-                let spec = this[`circle${neighbourIndex}`].shapeWithGrid.getSpec();
-                if (spec) {
-                    forbiddenShapes.push(spec);
-                }
-            }
-        }
-        this._eventOutput.emit('modifyShape', index, forbiddenShapes);
-        this._selectedShape = selectedShape;
-        this._requestSelection = true;
-    }
-
     _onNewSize(size) {
         let {options} = this;
         let sequenceLength = options.shapeSpecs.length;
 
-        let circleWidth = options.shapeWidth || 0;
-        let noCircles = options.shapeSpecs.length;
+        let {shapeWidth = 0} = options;
 
-        for (let i = 0; i < noCircles; i++) {
-            let {decorations} = this[`circle${i}`];
-            decorations.size = [circleWidth, circleWidth];
+        for (let [index] of options.shapeSpecs.entries()) {
+            let {decorations} = this[`shape${index}`];
+            decorations.size = [shapeWidth, shapeWidth];
             decorations.dock.size[1] = size[1] / sequenceLength;
         }
 
         /* After the layout has ended, the new shape positions should be set in a few ticks! */
         Timer.after(() =>
-            this._absoluteShapePositions = options.shapeSpecs
-                .map((shape, index) =>
-                this[`circle${index}`].getFrame().getLastAbsoluteTranslate()
-            )
-        , 10);
+                this._absoluteShapePositions = options.shapeSpecs
+                    .map((shape, index) =>
+                        this[`shape${index}`].getFrame().getLastAbsoluteTranslate()
+                    )
+            , 10);
     }
+
+    lockShapes() {
+        for (let [index] of this.options.shapeSpecs.entries()) {
+            let circleName = `shape${index}`;
+            this[circleName].lockShape();
+        }
+    }
+
+
+    unlockShapes() {
+        for (let [index] of this.options.shapeSpecs.entries()) {
+            let circleName = `shape${index}`;
+            this[circleName].unlockShape();
+        }
+    }
+
 }

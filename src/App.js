@@ -35,7 +35,7 @@ export class App extends ArvaApp {
      */
     static initialize(){
         setColors({
-            PrimaryUIColor: '#d35400'
+            PrimaryUIColor: '#FF3F3F'
         });
         /* Change initial route, view animation or something needed before we start */
         this.start();
