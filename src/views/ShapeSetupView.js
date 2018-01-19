@@ -25,7 +25,7 @@ import {Settings} from '../util/Settings.js';
 let levels = window.levels = LevelStorage.getLevels();
 let collisionGraph = LevelStorage.getCollisionGraph();
 
-let currentLevelIndex = 8;
+let currentLevelIndex = 14;
 
 /* Margin will be set later per level.
  * The margin here is needed so that scrolling can be done when zoomed in.
@@ -65,7 +65,7 @@ export class ShapeSetupView extends View {
     })
     @event.on('isDragged', function (position, shape) {
         let {shapeSelector} = this;
-        let resultFromDragging = this.shapeSlider.onShapeDragFromOtherSide(position, [this._globalShapeWidth, this._globalShapeWidth], shapeSelector.getSelectedShapeSequence());
+        let resultFromDragging = this.shapeSlider.onShapeDragFromOtherSide(position, [this._globalShapeWidth, this._globalShapeWidth], shapeSelector.getSelection());
         if (!resultFromDragging) {
             return shapeSelector.notifyShouldNotSnap(shape);
         }

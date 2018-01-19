@@ -186,6 +186,14 @@ export class ShapeSelector extends View {
             calculateRelativePositionForDimension(0),
             calculateRelativePositionForDimension(1)
         ]);
+        let previousIndex = this._finalSelection.findIndex((shape) => shape === draggedShape);
+        if(previousIndex !== -1 && this._finalSelection[index] !== draggedShape){
+            if(draggedShape.isRemovedFromIndex === undefined){
+                draggedShape.isRemovedFromIndex = previousIndex;
+            }
+        } else {
+            delete draggedShape.isRemovedFromIndex;
+        }
         draggedShape.activeExternalIndex = index;
     }
 
@@ -224,9 +232,17 @@ export class ShapeSelector extends View {
             this._problematicShape = null;
         }
         if (!shapeRenderable.isSnappingToOtherPosition()) {
-            delete this._finalSelection[shapeRenderable.activeExternalIndex];
+            delete this._finalSelection[
+                shapeRenderable.isRemovedFromIndex !== undefined ? shapeRenderable.isRemovedFromIndex : shapeRenderable.activeExternalIndex];
+            delete shapeRenderable.isRemovedFromIndex;
             return;
         }
+
+        if(shapeRenderable.isRemovedFromIndex){
+            delete this._finalSelection[shapeRenderable.isRemovedFromIndex];
+            delete shapeRenderable.isRemovedFromIndex;
+        }
+
         this._finalSelection[shapeRenderable.activeExternalIndex] = shapeRenderable;
         if(this._finalSelection.every((selection, index) => !!selection || !index)
             && this._finalSelection.length === this.options.noInbetweenSpaces + 1){
