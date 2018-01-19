@@ -99,8 +99,11 @@ export class ShapeWithFrame extends View {
         this.layouts.push((context) => {
 
             if (this._autoSpin) {
-                let newDiff = getTime(), timeDiffFromLastFrame = (newDiff - this._lastDiff);
-                if (this._lastDiff) {
+                let newDiff = getTime(),
+                    timeDiffFromLastFrame = (newDiff - this._lastDiff),
+                    timeSinceAutoSpinStarted = (newDiff - this._autoSpinStartAt);
+
+                if (this._lastDiff && timeSinceAutoSpinStarted > 200) {
                     let newSpeed = Math.min(0.02,
                         (1 - (this._currentRotation % (Math.PI / 2)) / Math.PI) * initialSpeed
                     );
@@ -155,6 +158,7 @@ export class ShapeWithFrame extends View {
 
     setAutoSpin(autoSpin) {
         this._autoSpin = this.layout.options.alwaysLayout = autoSpin;
+        this._autoSpinStartAt = getTime();
     }
 
     determineShapeSize(contextSize, dimension) {
