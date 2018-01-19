@@ -67,7 +67,7 @@ export class ShapeSetupView extends View {
     })
     @event.on('isDragged', function (position, shape) {
         let {shapeSelector} = this;
-        let resultFromDragging = this.shapeSlider.onShapeDragFromOtherSide(position, [this._globalShapeWidth, this._globalShapeWidth], shapeSelector.getSelection());
+        let resultFromDragging = this.shapeSlider.onShapeDragFromOtherSide(position, [this._globalShapeWidth, this._globalShapeWidth], shapeSelector.getSelection(), shape);
         if (!resultFromDragging) {
             return shapeSelector.notifyShouldNotSnap(shape);
         }

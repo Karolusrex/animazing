@@ -64,9 +64,11 @@ export class ShapeSlider extends View {
      * Called when a shape is dragged from the shape selector
      * @param foreignAbsolutePosition
      * @param foreignSize
+     * @param currentSelection
+     * @param shape
      * @returns {*}
      */
-    onShapeDragFromOtherSide(foreignAbsolutePosition, foreignSize, currentSelection) {
+    onShapeDragFromOtherSide(foreignAbsolutePosition, foreignSize, currentSelection, shape) {
         let {options} = this;
         let {shapeWidth} = options;
         if (!this._absoluteShapePositions) {
@@ -86,7 +88,7 @@ export class ShapeSlider extends View {
             /* Ignore the first one and the last one */
             index > 0 && index !== this._absoluteShapePositions.length - 1 &&
             /* Ignore the ones already occupied */
-            (!currentSelection[index] || currentSelection[index] !== this._currentlyHighlightedShape) &&
+            (!currentSelection[index] || currentSelection[index] === shape) &&
             potentialItem[1] < foreignAbsoluteCenter[1] && potentialItem[1] + shapeWidth > foreignAbsoluteCenter[1]
         );
         /* Not hovering over any item */
