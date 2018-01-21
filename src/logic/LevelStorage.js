@@ -49,12 +49,12 @@ export class LevelStorage {
         let sortAndPick = {
             sort: [
                 {
-                property: 'inbetweenSpaces',
-                direction: 'ascending'
-            }, {
-                property: ['availableShapes', 'length'],
-                direction: 'ascending'
-            }],
+                    property: 'inbetweenSpaces',
+                    direction: 'ascending'
+                }, {
+                    property: ['availableShapes', 'length'],
+                    direction: 'ascending'
+                }],
             pickUnique: {
                 matchesPerValue: 2,
                 grouping: [((level) => level.availableShapes.length), ((level) => level.inbetweenSpaces)]
@@ -67,12 +67,14 @@ export class LevelStorage {
             filter: {
                 stickCount,
                 rotationMode,
-                inbetweenSpaces: (spaces) => rotationMode === RotationMode.all ? spaces <= 4 : spaces < 3},
-                
+                inbetweenSpaces: (spaces) =>
+                    ((rotationMode === RotationMode.all && spaces <= 4) || spaces < 3) &&
+                        (stickCount > 2 || spaces === 1)
+            }
         }))));
         let processedLevels =
             this.advancedSelection(rawLevels, ...selectionGroups)
-                .map(({ rotationMode, id, availableShapes, startShape, endShape, inbetweenSpaces, cheatAnswer }, index) => {
+                .map(({rotationMode, id, availableShapes, startShape, endShape, inbetweenSpaces, cheatAnswer}, index) => {
                     availableShapes = availableShapes.map((shapeName) => ShapeSpecs[shapeName]);
                     return {
                         index,
@@ -130,7 +132,7 @@ export class LevelStorage {
             return array;
         }
 
-        let { matchesPerValue, grouping } = criteria;
+        let {matchesPerValue, grouping} = criteria;
         if (!Array.isArray(grouping)) {
             grouping = [grouping];
         }
@@ -148,10 +150,10 @@ export class LevelStorage {
             return array;
         }
         let filteredArray = array;
-        criteria = this.multipleSort(criteria, [{ property: 'matchesPerValue', direction: 'descending' }]);
+        criteria = this.multipleSort(criteria, [{property: 'matchesPerValue', direction: 'descending'}]);
         let unfulfillableCriteria;
         for (let criteriaObject of criteria) {
-            let { matchesPerValue, filter } = criteriaObject;
+            let {matchesPerValue, filter} = criteriaObject;
             let filteredEntries = this.multipleFilter(filteredArray, filter);
             criteriaObject.filteredEntries = filteredEntries;
             if (filteredEntries.length < matchesPerValue) {
@@ -167,7 +169,7 @@ export class LevelStorage {
             if (criteriaObject === unfulfillableCriteria) {
                 break;
             }
-            let { matchesPerValue, filteredEntries } = criteriaObject;
+            let {matchesPerValue, filteredEntries} = criteriaObject;
             arrayToReturn = arrayToReturn.concat(_.uniq(filteredArray.concat(filteredEntries)).slice(0, matchesPerValue));
         }
         return _.uniq(arrayToReturn);
@@ -188,7 +190,7 @@ export class LevelStorage {
                 if (!criteriaObject) {
                     break;
                 }
-                let { matcher } = criteriaObject;
+                let {matcher} = criteriaObject;
                 if (matcher) {
                     firstValue = matcher(firstItem);
                     secondValue = matcher(secondItem);

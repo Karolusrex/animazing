@@ -171,7 +171,7 @@ export class LevelGenerator extends View {
             if (getNextContextEmitter) {
                 context = await new Promise((resolve) => getNextContextEmitter.once('newContext', resolve));
             }
-            if (!associateShapesInInterval(i, shapePair, context, 1, doClickwiseRotation, false, [100, 100, 0], [200, 200])) {
+            if (associateShapesInInterval(i, shapePair, context, 1, doClickwiseRotation, false, [100, 100, 0], [200, 200])[0]) {
                 return true;
             }
         }
@@ -236,7 +236,7 @@ export class LevelGenerator extends View {
         let linksByStartNodeId = LevelGenerator.getLinksByStartNodeId(linksRestrictedByAllowedRotations);
         let foundLevels = [];
         let checkedShapeNames = {};
-        // TODO allow shuffling again with the following code line. It's removed now for reproducability
+        // Switch on and off shuffling here
         for (let startNode of _.shuffle(nodesRestrictedByAllowedRotations)) {
         // for (let startNode of nodesRestrictedByAllowedRotations) {
             /* We don't have to do a new set of levels for each of the 4 rotation states */
@@ -313,7 +313,7 @@ export class LevelGenerator extends View {
                 continue;
             }
             let nodesOfSameType = LevelGenerator.getNodesOfSameRotation(newPotentialNode, nodesById, rotationMode);
-            let newLinksByNodeId = LevelGenerator.getListDictFromNodeList(nodesOfSameType, linksByStartNodeId);
+            let newLinksByNodeId = LevelGenerator.getListDictFromNodeListToShapes(nodesOfSameType, linksByStartNodeId, Object.keys(visitedNodes).map((name) => name.split('_')[0]));
             let linksToStartNode = LevelGenerator.getLinksFromNodeToNodeGroup(linksByStartNodeId, startNode, nodesOfSameType);
             let potentialLinkCollection = LevelGenerator.mergeLinkDicts(availableLinks, newLinksByNodeId, { [currentNode.id]: [outgoingLink] }, linksToStartNode);
 
@@ -335,7 +335,7 @@ export class LevelGenerator extends View {
                 cheatAnswer: levelData.cheatAnswer.concat(newPotentialNode)
             };
             /* Await in order to prevent the browser from not responding to interruptions */
-            await new Promise((resolve) => setTimeout(resolve, 35));
+            await new Promise((resolve) => setTimeout(resolve, 30));
             let newLevels = await LevelGenerator.searchForLevel(
                 startNode,                                                              //  Stays the same
                 newPotentialNode,                                                       //  "currentNode"
@@ -352,7 +352,7 @@ export class LevelGenerator extends View {
             //Or perhaps set a flag for intermediary levels
             levelsToReturn = levelsToReturn.concat(
                 Array.isArray(newLevels) ?
-                    _.flattenDeep(newLevels).filter((level) => !!level && level.length !== 0) : newLevels
+                    _.flattenDeep(newLevels).filter((level) => !!level && level.length !== 0).filter(LevelGenerator.isValidLevel) : newLevels
             );
         }
         if (noNewLevels) {
@@ -429,8 +429,10 @@ export class LevelGenerator extends View {
         return nodeList.reduce((result, otherNode) => result.concat(linkDict[otherNode.id]), []);
     }
 
-    static getListDictFromNodeList(nodeList, linkDict) {
-        return nodeList.reduce((result, node) => Object.assign(result, { [node.id]: linkDict[node.id] }), {});
+    static getListDictFromNodeListToShapes(nodeList, linkDict, shapeNames) {
+        return nodeList.reduce((result, node) =>
+            Object.assign(result, { [node.id]: linkDict[node.id].filter(({target}) => shapeNames.includes(target.split('_')[0])) })
+        , {});
     }
 
     static getListDictFromNodeListWithReverse(nodeList, linkDict) {
@@ -527,5 +529,12 @@ export class LevelGenerator extends View {
 
     static getUnrotatedId(id) {
         return id.substr(0, id.indexOf('_'));
+    }
+
+    static isValidLevel(levelData) {
+        let correctSequence = levelData.cheatAnswer, {endShape, startShape} = levelData;
+        return levelData.inbetweenSpaces > 0
+            && correctSequence[correctSequence.length - 1].id !== `${endShape.shapeName}_${endShape.rotation}`
+            && correctSequence[0] !== `${startShape.shapeName}_${startShape.rotation}`;
     }
 }

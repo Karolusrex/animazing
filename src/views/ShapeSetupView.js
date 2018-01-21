@@ -25,7 +25,7 @@ import {Settings} from '../util/Settings.js';
 let levels = window.levels = LevelStorage.getLevels();
 let collisionGraph = LevelStorage.getCollisionGraph();
 
-let currentLevelIndex = 13;
+let currentLevelIndex = 1;
 
 /* Margin will be set later per level.
  * The margin here is needed so that scrolling can be done when zoomed in.
