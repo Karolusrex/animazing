@@ -250,6 +250,6 @@ export class ShapeSetupView extends View {
         let currentLevel = levels[currentLevelIndex];
         /* The very last shape obviously can't be the problem, so we do math.min. If you fail on the very last transition,
          * the one but the last will be marked as problematic */
-        this.shapeSelector.notifyCollidedForIndex(Math.min(forWhichShapeIndex, currentLevel.inbetweenSpaces + 1));
+        this.shapeSelector.notifyCollidedForIndex(Math.min(forWhichShapeIndex, currentLevel.inbetweenSpaces));
     }
 }
