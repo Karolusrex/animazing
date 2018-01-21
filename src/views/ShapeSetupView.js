@@ -25,12 +25,12 @@ import {Settings} from '../util/Settings.js';
 let levels = window.levels = LevelStorage.getLevels();
 let collisionGraph = LevelStorage.getCollisionGraph();
 
-let currentLevelIndex = 14;
+let currentLevelIndex = 13;
 
 /* Margin will be set later per level.
  * The margin here is needed so that scrolling can be done when zoomed in.
  * Scrolling is only enabled when sliding the shapes */
-@layout.scrollable({enabled: false, layoutOptions: {margins: [0, 0, 0, 0]}})
+@layout.scrollable({enabled: false, layoutOptions: {margins: [0, 0, 0, 0]}, overscroll: false})
 export class ShapeSetupView extends View {
 
     @layout.translate(0, 0, -10)
@@ -137,7 +137,7 @@ export class ShapeSetupView extends View {
 
     exitLockedMode() {
         let scrollView = this.getScrollView();
-        scrollView.goToFirstPage();
+        scrollView.setVelocity(8);
         this.getScrollView().options.enabled = false;
         this.showRenderable('whiteBackground');
         this.shapeSelector.unlockShapes();
