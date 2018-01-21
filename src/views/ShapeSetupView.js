@@ -149,7 +149,6 @@ export class ShapeSetupView extends View {
         this._sliding = true;
         this._selectedShapeSequence = sequence;
         let sequenceLength = sequence.length;
-        let snapPoints = [...Array(sequenceLength).keys()].map((index) => [this.maxRange / (sequenceLength - 1) * (index), 0]);
 
     }
 
