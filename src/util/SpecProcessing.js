@@ -7,12 +7,12 @@ import {ShapeGrid}                      from '../components/ShapeGrid.js';
 import {RotationDirectionManager}       from './RotationDirectionManager';
 
 export let specAttributes = {
-    rotate: { dimensions: 3, defaultValue: [0, 0, 0] },
-    align: { dimensions: 2, defaultValue: [0.5, 0] },
-    origin: { dimensions: 2, defaultValue: [0.5, 0.5] },
-    size: { dimensions: 2, defaultValue: [100, 10] },
-    translate: { dimensions: 3, defaultValue: [0, 0, 0] },
-    opacity: { dimensions: 1, defaultValue: 1 }
+    rotate: {dimensions: 3, defaultValue: [0, 0, 0]},
+    align: {dimensions: 2, defaultValue: [0.5, 0]},
+    origin: {dimensions: 2, defaultValue: [0.5, 0.5]},
+    size: {dimensions: 2, defaultValue: [100, 10]},
+    translate: {dimensions: 3, defaultValue: [0, 0, 0]},
+    opacity: {dimensions: 1, defaultValue: 1}
 };
 
 export const RotationMode = {
@@ -333,7 +333,7 @@ let _normalizeWeights = (weights, goalT, easing) => {
 export function mergeSpecs(startSpec, endSpec, t, goalT, easing, clockwiseRotate, sizeDistortion) {
     let [normalizedT] = _normalizeWeights([t], goalT, easing);
     let spec = {};
-    for (let [attribute, { dimensions, defaultValue }] of Object.entries(specAttributes)) {
+    for (let [attribute, {dimensions, defaultValue}] of Object.entries(specAttributes)) {
         spec[attribute] = [];
 
         for (let i = 0; i < dimensions; i++) {
@@ -382,12 +382,12 @@ export function normalizeRotationToOther(rotation, otherRotation, maxRotation = 
         /* If it needs to rotate the other way... */
         otherRotation = normalizedOtherRotation;
         /* If we explicitly request a clockwise rotation, and that's what we're getting, don't rotate the other way */
-        if (!(clockwiseRotate && normalizedDiff === - maxRotation / 2)
+        if (!(clockwiseRotate && normalizedDiff === -maxRotation / 2)
             && biggerOrPotentiallyEqual(Math.abs(normalizedDiff), (maxRotation / 2), clockwiseRotate)) {
             otherRotation -= Math.sign(normalizedDiff) * maxRotation;
         }
         /* On the other hand, if we have counter clock wise, if we should have clockwise ...*/
-    } else if (!clockwiseRotate && rotationDiff === - maxRotation / 2){
+    } else if (!clockwiseRotate && rotationDiff === -maxRotation / 2) {
         otherRotation -= Math.sign(normalizedDiff) * maxRotation;
     }
     return otherRotation;
@@ -401,7 +401,7 @@ function biggerOrPotentiallyEqual(biggerValue, smallerValue, doEqual) {
 export function mergeMultipleSpecs(startState, endSpecs, weights, goalT, easing) {
     let normalizedWeights = _normalizeWeights(weights, goalT, easing);
     let spec = {};
-    for (let [attribute, { dimensions, defaultValue }] of Object.entries(specAttributes)) {
+    for (let [attribute, {dimensions, defaultValue}] of Object.entries(specAttributes)) {
         spec[attribute] = [];
 
         for (let i = 0; i < dimensions; i++) {
