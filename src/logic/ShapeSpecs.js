@@ -199,9 +199,6 @@ export class ShapeSpecCollection {
         }
     });
 
-
-
-
     pi = new ShapeSpec({
         shape: {
             topBar: {
@@ -221,8 +218,6 @@ export class ShapeSpecCollection {
             }
         }
     });
-
-
 
     capitalN = new ShapeSpec({
         shape: {
@@ -358,7 +353,6 @@ export class ShapeSpecCollection {
         }
     });
 
-
     sum = new ShapeSpec({
         shape: {
             topBar: {
@@ -409,6 +403,81 @@ export class ShapeSpecCollection {
         }
     });
 
+    letterX = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, - Math.PI / 4],
+                translate: [55, -55, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0, - Math.PI / 4],
+                translate: [-55, 55, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0,  Math.PI / 4],
+                translate: [55, 55, 0],
+                size: stickDimensions
+            },
+            extraBar: {
+                rotate: [0, 0,  Math.PI / 4],
+                translate: [-55, -55, 0],
+                size: stickDimensions
+            }
+        }
+    });
+
+    fan = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, - Math.PI / 4],
+                translate: [47.5, -10, 0],
+                size: stickDimensions
+            },
+            extraBar: {
+                rotate: [0, 0, 0],
+                translate: [-60, 55, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, 0],
+                translate: [60, 55, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0,  Math.PI / 4],
+                translate: [-47.5, -10, 0],
+                size: stickDimensions
+            }
+        }
+    });
+
+    stairs = new ShapeSpec({
+        shape: {
+            topBar: {
+                rotate: [0, 0, 0],
+                translate: [-20, -20, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, 0],
+                translate: [-60, -60, 0],
+                size: stickDimensions
+            },
+            midBar: {
+                rotate: [0, 0,  0],
+                translate: [20, 20, 0],
+                size: stickDimensions
+            },
+            extraBar: {
+                rotate: [0, 0,  0],
+                translate: [60, 60, 0],
+                size: stickDimensions
+            }
+        }
+    });
+
     crossBow = new ShapeSpec({
         shape: {
             topBar: {
@@ -417,6 +486,31 @@ export class ShapeSpecCollection {
                 size: stickDimensions
             },
             midBar: {
+                rotate: [0, 0, Math.PI / 2],
+                translate: [0, 25, 0],
+                size: stickDimensions
+            },
+            bottomBar: {
+                rotate: [0, 0, Math.PI / 3],
+                translate: [35, -50, 0],
+                size: stickDimensions
+            },
+            extraBar: {
+                rotate: [0, 0, 0],
+                translate: [0, 100, 0],
+                size: stickDimensions
+            }
+        }
+    });
+
+    shuffledCrossBow = new ShapeSpec({
+        shape: {
+            midBar: {
+                rotate: [0, 0, -Math.PI / 3],
+                translate: [-35, -50, 0],
+                size: stickDimensions
+            },
+topBar: {
                 rotate: [0, 0, Math.PI / 2],
                 translate: [0, 25, 0],
                 size: stickDimensions
