@@ -141,15 +141,20 @@ export class ShapeWithFrame extends View {
             return;
         }
         this.showRenderable(`activatedFrame`);
-
     }
 
-    unselect() {
+    selectAsForbidden() {
+        this.activatedFrame.setProperties({backgroundColor: 'rgba(255, 63, 63, 0.3)'});
+        this.select();
+    }
+
+    async unselect() {
         if(this.options.activated){
             console.log('Cannot unselect shape because it is permanently activated!');
             return;
         }
-        this.hideRenderable(`activatedFrame`);
+        await this.hideRenderable(`activatedFrame`);
+        this.activatedFrame.setProperties({backgroundColor: 'white'});
     }
 
     isEnabled() {

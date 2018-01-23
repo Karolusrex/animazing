@@ -26,9 +26,16 @@ textarea::-webkit-scrollbar {
     display: none;
 }
 
+.famous-container {
+    max-height: 820px;
+    max-width: 480px;
+    overflow:hidden !important;
+}
+
 .famous-container, .famous-group {
     position: absolute;
     top: 0px;
+
     left: 0px;
     bottom: 0px;
     right: 0px;

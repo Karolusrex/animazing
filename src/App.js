@@ -6,6 +6,7 @@ import {provide}                    from 'arva-js/utils/di/Decorators.js';
 import {Injection}                  from 'arva-js/utils/Injection.js';
 import {DataSource}                 from 'arva-js/data/DataSource.js';
 import {App as ArvaApp}             from 'arva-js/core/App.js';
+import Context                  from 'famous/core/Context.js';
 
 /* Importing CSS in jspm bundled builds injects them into the DOM automagically */
 import './famous.css';
@@ -56,6 +57,9 @@ export class App extends ArvaApp {
      * app is up and running.
      */
     static done(){
+        let context = Injection.get(Context);
+        /* Fix so that the max height/width works well */
+        setTimeout(() => context.setSize(), 10);
     }
 }
 
