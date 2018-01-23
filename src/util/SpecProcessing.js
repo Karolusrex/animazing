@@ -2,9 +2,9 @@
  * Created by lundfall on 5/31/16.
  */
 
-import {ShapeSpec}                      from '../logic/ShapeSpecs.js';
-import {ShapeGrid}                      from '../components/ShapeGrid.js';
-import {RotationDirectionManager}       from './RotationDirectionManager';
+import {ShapeSpec} from '../logic/ShapeSpecs.js';
+import {ShapeGrid} from '../components/ShapeGrid.js';
+import {RotationDirectionManager} from './RotationDirectionManager';
 
 export let specAttributes = {
     rotate: {dimensions: 3, defaultValue: [0, 0, 0]},

@@ -100,6 +100,16 @@ export class ShapeSlider extends View {
             this.unselectShape();
             this._currentlyHighlightedShape = shapeObject;
         }
+        /* Check if we are attempting to put 2 shapes in a row */
+        let previousIndex = hoveredItemIndex - 1, nextIndex = hoveredItemIndex + 1;
+        if(
+            (currentSelection[previousIndex] && currentSelection[previousIndex].isTwin(shape)) ||
+            (currentSelection[nextIndex] && currentSelection[nextIndex].isTwin(shape))
+        ) {
+            this._currentlyHighlightedShape = shapeObject;
+            shapeObject.selectAsForbidden();
+            return;
+        }
         shapeObject.select();
         return [this._absoluteShapePositions[hoveredItemIndex], hoveredItemIndex];
     }

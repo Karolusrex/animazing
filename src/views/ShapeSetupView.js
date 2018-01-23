@@ -25,7 +25,7 @@ import {Settings} from '../util/Settings.js';
 let levels = window.levels = LevelStorage.getLevels();
 let collisionGraph = LevelStorage.getCollisionGraph();
 
-let currentLevelIndex = 1;
+let currentLevelIndex = 26;
 
 /* Margin will be set later per level.
  * The margin here is needed so that scrolling can be done when zoomed in.
@@ -152,7 +152,6 @@ export class ShapeSetupView extends View {
 
     }
 
-
     _createShapeSelectorFromLevel(levelIndex) {
         let level = levels[levelIndex];
         return new ShapeSelector({
@@ -195,9 +194,6 @@ export class ShapeSetupView extends View {
         return Math.min(position, furthestPoint);
     }
 
-
-
-
     _continuouslyCalculateShapeWidth() {
         this.layout.on('layoutstart', ({size}) => {
             let numberOfShapes = levels[currentLevelIndex].inbetweenSpaces + 2;
@@ -227,7 +223,7 @@ export class ShapeSetupView extends View {
         let currentLevel = levels[currentLevelIndex];
         let shapeSequence = [...this.shapeSelector.getSelectedShapeSequence()];
         shapeSequence[0] = currentLevel.startShape;
-        shapeSequence.push(currentLevel.endShape);
+        shapeSequence[currentLevel.inbetweenSpaces + 1] = currentLevel.endShape;
         return shapeSequence;
     }
 

@@ -91,20 +91,33 @@ export class GamePlayView extends View {
         scrollView.on('swipestart', () => {
             this._autoPlay = false;
         });
-        shapeSetupView.getScrollView().on('scroll', async ({scrollOffset}) => {
+        scrollView.on('mousewheel', () => {
+            this._autoPlay = false;
+        });
+        scrollView.on('scroll', async ({scrollOffset}) => {
             if (this._autoPlay === true &&
-                scrollOffset % (this._maxScrollHeight / this._selectedShapeSequence.length) < 1 &&
-                scrollView.getVelocity() < 0.1) {
+                scrollOffset % (this._maxScrollHeight / (this._selectedShapeSequence.length - 1)) < 2 &&
+                (this._maxScrollHeight - scrollOffset) > 5 ) {
                 this._pushScrollToNextPositon();
             }
             this._currentPosition = Math.max(0, scrollOffset);
-            if (scrollOffset >= this._maxScrollHeight && !this._isDead && !this._levelComplete) {
+            if (scrollOffset >= this._maxScrollHeight &&
+                !this._isDead &&
+                !this._levelComplete &&
+                /* Level can only be completed if all slots are filled */
+                [...this._selectedShapeSequence].every((shape) => !!shape)
+            ) {
                 this._levelComplete = true;
                 this.hideRenderable('lowerButton');
                 this.replaceRenderable('lowerButton', this.nextLevel);
                 this.showRenderable('lowerButton');
             }
         });
+
+
+        for(let i = 0;i<40;i++){
+            this.renderables[`debug${i}`] = new Surface({properties: {backgroundColor: 'black', borderRadius: '50%'}});
+        }
     }
 
     @layout.animate({
@@ -139,6 +152,7 @@ export class GamePlayView extends View {
 
     _dieAtPosition(inputPosition, forWhichShapeIndex) {
         if (!this._isDead) {
+            this._autoPlay = false;
             this.shapeSetupView.notifyCollidedForIndex(forWhichShapeIndex);
             this._diedAtPosition = inputPosition;
             this._isDead = true;
@@ -152,8 +166,9 @@ export class GamePlayView extends View {
 
     _pushScrollToNextPositon() {
         if (this._autoPlay) {
-            // todo
-            // this.shapeSetupView.getScrollView().setVelocity(-0.15);
+            let scrollView = this.shapeSetupView.getScrollView();
+            scrollView.applyScrollForce(0);
+            scrollView.setVelocity({3: -1.2, 4: -0.9}[this.shapeSetupView.getNumberOfSpaces()] || -0.8);
         }
     }
 
@@ -171,7 +186,8 @@ export class GamePlayView extends View {
         this.shapeSetupView.enterLockedMode();
         this._selectedShapeSequence = shapeSetupView.getSelectedShapeSequence();
         this._maxScrollHeight = shapeSetupView.getTotalScrollHeight();
-        this._autoPlay = true;
+        // TODO: Enable auto play
+        // this._autoPlay = this._selectedShapeSequence.length === numberOfSpaces;
         setTimeout(this._pushScrollToNextPositon, 100);
         this._inPlayMode = true;
         this._isDead = false;

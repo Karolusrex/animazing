@@ -121,22 +121,10 @@ export class ShapeSelector extends View {
         }
 
         this.options.shapeSpecs = shapeSpecs;
-        let numberOfShapes = shapeSpecs.length;
+        this._shapeCount = shapeSpecs.length;
 
-        for (let [i, shapeSpec] of shapeSpecs.entries()) {
-
-            let shapeRenderable = new DraggableShape({
-                colorScheme: 'transparent',
-                autoSpin: rotationMode !== RotationMode.noRotation,
-                shapeSpec,
-                startRotation: i * Math.PI / 2
-            });
-
-            this.addRenderable(shapeRenderable, `shape${i}`
-                /* Size is set properly later in the pre-layout function */
-                , layout.size(100, 100), layout.translate(0, 0, 10), layout.animate());
-            shapeRenderable.on('isDragged', () => this._onShapeDrag(shapeRenderable));
-            shapeRenderable.on('finishedDragging', () => this._onShapeFinishedDrag(shapeRenderable));
+        for (let shapeSpec of shapeSpecs) {
+            this._addShape(shapeSpec, rotationMode, true);
         }
     }
 
@@ -145,7 +133,6 @@ export class ShapeSelector extends View {
         draggedShape.snapToPositionWhenDropped([0, 0]);
     }
 
-
     hideAllShapes() {
         this._toggleAllShapes(false);
     }
@@ -153,9 +140,12 @@ export class ShapeSelector extends View {
     lockShapes() {
         this._hideButtons();
         this._problematicShape = null;
-        for (let [index] of this.options.shapeSpecs.entries()) {
+        for (let index = 0; index < this._shapeCount; index++) {
             let shapeRenderableName = `shape${index}`;
             let shape = this[shapeRenderableName];
+            if (!shape) {
+                continue;
+            }
             if (shape.isHome) {
                 this.hideRenderable(shapeRenderableName)
             } else {
@@ -165,9 +155,12 @@ export class ShapeSelector extends View {
     }
 
     unlockShapes() {
-        for (let [index] of this.options.shapeSpecs.entries()) {
+        for (let index = 0; index < this._shapeCount; index++) {
             let shapeRenderableName = `shape${index}`;
             let shape = this[shapeRenderableName];
+            if (!shape) {
+                continue;
+            }
             this.showRenderable(shapeRenderableName);
             if (this._problematicShape === shape) {
                 shape.markAsProblematic();
@@ -198,8 +191,7 @@ export class ShapeSelector extends View {
     }
 
     getSelectedShapeSequence() {
-        /* Need to clone with spread operator because otherwise filter will automatically remove hole (as supposed to undefined entries) */
-        return [...this._finalSelection].filter((shape, index) => !!shape || !index)
+        return this._finalSelection
             .map((shape) => {
                     if (!shape) {
                         return;
@@ -213,19 +205,27 @@ export class ShapeSelector extends View {
     _onNewSize(width, height) {
         this._lastKnownSize = [width, height];
         let shapeHeight = this.options.shapeWidth || 0;
-        for (let [shapeIndex] of this.options.shapeSpecs.entries()) {
-            this[`shape${shapeIndex}`].decorations.size = [shapeHeight, shapeHeight];
-            this[`shape${shapeIndex}`].decorations.translate[0] = width * .75 - shapeHeight / 2;
-            this[`shape${shapeIndex}`].decorations.translate[1] = margin / 2 +
-                Math.max(0, (shapeIndex) * (margin + shapeHeight));
+        for (let shapeIndex = 0; shapeIndex < this._shapeCount; shapeIndex++) {
+            let shapeRenderable = this[`shape${shapeIndex}`];
+            if (!shapeRenderable) {
+                continue;
+            }
+            shapeRenderable.decorations.size = [shapeHeight, shapeHeight];
+            shapeRenderable.decorations.translate[0] = width * .75 - shapeHeight / 2;
+            shapeRenderable.decorations.translate[1] = margin / 2 +
+                Math.max(0, (this.options.shapeSpecs.indexOf(shapeRenderable.getSpec())) * (margin + shapeHeight));
         }
     }
 
 
     _clearSelection() {
-        for (let [index] of this.options.shapeSpecs.entries()) {
-            this.removeRenderable(`shape${index}`);
+        for (let index = 0; index < this._shapeCount; index++) {
+            let shapeName = `shape${index}`;
+            if(this[shapeName]){
+                this.removeRenderable(shapeName);
+            }
         }
+        this._shapeCount = 0;
     }
 
     getSelection() {
@@ -242,12 +242,23 @@ export class ShapeSelector extends View {
             delete this._finalSelection[
                 shapeRenderable.isRemovedFromIndex !== undefined ? shapeRenderable.isRemovedFromIndex : shapeRenderable.activeExternalIndex];
             delete shapeRenderable.isRemovedFromIndex;
+            let stationaryTwinIndex = this._getStationaryTwinIndex(shapeRenderable);
+            /* If there is a stationary twin that needs to be replaced */
+            if (stationaryTwinIndex !== -1) {
+                this._removeShape(stationaryTwinIndex);
+            }
             return;
         }
 
         if (shapeRenderable.isRemovedFromIndex) {
             delete this._finalSelection[shapeRenderable.isRemovedFromIndex];
             delete shapeRenderable.isRemovedFromIndex;
+            /* If there are more than 2 in-between spaces it makes sense to re-use old ones, and if the shape doesn't have a duplicate
+             * that is positioned at it's starting position */
+        } else if (this.options.noInbetweenSpaces > 2 &&
+            this._getStationaryTwinIndex(shapeRenderable) === -1
+        ) {
+            this._addShape(shapeRenderable.getSpec(), this.options.rotationMode, false);
         }
 
         this._finalSelection[shapeRenderable.activeExternalIndex] = shapeRenderable;
@@ -279,11 +290,12 @@ export class ShapeSelector extends View {
         this.reflowRecursively();
     }
 
-    _onShapeDrag(shapeRenderable) {
+    _onShapeDrag(shapeRenderable, willDropImmediately) {
         if (!shapeRenderable.isHome && this._canRotateShapes()) {
             shapeRenderable.setAutoSpin(true);
         }
-        if (this._selectedShape) {
+        /* If the shape is just about to drop, it's not useful to exit the configuration mode */
+        if (this._selectedShape && !willDropImmediately) {
             this._exitShapeConfigurationMode();
         }
     }
@@ -294,15 +306,16 @@ export class ShapeSelector extends View {
 
     _exitShapeConfigurationMode() {
         this._hideButtons();
-        /* Just for reducing a bit of cognitive load, wait a bit before making the other shapes reappear */
         this._toggleAllShapes(true);
         this._selectedShape = null;
     }
 
     _toggleAllShapes(shouldShow) {
-        for (let [index] of this.options.shapeSpecs.entries()) {
+        for (let index = 0; index < this._shapeCount; index++) {
             let otherShapeRenderableName = `shape${index}`;
-            this.showRenderable(otherShapeRenderableName, shouldShow);
+            if (this[otherShapeRenderableName]) {
+                this.showRenderable(otherShapeRenderableName, shouldShow);
+            }
         }
     }
 
@@ -315,9 +328,12 @@ export class ShapeSelector extends View {
 
     _showRotationControls(shapeRenderable) {
         let currentShapes = this.options.shapeSpecs;
-        for (let [index] of currentShapes.entries()) {
+        for (let index = 0; index < this._shapeCount; index++) {
             let otherShapeRenderableName = `shape${index}`;
             let otherShapeRenderable = this[otherShapeRenderableName];
+            if (!otherShapeRenderable) {
+                continue;
+            }
 
             if (otherShapeRenderable === shapeRenderable ||
                 /* Don't hide renderables that are already in place */
@@ -338,4 +354,43 @@ export class ShapeSelector extends View {
         this._problematicShape = this._finalSelection[forWhichShapeIndex];
     }
 
+    /**
+     * As duplicate shapes are added, the size of this._shapeCount will increase more and more, and there will effectively be
+     * "holes" in the "array" of shapes.
+     *
+     * @param index
+     * @param shapeSpec
+     * @param rotationMode
+     * @param showInitially
+     * @returns {DraggableShape}
+     * @private
+     */
+    _addShape(shapeSpec, rotationMode, showInitially = true) {
+        let index = this._shapeCount++;
+        let shapeRenderable = new DraggableShape({
+            colorScheme: 'transparent',
+            autoSpin: rotationMode !== RotationMode.noRotation,
+            shapeSpec,
+            startRotation: index * Math.PI / 2
+        });
+
+        this.addRenderable(shapeRenderable, `shape${index}`
+            /* Size is set properly later in the pre-layout function */
+            , layout.size(100, 100), layout.translate(0, 0, 10), layout.animate({showInitially}));
+        shapeRenderable.on('isDragged', (position, shape, willDropImmediately) => this._onShapeDrag(shapeRenderable, willDropImmediately));
+        shapeRenderable.on('finishedDragging', () => this._onShapeFinishedDrag(shapeRenderable));
+        return shapeRenderable;
+    }
+
+    _removeShape(index) {
+        this.removeRenderable(`shape${index}`);
+    }
+
+    _getStationaryTwinIndex(shapeRenderable) {
+        return Array(this._shapeCount + 1).fill().findIndex((_, index) =>
+                this[`shape${index}`] &&
+                this[`shape${index}`].isTwin(shapeRenderable) &&
+                !this[`shape${index}`].isSnappingToOtherPosition()
+            );
+    }
 }

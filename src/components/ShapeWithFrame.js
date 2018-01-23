@@ -17,6 +17,7 @@ import {
 import {Settings} from '../util/Settings.js';
 import AnimationController from 'famous-flex/AnimationController.js';
 import {combineOptions} from 'arva-js/utils/CombineOptions.js';
+import {Colors}         from 'arva-kit/defaults/DefaultColors.js';
 
 let boxShadow = 'rgba(0, 0, 0, 0.16) -1px 0px 64px', borderRadius = '20px';
 export class ShapeWithFrame extends View {
