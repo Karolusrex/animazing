@@ -276,10 +276,12 @@ export function specBoundingBoxSize(spec) {
  */
 //TODO Cleanup function arguments
 export function associateShapesInInterval(input, shapes, context, maxRange, clockwiseRotate, displayOpaque = false, extraTranslate = [0, 0, 0], size) {
-
+    if (!shapes[0] || !shapes[shapes.length - 1]) {
+        throw new Error('There needs to be a shape at the front and the back specified');
+    }
     let allSpecs = [];
     let i = 0;
-    let indexOfNextShape = 1;
+    let lastIndex = 1;
     shapes[0].forEach((bar) => {
         let specCombo = [];
         let j;
@@ -291,16 +293,26 @@ export function associateShapesInInterval(input, shapes, context, maxRange, cloc
             }
         }
         if (!inbetween) j--;
-        let shapeCombo = [shapes[j], shapes[j + 1]];
-        indexOfNextShape = j + 1;
+        let firstIndex = j;
+        lastIndex = j + 1;
+        while (!shapes[firstIndex]) {
+            firstIndex--;
+        }
+        while (!shapes[lastIndex]) {
+            lastIndex++;
+        }
+        let shapeCombo = [shapes[firstIndex], shapes[lastIndex]];
         specCombo.push(shapeCombo[0][bar]);
         specCombo.push(shapeCombo[1][bar]);
-        let targetValue = maxRange / (shapes.length - 1);
+        let indexDistance = lastIndex - firstIndex;
+        let targetValue = indexDistance * maxRange / (shapes.length - 1);
         if (clockwiseRotate === undefined) {
             clockwiseRotate = RotationDirectionManager.shouldShapesClockwiseRotate(...shapeCombo);
         }
         let spec = mergeSpecs(...specCombo,
-            inbetween ? input - Math.min(Math.floor(input / (targetValue)), shapes.length - 2) * (targetValue) : targetValue,
+            inbetween ?
+                input - Math.min(Math.floor(input / (targetValue / indexDistance)) - (j - firstIndex), shapes.length - 2) * (targetValue / indexDistance)
+                : targetValue,
             targetValue, (t) => t, clockwiseRotate, size[0] / ShapeGrid.getSize()[0]);
         allSpecs.push(spec);
         if (displayOpaque) {
@@ -314,8 +326,10 @@ export function associateShapesInInterval(input, shapes, context, maxRange, cloc
         i++;
     });
     /* For collision handling */
-    let hasCollision = !allSpecs.every((firstSpec, index) => allSpecs.filter((_, innerIndex) => index !== innerIndex).every((innerSpec) => !doBoxesCollide(firstSpec, innerSpec)));
-    return [hasCollision, indexOfNextShape];
+    let hasCollision = !allSpecs.every((firstSpec, index) =>
+        allSpecs.filter((_, innerIndex) => index !== innerIndex).every((innerSpec, innerIndex) =>
+        !doBoxesCollide(firstSpec, innerSpec)));
+    return [hasCollision, lastIndex];
 }
 
 let _ensureNewArray = (potentialArray) => Array.isArray(potentialArray) ? [...potentialArray] : [potentialArray];
