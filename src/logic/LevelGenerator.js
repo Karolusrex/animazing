@@ -51,7 +51,6 @@ export class LevelGenerator extends View {
         }
     }
 
-
     setRotationMode(rotationMode) {
         this.titleText.setContent(`Rotation mode: ${rotationMode}`);
     }
@@ -295,7 +294,9 @@ export class LevelGenerator extends View {
         } : null;
 
 
-        if (levelData.inbetweenSpaces >= 4 || !outgoingLinks.length || skipByShapeName[currentNode.shapeName]) {
+
+        if (levelData.inbetweenSpaces >= 4 || !outgoingLinks.length || skipByShapeName[currentNode.shapeName] ||
+            (currentNode.shapeName === startNode.shapeName && levelData.inbetweenSpaces >= 0)) {
             return levelDataInCaseOfBailOut;
         }
 
@@ -532,9 +533,8 @@ export class LevelGenerator extends View {
     }
 
     static isValidLevel(levelData) {
-        let correctSequence = levelData.cheatAnswer, {endShape, startShape} = levelData;
+        let correctSequence = levelData.cheatAnswer, {endShape} = levelData;
         return levelData.inbetweenSpaces > 0
-            && correctSequence[correctSequence.length - 1].id !== `${endShape.shapeName}_${endShape.rotation}`
-            && correctSequence[0] !== `${startShape.shapeName}_${startShape.rotation}`;
+            && !correctSequence.find(({id}, index) => index !== correctSequence.length - 1 && id === `${endShape.shapeName}_${endShape.rotation}`);
     }
 }
