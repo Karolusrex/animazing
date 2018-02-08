@@ -1,36 +1,27 @@
 import Surface from 'famous/core/Surface.js';
-import Timer from 'famous/utilities/Timer.js';
 import AnimationController from 'famous-flex/AnimationController.js';
-import {Text} from 'arva-kit/text/Text.js';
 import {OutlineTextButton} from 'arva-kit/buttons/OutlineTextButton.js'
 
 import {View} from 'arva-js/core/View.js';
 import {layout, event, flow} from 'arva-js/layout/decorators.js';
-import insertRule from 'insert-rule';
-import {ShapeSpecs, ShapeSpec} from '../logic/ShapeSpecs.js';
-import {
-    associateShapesInInterval,
-} from '../util/SpecProcessing.js';
-import {Shape} from '../components/Shape.js';
 import {ShapeSelector} from '../components/ShapeSelector.js';
-import {ShapeGrid} from '../components/ShapeGrid.js';
 import {ShapeSlider} from '../components/ShapeSlider.js';
 
 import {LevelStorage} from '../logic/LevelStorage.js';
-import {RotationMode} from '../util/SpecProcessing.js';
 import {Settings} from '../util/Settings.js';
+import {ArrowrightIcon} from 'arva-kit/icons/rounded/bold/ArrowrightIcon.js';
 
 
 //TODO Remove global variable
 let levels = window.levels = LevelStorage.getLevels();
-let collisionGraph = LevelStorage.getCollisionGraph();
 
-let currentLevelIndex = 26;
+let currentLevelIndex = 1;
 
 /* Margin will be set later per level.
  * The margin here is needed so that scrolling can be done when zoomed in.
  * Scrolling is only enabled when sliding the shapes */
 @layout.scrollable({enabled: false, layoutOptions: {margins: [0, 0, 0, 0]}, overscroll: false})
+
 export class ShapeSetupView extends View {
 
     @layout.translate(0, 0, -10)
@@ -45,6 +36,15 @@ export class ShapeSetupView extends View {
     @layout.stick.center()
     whiteBackground = new Surface({properties: {backgroundColor: 'white'}});
 
+
+    @layout.size(24, 24)
+    @layout.animate({showInitially: false})
+    @layout.translate(0, 0, 30)
+    @layout.rotate(0, 0, 0)
+    @layout.stick.center()
+    @flow.stateStep('gatherAttention', {}, layout.scale(1.2, 1.2, 1.2))
+    @flow.stateStep('gatherAttention', {}, layout.scale(1, 1, 1))
+    instructionArrow = new ArrowrightIcon({color: 'black'});
 
     @layout.animate({
         showInitially: false,
@@ -62,11 +62,18 @@ export class ShapeSetupView extends View {
     nextLevelButton = new OutlineTextButton({variation: 'bold', clickEventName: 'nextLevel', content: 'NEXT LEVEL'});
 
 
+    @event.on('selectionComplete', function () {
+        this.hideRenderable('instructionArrow');
+        /* Flag for making sure that the instructional arrow works correctly */
+        this._selectionOnceCompleted = true;
+    })
     @event.on('finishedDragging', function () {
         this.shapeSlider.unselectShape();
+        this._isDraggingShape = false;
     })
     @event.on('isDragged', function (position, shape) {
         let {shapeSelector} = this;
+        this._isDraggingShape = true;
         let resultFromDragging = this.shapeSlider.onShapeDragFromOtherSide(position, [this._globalShapeWidth, this._globalShapeWidth], shapeSelector.getSelection(), shape);
         if (!resultFromDragging) {
             return shapeSelector.notifyShouldNotSnap(shape);
@@ -76,13 +83,9 @@ export class ShapeSetupView extends View {
     })
     @layout.translate(0, 0, 100)
     @layout.fullSize()
-    shapeSelector = this._createShapeSelectorFromLevel(currentLevelIndex);
+    shapeSelector = this._createShapeSelectorFromLevel(currentLevelIndex, true);
 
-    @event.on('shapeChanged', function (index, spec, completeSequence) {
-        if (completeSequence) {
-            this._onSelectionComplete(completeSequence);
-        }
-    })
+
     @layout.animate({
         hide: {
             animation: function () {
@@ -114,7 +117,7 @@ export class ShapeSetupView extends View {
         this._standardBoxShadow = '1px 3px 37px 0px rgba(168,91,132,1)';
         this._glowingBoxShadow = '1px 3px 97px 5px rgba(168,91,132,1)';
 
-        this._continuouslyCalculateShapeWidth();
+        this._renderLoop();
 
         /* Use the 'renderables' to listen for the animationcontroller since the shapeslider itself changes when the level changes */
 
@@ -152,8 +155,16 @@ export class ShapeSetupView extends View {
 
     }
 
-    _createShapeSelectorFromLevel(levelIndex) {
+    _createShapeSelectorFromLevel(levelIndex, isFirstLevel = false) {
         let level = levels[levelIndex];
+        this._isFirstLevel = isFirstLevel;
+        this.showRenderable('instructionArrow', isFirstLevel);
+        if(isFirstLevel){
+            this.repeatFlowState('instructionArrow', 'gatherAttention');
+        } else {
+            this.cancelRepeatFlowState('instructionArrow');
+        }
+
         return new ShapeSelector({
             showInitially: false,
             shapeSpecs: level.availableShapes,
@@ -194,11 +205,22 @@ export class ShapeSetupView extends View {
         return Math.min(position, furthestPoint);
     }
 
-    _continuouslyCalculateShapeWidth() {
+    _renderLoop() {
         this.layout.on('layoutstart', ({size}) => {
             let numberOfShapes = levels[currentLevelIndex].inbetweenSpaces + 2;
             let maxWidth = size[0] / 2 - 40;
             this._lastSeenSize = size;
+            if(this._isFirstLevel){
+                let instructionArrowDecorations = this.instructionArrow.decorations;
+
+                if(this._isDraggingShape || this._selectionOnceCompleted){
+                    instructionArrowDecorations.rotate = [0, 0, Math.PI];
+                    instructionArrowDecorations.translate = [5 , 0, 30000];
+                } else {
+                    instructionArrowDecorations.rotate = [0, 0, 0];
+                    instructionArrowDecorations.translate = [5 , - size[1] / 2 + this.shapeSlider.options.shapeWidth / 2 + 12, 30000];
+                }
+            }
             this._globalShapeWidth = this.shapeSlider.options.shapeWidth =
                 this.shapeSelector.options.shapeWidth =
                     Math.min(Math.min(180, maxWidth)

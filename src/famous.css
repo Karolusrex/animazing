@@ -14,8 +14,9 @@
     padding: 0px;
     opacity: .999999; /* ios8 hotfix */
     overflow: hidden;
-    -webkit-transform-style: preserve-3d;
-    transform-style: preserve-3d;
+    position: fixed !important;
+    /*-webkit-transform-style: preserve-3d;*/
+    /*transform-style: preserve-3d;*/
 }
 
 svg {
@@ -40,10 +41,10 @@ textarea::-webkit-scrollbar {
     bottom: 0px;
     right: 0px;
     overflow: visible;
-    -webkit-transform-style: preserve-3d;
-    transform-style: preserve-3d;
-    -webkit-backface-visibility: visible;
-    backface-visibility: visible;
+    /*-webkit-transform-style: preserve-3d;*/
+    /*transform-style: preserve-3d;*/
+    /*-webkit-backface-visibility: visible;*/
+    /*backface-visibility: visible;*/
     pointer-events: none;
 }
 
@@ -58,15 +59,32 @@ textarea::-webkit-scrollbar {
     position: absolute;
     -webkit-transform-origin: center center;
     transform-origin: center center;
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-    -webkit-transform-style: preserve-3d;
-    transform-style: preserve-3d;
+    /*-webkit-backface-visibility: hidden;*/
+    /*backface-visibility: hidden;*/
+    /*-webkit-transform-style: preserve-3d;*/
+    /*transform-style: preserve-3d;*/
     -webkit-box-sizing: border-box;
     -moz-box-sizing: border-box;
     box-sizing: border-box;
     -webkit-tap-highlight-color: transparent;
     pointer-events: auto;
+}
+
+@keyframes scaled-up {
+    From {
+        -webkit-transform: scale(1.0);
+    }
+    To {
+        -webkit-transform: scale(2.0);
+    }
+}
+@keyframes scaled-down {
+    From {
+        -webkit-transform: scale(2.0);
+    }
+    To {
+        -webkit-transform: scale(1.0);
+    }
 }
 
 .famous-container-group {

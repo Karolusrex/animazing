@@ -33,8 +33,10 @@ export class ShapeWithFrame extends View {
         }
     });
 
+    @layout.rotate(0, 0, 0)
+    @layout.stick.center()
     @layout.animate({showInitially: false})
-    @layout.fullSize()
+    @layout.size(undefined, undefined)
     @layout.translate(0, 0, -20)
     activatedFrame = new Surface({
         properties: {
@@ -95,7 +97,7 @@ export class ShapeWithFrame extends View {
                 }
             }
         });
-        let initialSpeed = 0.005;
+        let initialSpeed = 0.007;
 
         this.layouts.push((context) => {
 
@@ -104,7 +106,7 @@ export class ShapeWithFrame extends View {
                     timeDiffFromLastFrame = (newDiff - this._lastDiff),
                     timeSinceAutoSpinStarted = (newDiff - this._autoSpinStartAt);
 
-                if (this._lastDiff && timeSinceAutoSpinStarted > 200) {
+                if (this._lastDiff && timeSinceAutoSpinStarted > 400) {
                     let newSpeed = Math.min(0.02,
                         (1 - (this._currentRotation % (Math.PI / 2)) / Math.PI) * initialSpeed
                     );
@@ -118,9 +120,9 @@ export class ShapeWithFrame extends View {
                     }
                     if (this._spinSpeed) {
                         this._spinSpeed = newSpeed;
-                        this.shape.decorations.rotate = [0, 0, this._currentRotation += upcomingRotationDelta];
+                        this.shape.decorations.rotate = /*this.activatedFrame.decorations.rotate =*/ [0, 0, this._currentRotation += upcomingRotationDelta];
                         this._rotationTransitionable.set(this._currentRotation);
-                    } else if (Date.now() - this._lockedAt > 100) {
+                    } else if (Date.now() - this._lockedAt > 300) {
                         this._lockedAt = null;
                         this._spinSpeed = initialSpeed;
                         this._currentRotation += this._spinSpeed;
@@ -129,7 +131,7 @@ export class ShapeWithFrame extends View {
                 this._lastDiff = newDiff;
             } else {
                 let currentRotation = this._rotationTransitionable.get();
-                this.shape.decorations.rotate = [0, 0, currentRotation];
+                this.shape.decorations.rotate = /*this.activatedFrame.decorations.rotate =*/ [0, 0, currentRotation];
                 this.layout.options.alwaysLayout = this._rotationTransitionable.isActive();
                 this._currentRotation = currentRotation;
             }

@@ -6,6 +6,7 @@ import {ShapeWithFrame} from './ShapeWithFrame';
 import {Snappable} from './Snappable';
 import {Colors} from 'arva-kit/defaults/DefaultColors.js';
 
+
 export class DraggableShape extends ShapeWithFrame {
 
     _snapBackTransitionable = new Transitionable(0);

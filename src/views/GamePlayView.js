@@ -12,6 +12,7 @@ import {
 }                               from '../util/SpecProcessing.js';
 import {PlayIcon}               from '../components/icons/PlayIcon';
 import {StopIcon}               from '../components/icons/StopIcon';
+import DOMBuffer                from 'famous/core/DOMBuffer.js';
 
 
 export class GamePlayView extends View {
@@ -65,8 +66,10 @@ export class GamePlayView extends View {
         this.decorateRenderable('lowerButton', layout.size(80, 80));
         setTimeout(() => this.decorateRenderable('lowerButton', layout.size(64, 64)), 300);
     })
-    @flow.stateStep('sequenceRun', {transition: {duration: 500}}, layout.scale(2, 2, 1))
-    @flow.defaultState('default', {transition: {duration: 500}}, layout.size(undefined, undefined), layout.scale(1, 1, 1), layout.translate(0, 0, 0))
+    @flow.stateStep('slightlyHigher', {transition: {duration: 0}}, layout.scale(2, 2, 2))
+    /* To be filled in */
+    @flow.stateStep('slightlyHigher', {transition: {duration: 100}}, layout.translate(0, 0, 0))
+    @flow.defaultState('default', {transition: {duration: 0}}, layout.size(undefined, undefined), layout.scale(1, 1, 1), layout.translate(0, 0, 0))
     shapeSetupView = new ShapeSetupView();
 
     _initSticks() {
@@ -101,7 +104,7 @@ export class GamePlayView extends View {
                 this._pushScrollToNextPositon();
             }
             this._currentPosition = Math.max(0, scrollOffset);
-            if (scrollOffset >= this._maxScrollHeight &&
+            if (scrollOffset >= (this._maxScrollHeight - 0.001) &&
                 !this._isDead &&
                 !this._levelComplete &&
                 /* Level can only be completed if all slots are filled */
@@ -176,14 +179,10 @@ export class GamePlayView extends View {
         this._inSlideMode = true;
         let {shapeSetupView} = this;
         this._currentShapeWidth = shapeSetupView.getShapeWidth() * 2;
-        //3: /4,
-        let numberOfSpaces = shapeSetupView.getNumberOfSpaces();
-        shapeSetupView.decorations.flow.states.sequenceRun.steps[0].transformations[1] =
-            layout.translate(0, this._currentShapeWidth *
-                (0.25 * (numberOfSpaces - 2)) + shapeSetupView.getInitialMarginSize() * (0.5 * (numberOfSpaces - 2)), 0);
-        await this.setRenderableFlowState('shapeSetupView', 'sequenceRun');
         /* Set the translation a bit more to the top so that the initial shape gets centered in the middle */
         this.shapeSetupView.enterLockedMode();
+        //3: /4,
+        await this._zoomIn();
         this._selectedShapeSequence = shapeSetupView.getSelectedShapeSequence();
         this._maxScrollHeight = shapeSetupView.getTotalScrollHeight();
         // TODO: Enable auto play
@@ -208,6 +207,28 @@ export class GamePlayView extends View {
         this.replaceRenderable('lowerButton', this.playButton);
         this.showRenderable('lowerButton');
         this.layout.options.alwaysLayout = false;
-        return this.setRenderableFlowState('shapeSetupView', 'default');
+        return this._zoomOut();
+    }
+
+    /* Complex zoom in/out code due to performance constraints */
+    async _zoomOut() {
+        let {shapeSetupView} = this;
+        shapeSetupView.decorations.scale = [1, 1, 1];
+        DOMBuffer.assignProperty(this.shapeSetupView.getScrollView().group._element.style, 'animation', 'scaled-down 0.5s ease 0s 1 normal forwards running');
+        await this.setRenderableFlowState('shapeSetupView', 'default');
+        await new Promise((resolve) => setTimeout(resolve, 500));
+
+    }
+
+    async _zoomIn() {
+        let {shapeSetupView} = this;
+        let numberOfSpaces = shapeSetupView.getNumberOfSpaces();
+        DOMBuffer.assignProperty(this.shapeSetupView.getScrollView().group._element.style, 'animation', 'scaled-up 0.5s ease 0s 1 normal forwards running');
+        await new Promise((resolve) => setTimeout(resolve, 500));
+        DOMBuffer.assignProperty(this.shapeSetupView.getScrollView().group._element.style, 'animation', '');
+        shapeSetupView.decorations.flow.states.slightlyHigher.steps[1].transformations[0] =
+            layout.translate(0, this._currentShapeWidth *
+                (0.25 * (numberOfSpaces - 2)) + shapeSetupView.getInitialMarginSize() * (0.5 * (numberOfSpaces - 2)), 0);
+        await this.setRenderableFlowState('shapeSetupView', 'slightlyHigher');
     }
 }
