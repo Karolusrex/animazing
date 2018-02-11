@@ -236,8 +236,8 @@ export class LevelGenerator extends View {
         let foundLevels = [];
         let checkedShapeNames = {};
         // Switch on and off shuffling here
-        for (let startNode of _.shuffle(nodesRestrictedByAllowedRotations)) {
-        // for (let startNode of nodesRestrictedByAllowedRotations) {
+        // for (let startNode of _.shuffle(nodesRestrictedByAllowedRotations)) {
+        for (let startNode of nodesRestrictedByAllowedRotations) {
             /* We don't have to do a new set of levels for each of the 4 rotation states */
             if (checkedShapeNames[startNode.shapeName]) {
                 continue;
