@@ -78,6 +78,11 @@ export function doBoxesCollide(box1, box2, debugContext) {
             //http://www.gamedev.net/page/resources/_/technical/game-programming/2d-rotated-rectangle-collision-r2604
             let xAxis = generateAxisDimension(cornerCoordinates, axisDirection, 0);
             let yAxis = generateAxisDimension(cornerCoordinates, axisDirection, 1);
+            /* Force x axis positive */
+            if(xAxis < 0){
+                xAxis *= -1;
+                yAxis *= -1;
+            }
             if (debugContext) {
                 debugContext.set(`debug${debugCounter++}`, {
                     size: [1, 200],
@@ -87,12 +92,6 @@ export function doBoxesCollide(box1, box2, debugContext) {
                     translate: [0, 0, 3000]
                 });
 
-                /*debugContext.set(`debug${debugCounter++}`, {
-                    size: [7, 7],
-                    origin: [0.5, 0.5],
-                    align: [0.5, 0.5],
-                    translate: [xAxis, yAxis, 3000]
-                });*/
             }
 
 
@@ -135,7 +134,7 @@ export function doBoxesCollide(box1, box2, debugContext) {
                     }
 
 
-                    let scalarValue = cornerProjection[0] * Math.abs(axis[0]) + cornerProjection[1] * Math.abs(axis[1]);
+                    let scalarValue = cornerProjection[0] * axis[0] + cornerProjection[1] * axis[1];
                     minMaxCornerValues[boxNo][0] = Math.min(minMaxCornerValues[boxNo][0], scalarValue);
                     minMaxCornerValues[boxNo][1] = Math.max(minMaxCornerValues[boxNo][1], scalarValue);
                 }
@@ -147,6 +146,7 @@ export function doBoxesCollide(box1, box2, debugContext) {
                 if (!(minMaxCornerValues[boxNo][0] >= minMaxCornerValues[+!boxNo][0] && minMaxCornerValues[boxNo][0] <= minMaxCornerValues[+!boxNo][1]) ||
                     (minMaxCornerValues[boxNo][1] < minMaxCornerValues[+!boxNo][1] && minMaxCornerValues[boxNo][1] > minMaxCornerValues[+!boxNo][0])){
                     return false;
+                    /* If using the below line of code, then an unoptimized version is used. */
                     // hasOverlap = false;
                 }
             }
