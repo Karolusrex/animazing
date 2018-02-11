@@ -320,8 +320,8 @@ export class ShapeSpecCollection {
             }
         }
     });
-
-    mess = new ShapeSpec({
+    /* Remove due to the poor aesthetics of this shape */
+    /*mess = new ShapeSpec({
         shape: {
             topBar: {
                 rotate: [0, 0, 0],
@@ -339,7 +339,7 @@ export class ShapeSpecCollection {
                 size: stickDimensions
             }
         }
-    });
+    });*/
 
     shuffledUpPointArrow = new ShapeSpec({
         shape: {
