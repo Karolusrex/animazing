@@ -236,7 +236,7 @@ export function specBoundingBoxSize(spec) {
     let {rotate = specAttributes.rotate.defaultValue} = spec;
     let corners = calcSpecCorners(spec);
 
-    let normalizedRotation = rotate[2] > 0 ? (rotate[2] % (Math.PI * 2)) : (rotate[2] - Math.PI * 2 * (Math.floor(rotate[2] / (Math.PI * 2))));
+    let normalizedRotation = normalizeRotation(rotate[2]);
 
     let width = normalizedRotation < Math.PI / 2 ?
         corners['bottomRight'][0] - corners['topLeft'][0] : (
@@ -262,6 +262,10 @@ export function specBoundingBoxSize(spec) {
     return [width, height];
 }
 
+
+export function normalizeRotation(rotation) {
+    return rotation > 0 ? (rotation % (Math.PI * 2)) : (rotation - Math.PI * 2 * (Math.floor(rotation / (Math.PI * 2))));
+}
 /**
  *
  * @param input
