@@ -4,9 +4,8 @@ import {View}                   from 'arva-js/core/View.js';
 import {layout, event, flow}    from 'arva-js/layout/decorators.js';
 import {ShapeSetupView}         from './ShapeSetupView';
 import {ArrowrightIcon}         from 'arva-kit/icons/angular/thin/ArrowrightIcon.js';
-import {ArrowleftIcon}          from 'arva-kit/icons/angular/thin/ArrowleftIcon.js';
 import {FloatingImageButton}    from 'arva-kit/buttons/FloatingImageButton';
-import {ShapeSpecs, ShapeSpec}  from '../logic/ShapeSpecs.js';
+import {ShapeSpec}              from '../logic/ShapeSpecs.js';
 import {
     associateShapesInInterval,
 }                               from '../util/SpecProcessing.js';
@@ -24,7 +23,7 @@ export class GamePlayView extends View {
 
 
     @event.on('nextLevel', async function () {
-        await this._exitSlideMode();
+        await this._exitSlideMode(true);
         this._levelComplete = false;
         this.shapeSetupView.gotoNextLevel();
     })
@@ -32,7 +31,7 @@ export class GamePlayView extends View {
         if (!this._inSlideMode) {
             this._enterSlideMode();
         } else {
-            this._exitSlideMode();
+            this._exitSlideMode(true);
         }
     })
     @layout.stick.bottomRight()
@@ -197,8 +196,8 @@ export class GamePlayView extends View {
 
     }
 
-    _exitSlideMode() {
-        this.shapeSetupView.exitLockedMode();
+    _exitSlideMode(shouldGoToNextLevel) {
+        this.shapeSetupView.exitLockedMode(shouldGoToNextLevel);
         this._autoPlay = false;
         this._inPlayMode = false;
         this._inSlideMode = false;

@@ -9,13 +9,13 @@ import {ShapeSlider} from '../components/ShapeSlider.js';
 
 import {LevelStorage} from '../logic/LevelStorage.js';
 import {Settings} from '../util/Settings.js';
-import {ArrowrightIcon} from 'arva-kit/icons/rounded/bold/ArrowrightIcon.js';
+import {LeftArrowInstruction, RightArrowInstruction, InstructionBubble} from './InstructionBubble';
 
 
 //TODO Remove global variable
 let levels = window.levels = LevelStorage.getLevels();
 
-let currentLevelIndex = 1;
+let currentLevelIndex = (+localStorage.getItem('currentLevel')) || 1;
 
 /* Margin will be set later per level.
  * The margin here is needed so that scrolling can be done when zoomed in.
@@ -37,14 +37,41 @@ export class ShapeSetupView extends View {
     whiteBackground = new Surface({properties: {backgroundColor: 'white'}});
 
 
-    @layout.size(24, 24)
+    @layout.size(100, 48)
     @layout.animate({showInitially: false})
-    @layout.translate(0, 0, 30)
+    @layout.translate(0, 0, 30000)
     @layout.rotate(0, 0, 0)
     @layout.stick.center()
-    @flow.stateStep('gatherAttention', {}, layout.scale(1.2, 1.2, 1.2))
-    @flow.stateStep('gatherAttention', {}, layout.scale(1, 1, 1))
-    instructionArrow = new ArrowrightIcon({color: 'black'});
+    @flow.stateStep('gatherAttention', {transition: {duration: 300}}, layout.scale(1.1, 1.1, 1.1))
+    @flow.stateStep('gatherAttention', {transition: {duration: 300}}, layout.scale(1, 1, 1))
+    dragText = new RightArrowInstruction({text: 'Drag'});
+
+    @layout.size(100, 48)
+    @layout.animate({showInitially: false})
+    @layout.translate(0, 0, 3000)
+    @layout.rotate(0, 0, 0)
+    @layout.stick.center()
+    @flow.stateStep('gatherAttention', {transition: {duration: 300}}, layout.scale(1.1, 1.1, 1.1))
+    @flow.stateStep('gatherAttention', {transition: {duration: 300}}, layout.scale(1, 1, 1))
+    dropText = new LeftArrowInstruction({text: 'Drop'});
+
+    @layout.size(100, 48)
+    @layout.animate({showInitially: false})
+    @layout.translate(-96, -28, 3000)
+    @layout.rotate(0, 0, 0)
+    @layout.stick.bottomRight()
+    @flow.stateStep('gatherAttention', {transition: {duration: 300}}, layout.scale(1.1, 1.1, 1.1))
+    @flow.stateStep('gatherAttention', {transition: {duration: 300}}, layout.scale(1, 1, 1))
+    playText = new RightArrowInstruction({text: 'Play'});
+
+    @layout.size(100, 48)
+    @layout.animate({showInitially: false})
+    @layout.translate(50, -35, 3000)
+    @layout.rotate(0, 0, 0)
+    @layout.stick.topLeft()
+    @flow.stateStep('gatherAttention', {transition: {duration: 300}}, layout.translateFrom(0, 15, 0))
+    @flow.stateStep('gatherAttention', {transition: {duration: 300}}, layout.translateFrom(0, -15, 0))
+    scrollText = new InstructionBubble({text: 'Scroll'});
 
     @layout.animate({
         showInitially: false,
@@ -63,17 +90,16 @@ export class ShapeSetupView extends View {
 
 
     @event.on('selectionComplete', function () {
-        this.hideRenderable('instructionArrow');
-        /* Flag for making sure that the instructional arrow works correctly */
-        this._selectionOnceCompleted = true;
+        /* Flag for making sure that the instructional stuff works correctly */
+        this._onSelectionComplete();
     })
     @event.on('finishedDragging', function () {
         this.shapeSlider.unselectShape();
-        this._isDraggingShape = false;
+        this._onDragged();
     })
     @event.on('isDragged', function (position, shape) {
         let {shapeSelector} = this;
-        this._isDraggingShape = true;
+        this._onDragged();
         let resultFromDragging = this.shapeSlider.onShapeDragFromOtherSide(position, [this._globalShapeWidth, this._globalShapeWidth], shapeSelector.getSelection(), shape);
         if (!resultFromDragging) {
             return shapeSelector.notifyShouldNotSnap(shape);
@@ -103,27 +129,66 @@ export class ShapeSetupView extends View {
     constructor(options = {}) {
         super(options);
         window.currentLevel = levels[currentLevelIndex];
+        //TODO remove this cheat
         document.body.onkeyup = (e) => {
             if (e.keyCode === 0 || e.keyCode === 32) {
                 e.preventDefault();
                 this.gotoNextLevel();
             }
         };
-        //TODO Implement this cheat somewhere
+
         this.on('nextLevel', () => {
             this.gotoNextLevel();
         });
 
-        this._standardBoxShadow = '1px 3px 37px 0px rgba(168,91,132,1)';
-        this._glowingBoxShadow = '1px 3px 97px 5px rgba(168,91,132,1)';
-
+        this._onNewLevel();
         this._renderLoop();
 
         /* Use the 'renderables' to listen for the animationcontroller since the shapeslider itself changes when the level changes */
 
     }
 
+    _onDragged() {
+        let selectedShapeSequence = this.shapeSelector.getSelectedShapeSequence().filter((item) => !!item);
+        /* If there's still things left to drag, then show the drag text */
+        if(this._isFirstLevel && selectedShapeSequence.length === 0){
+            this._showInstruction('dropText');
+        }
+    }
+
+    _onSelectionComplete() {
+        if(this._isFirstLevel){
+            this._showInstruction('playText');
+        }
+    }
+
+    _onLockedMode() {
+        if(this._isFirstLevel){
+            this._showInstruction('scrollText');
+        }
+    }
+
+    _onUnlockedMode(shouldGoToNextLevel) {
+        if(shouldGoToNextLevel){
+            return this._hideInstruction();
+        }
+        if(this._isFirstLevel){
+            this._showInstruction('playText');
+        }
+    }
+
+    _hideInstruction(){
+        this._showInstruction();
+    }
+
+    _showInstruction(instructionToShow) {
+        for(let renderableName of ['playText', 'dragText', 'dropText', 'scrollText']){
+            this.showRenderable(renderableName, instructionToShow === renderableName);
+        }
+    }
+
     enterLockedMode() {
+        this._onLockedMode();
         let numberOfSpaces = this.getNumberOfSpaces();
         // 3: 4/3 4: 6/4
         this._totalScrollHeight = this._lastSeenSize[1] * (((numberOfSpaces - 1) * 2)/numberOfSpaces);
@@ -138,7 +203,8 @@ export class ShapeSetupView extends View {
         return this._totalScrollHeight;
     }
 
-    exitLockedMode() {
+    exitLockedMode(shouldGoToNextLevel) {
+        this._onUnlockedMode(shouldGoToNextLevel);
         let scrollView = this.getScrollView();
         scrollView.setVelocity(8);
         this.getScrollView().options.enabled = false;
@@ -147,23 +213,10 @@ export class ShapeSetupView extends View {
         this.shapeSlider.unlockShapes();
     }
 
-    _onSelectionComplete(sequence) {
-        /* Go into slide mode */
-        this._sliding = true;
-        this._selectedShapeSequence = sequence;
-        let sequenceLength = sequence.length;
 
-    }
-
-    _createShapeSelectorFromLevel(levelIndex, isFirstLevel = false) {
+    _createShapeSelectorFromLevel(levelIndex) {
         let level = levels[levelIndex];
-        this._isFirstLevel = isFirstLevel;
-        this.showRenderable('instructionArrow', isFirstLevel);
-        if(isFirstLevel){
-            this.repeatFlowState('instructionArrow', 'gatherAttention');
-        } else {
-            this.cancelRepeatFlowState('instructionArrow');
-        }
+
 
         return new ShapeSelector({
             showInitially: false,
@@ -184,14 +237,10 @@ export class ShapeSetupView extends View {
 
     _cancelSlide() {
         this._levelComplete = false;
-        this._sliding = false;
         this._isDead = false;
         delete this.renderables.snappable;
     }
 
-    _restrictSlider([x, y]) {
-        return [this._dontGoFurtherIfDead(x), y];
-    }
 
     _dontGoFurtherIfDead(position) {
         return this._isDead ? this._restrictToInbetweenValueRoundUp(position, this._diedAtPosition) : position;
@@ -211,15 +260,9 @@ export class ShapeSetupView extends View {
             let maxWidth = size[0] / 2 - 40;
             this._lastSeenSize = size;
             if(this._isFirstLevel){
-                let instructionArrowDecorations = this.instructionArrow.decorations;
-
-                if(this._isDraggingShape || this._selectionOnceCompleted){
-                    instructionArrowDecorations.rotate = [0, 0, Math.PI];
-                    instructionArrowDecorations.translate = [5 , 0, 30000];
-                } else {
-                    instructionArrowDecorations.rotate = [0, 0, 0];
-                    instructionArrowDecorations.translate = [5 , - size[1] / 2 + this.shapeSlider.options.shapeWidth / 2 + 12, 30000];
-                }
+                /* Set the appropriate position of some instructions dependent on the shapeWidth */
+                this.scrollText.decorations.translate[0] = size[0] / 4 - 50;
+                this.dragText.decorations.translate = [5 , - size[1] / 2 + this.shapeSlider.options.shapeWidth / 2 + 12, 30000];
             }
             this._globalShapeWidth = this.shapeSlider.options.shapeWidth =
                 this.shapeSelector.options.shapeWidth =
@@ -255,6 +298,7 @@ export class ShapeSetupView extends View {
 
     gotoNextLevel() {
         let newLevel = levels[++currentLevelIndex];
+        this._onNewLevel();
         window.currentLevel = newLevel;
         this.shapeSelector.setSelection(newLevel.availableShapes, newLevel.rotationMode, newLevel.inbetweenSpaces);
         this.replaceRenderable('shapeSlider', this._createShapeSliderFromLevel(currentLevelIndex));
@@ -268,5 +312,23 @@ export class ShapeSetupView extends View {
         /* The very last shape obviously can't be the problem, so we do math.min. If you fail on the very last transition,
          * the one but the last will be marked as problematic */
         this.shapeSelector.notifyCollidedForIndex(Math.min(forWhichShapeIndex, currentLevel.inbetweenSpaces));
+    }
+
+    _onNewLevel() {
+        this._isFirstLevel = currentLevelIndex === 1;
+        localStorage.setItem('currentLevel', currentLevelIndex);
+        if(this._isFirstLevel){
+            this._showInstruction('dragText');
+            this.repeatFlowState('dragText', 'gatherAttention');
+            this.repeatFlowState('dropText', 'gatherAttention');
+            this.repeatFlowState('playText', 'gatherAttention');
+            this.repeatFlowState('scrollText', 'gatherAttention');
+        } else {
+            this._hideInstruction();
+            this.cancelRepeatFlowState('dragText');
+            this.cancelRepeatFlowState('dropText');
+            this.cancelRepeatFlowState('playText');
+            this.cancelRepeatFlowState('scrollText');
+        }
     }
 }
